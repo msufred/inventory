@@ -35,7 +35,7 @@
             </TableView>
             <VBox>
                <children>
-                  <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0">
+                  <HBox id="summary-3" alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0">
                      <children>
                         <Label styleClass="text-big" text="Total" />
                         <Label fx:id="lblTotal" text="P 0.00">
@@ -54,11 +54,7 @@
                         <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
                         <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Unit Price">
-                           <columns>
-                              <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
-                           </columns>
-                        </TableColumn>
+                        <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
                            <columns>
                               <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
@@ -70,7 +66,7 @@
                            </columns>
                         </TableColumn>
                         <TableColumn fx:id="colItemQuantity" prefWidth="40.0" styleClass="table-cell-center-align" text="Qty" />
-                        <TableColumn fx:id="colItemTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
+                        <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
                      </columns>
                   </TableView>
                </children>

@@ -22,24 +22,52 @@
          <children>
             <VBox>
                <children>
-                  <Label styleClass="form-label" text="Product" />
-                  <ComboBox fx:id="cbProducts" prefWidth="300.0" promptText="Select Product" styleClass="form-combo-box" />
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER">
-               <children>
-                  <Label styleClass="form-label" text="In Stock" />
-                  <Label fx:id="lblStock" text="0">
-                     <styleClass>
-                        <String fx:value="form-label" />
-                        <String fx:value="text-bold" />
-                        <String fx:value="text-big" />
-                     </styleClass>
-                  </Label>
+                  <ComboBox fx:id="cbProducts" prefWidth="380.0" promptText="Select Product" styleClass="form-combo-box" />
                </children>
             </VBox>
          </children>
       </HBox>
+      <VBox>
+         <children>
+            <HBox>
+               <children>
+                  <Label prefWidth="110.0" styleClass="form-label" text="Date Purchased:" />
+                  <Label fx:id="lblDate" styleClass="form-label" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <Label prefWidth="110.0" styleClass="form-label" text="Supplier:" />
+                  <Label fx:id="lblSupplier" styleClass="form-label" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <Label prefWidth="110.0" styleClass="form-label" text="In Stock:" />
+                  <Label fx:id="lblStock" text="0">
+                     <styleClass>
+                        <String fx:value="form-label" />
+                        <String fx:value="text-bold" />
+                     </styleClass>
+                  </Label>
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <Label prefWidth="110.0" styleClass="form-label" text="Unit Price:" />
+                  <Label fx:id="lblPrice" text="0">
+                     <styleClass>
+                        <String fx:value="form-label" />
+                        <String fx:value="text-bold" />
+                     </styleClass>
+                  </Label>
+               </children>
+            </HBox>
+         </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </VBox>
       <HBox spacing="8.0">
          <children>
             <VBox>
@@ -68,7 +96,7 @@
             </VBox>
          </children>
          <VBox.margin>
-            <Insets top="8.0" />
+            <Insets top="16.0" />
          </VBox.margin>
       </HBox>
       <ProgressBar fx:id="progressBar" prefWidth="380.0" visible="false">

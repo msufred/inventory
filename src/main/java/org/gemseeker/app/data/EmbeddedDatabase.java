@@ -99,11 +99,12 @@ public class EmbeddedDatabase {
                 while (rs.next()) {
                     Product product = new Product();
                     product.setId(rs.getInt(1));
-                    product.setName(rs.getString(2));
-                    product.setSku(rs.getString(3));
-                    product.setSupplier(rs.getString(4));
-                    product.setUnit(rs.getString(5));
-                    product.setUnitPrice(rs.getDouble(6));
+                    product.setDate(rs.getDate(2).toLocalDate());
+                    product.setName(rs.getString(3));
+                    product.setSku(rs.getString(4));
+                    product.setSupplier(rs.getString(5));
+                    product.setUnit(rs.getString(6));
+                    product.setUnitPrice(rs.getDouble(7));
                     products.add(product);
                 }
             }
@@ -120,17 +121,18 @@ public class EmbeddedDatabase {
                 while (rs.next()) {
                     Product product = new Product();
                     product.setId(rs.getInt(1));
-                    product.setName(rs.getString(2));
-                    product.setSku(rs.getString(3));
-                    product.setSupplier(rs.getString(4));
-                    product.setUnit(rs.getString(5));
-                    product.setUnitPrice(rs.getDouble(6));
+                    product.setDate(rs.getDate(2).toLocalDate());
+                    product.setName(rs.getString(3));
+                    product.setSku(rs.getString(4));
+                    product.setSupplier(rs.getString(5));
+                    product.setUnit(rs.getString(6));
+                    product.setUnitPrice(rs.getDouble(7));
                     
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(7));
-                    stock.setProductId(rs.getInt(8));
-                    stock.setQuantity(rs.getInt(9));
-                    stock.setQuantityOut(rs.getInt(10));
+                    stock.setId(rs.getInt(8));
+                    stock.setProductId(rs.getInt(9));
+                    stock.setQuantity(rs.getInt(10));
+                    stock.setQuantityOut(rs.getInt(11));
                     stock.setProduct(product);
                     stocks.add(stock);
                 }
@@ -194,11 +196,12 @@ public class EmbeddedDatabase {
                     
                     Product product = new Product();
                     product.setId(rs.getInt(10));
-                    product.setName(rs.getString(11));
-                    product.setSku(rs.getString(12));
-                    product.setSupplier(rs.getString(13));
-                    product.setUnit(rs.getString(14));
-                    product.setUnitPrice(rs.getDouble(15));
+                    product.setDate(rs.getDate(11).toLocalDate());
+                    product.setName(rs.getString(12));
+                    product.setSku(rs.getString(13));
+                    product.setSupplier(rs.getString(14));
+                    product.setUnit(rs.getString(15));
+                    product.setUnitPrice(rs.getDouble(16));
                     
                     item.setProduct(product);
                     orderItems.add(item);
@@ -248,11 +251,12 @@ public class EmbeddedDatabase {
                     
                     Product product = new Product();
                     product.setId(rs.getInt(8));
-                    product.setName(rs.getString(9));
-                    product.setSku(rs.getString(10));
-                    product.setSupplier(rs.getString(11));
-                    product.setUnit(rs.getString(12));
-                    product.setUnitPrice(rs.getDouble(13));
+                    product.setDate(rs.getDate(9).toLocalDate());
+                    product.setName(rs.getString(10));
+                    product.setSku(rs.getString(11));
+                    product.setSupplier(rs.getString(12));
+                    product.setUnit(rs.getString(13));
+                    product.setUnitPrice(rs.getDouble(14));
                     
                     item.setProduct(product);
                     items.add(item);

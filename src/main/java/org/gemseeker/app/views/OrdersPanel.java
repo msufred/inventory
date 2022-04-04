@@ -25,6 +25,7 @@ import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
 import org.gemseeker.app.views.tablecells.DateTableCell;
+import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
@@ -96,35 +97,15 @@ public class OrdersPanel extends AbstractPanelController {
         colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
         colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
+        colItemDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        colItemPriceAfter.setCellFactory(col -> new TableCell<OrderItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colItemPriceAfter.setCellFactory(col -> new PriceTableCell<>());
         colItemQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
-        colItemTotal.setCellFactory(col -> new TableCell<OrderItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colItemTotal.setCellFactory(col -> new PriceTableCell<>());
         colItemQuantityOut.setCellValueFactory(new PropertyValueFactory<>("quantityOut"));
         colItemTotalOut.setCellValueFactory(new PropertyValueFactory<>("totalOut"));
-        colItemTotalOut.setCellFactory(col -> new TableCell<OrderItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colItemTotalOut.setCellFactory(col -> new PriceTableCell<>());
         
         disposables.addAll(
                 JavaFxObservable.changesOf(mOrderTotal).subscribe(value -> {

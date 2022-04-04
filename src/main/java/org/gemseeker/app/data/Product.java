@@ -1,5 +1,7 @@
 package org.gemseeker.app.data;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -9,6 +11,7 @@ import org.gemseeker.app.data.frameworks.IEntry;
 public class Product implements IEntry {
 
     private int id;
+    private LocalDate date;
     private String name;
     private String sku;
     private String supplier;
@@ -21,6 +24,14 @@ public class Product implements IEntry {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public String getName() {
@@ -66,9 +77,9 @@ public class Product implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO products ("
-                + "name, sku, supplier, unit, unit_price) "
-                + "VALUES ('%s', '%s', '%s', '%s', '%f')",
-                name, sku, supplier, unit, unitPrice);
+                + "date, name, sku, supplier, unit, unit_price) "
+                + "VALUES ('%s', '%s', '%s', '%s', '%s', '%f')",
+                date, name, sku, supplier, unit, unitPrice);
     }
     
     @Override

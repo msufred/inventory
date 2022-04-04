@@ -28,7 +28,10 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
 public class AddOrderItemWindow extends AbstractWindowController {
     
     @FXML private ComboBox<Stock> cbProducts;
+    @FXML private Label lblDate;
+    @FXML private Label lblSupplier;
     @FXML private Label lblStock;
+    @FXML private Label lblPrice;
     @FXML private TextField tfDiscount;
     @FXML private TextField tfPriceAfter;
     @FXML private TextField tfQuantity;
@@ -84,8 +87,15 @@ public class AddOrderItemWindow extends AbstractWindowController {
     private void recalculate() {
         Stock s = cbProducts.getValue();
         if (s != null) {
-            lblStock.setText(String.format("%d", s.getQuantity() - s.getQuantityOut()));
             Product p = s.getProduct();
+            
+            // display product details
+            lblDate.setText(Utils.dateTimeFormat.format(p.getDate()));
+            lblSupplier.setText(p.getSupplier());
+            lblStock.setText(Utils.getMoneyFormat((int) s.getQuantity() - s.getQuantityOut()));
+            lblPrice.setText("P " + Utils.getMoneyFormat(p.getUnitPrice()));
+            
+            // calculate
             double price = p.getUnitPrice();
             double discount = 0;
             if (!tfDiscount.getText().isEmpty()) {
@@ -145,6 +155,10 @@ public class AddOrderItemWindow extends AbstractWindowController {
     @Override
     public void onClose() {
         cbProducts.getItems().clear();
+        lblDate.setText("");
+        lblSupplier.setText("");
+        lblStock.setText("0");
+        lblPrice.setText("0");
         tfDiscount.setText("0");
         tfPriceAfter.clear();
         tfQuantity.setText("1");

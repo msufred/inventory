@@ -70,7 +70,7 @@
                            </columns>
                         </TableColumn>
                         <TableColumn fx:id="colItemQuantity" prefWidth="40.0" styleClass="table-cell-center-align" text="Qty" />
-                        <TableColumn fx:id="colItemTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
+                        <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
                      </columns>
                   </TableView>
                </children>

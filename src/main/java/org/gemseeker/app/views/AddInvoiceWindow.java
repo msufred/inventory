@@ -31,6 +31,8 @@ import org.gemseeker.app.data.Order;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
+import org.gemseeker.app.views.tablecells.DiscountTableCell;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
@@ -57,7 +59,7 @@ public class AddInvoiceWindow extends AbstractWindowController {
     @FXML private TableColumn<InvoiceItem, Product> colUnit;
     @FXML private TableColumn<InvoiceItem, Product> colPriceBefore;
     @FXML private TableColumn<InvoiceItem, Double> colDiscount;
-    @FXML private TableColumn<InvoiceItem, Product> colPriceAfter;
+    @FXML private TableColumn<InvoiceItem, Double> colPriceAfter;
     @FXML private TableColumn<InvoiceItem, Integer> colQuantity;
     @FXML private TableColumn<InvoiceItem, Double> colTotal;
     @FXML private ProgressBar progressBar;
@@ -95,18 +97,12 @@ public class AddInvoiceWindow extends AbstractWindowController {
         colPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
         colPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
         colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
+        colDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        
+        colPriceAfter.setCellFactory(col -> new PriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
-        colTotal.setCellFactory(col -> new TableCell<InvoiceItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(items);
         
@@ -230,6 +226,7 @@ public class AddInvoiceWindow extends AbstractWindowController {
         tfAddress.clear();
         items.clear();
         mTotal.set(0);
+        showProgress(false);
     }
 
     @Override

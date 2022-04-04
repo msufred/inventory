@@ -28,6 +28,8 @@ import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
+import org.gemseeker.app.views.tablecells.DiscountTableCell;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
@@ -84,25 +86,12 @@ public class AddOrderWindow extends AbstractWindowController {
         colPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
         colPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
         colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
+        colDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        colPriceAfter.setCellFactory(col -> new TableCell<OrderItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colPriceAfter.setCellFactory(col -> new PriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
-        colTotal.setCellFactory(col -> new TableCell<OrderItem, Double>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty) setText(Utils.getMoneyFormat(item));
-                else setText("");
-            }
-        });
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(orderItems);
         
@@ -145,24 +134,22 @@ public class AddOrderWindow extends AbstractWindowController {
             order.setTotal(mTotal.get());
             return EmbeddedDatabase.getInstance().addEntryReturnId(order);
         }).flatMap(id -> Single.fromCallable(() -> {
-            // Save Order Item entries
             if (id != -1) {
+                EmbeddedDatabase database = EmbeddedDatabase.getInstance();
                 for (OrderItem orderItem : orderItems) {
+                    // add OrderItems
                     orderItem.setOrderId(id);
-                    EmbeddedDatabase.getInstance().addEntry(orderItem);
-                }
-            }
-            return id;
-        })).flatMap(id -> Single.fromCallable(() -> {
-            // Update Inventory
-            if (id != -1) {
-                for (OrderItem orderItem : orderItems) {
-                    Product p = orderItem.getProduct();
-                    Stock s = EmbeddedDatabase.getInstance().getStock(p.getId());
-                    if (s != null) {
-                        int qtyOut = s.getQuantityOut() + orderItem.getQuantity();
-                        EmbeddedDatabase.getInstance().updateEntry("stocks", "quantity_out", qtyOut, 
-                                "id", s.getId());
+                    boolean added = database.addEntry(orderItem);
+                    
+                    // update Stocks
+                    if (added) {
+                        Product p = orderItem.getProduct();
+                        Stock s = database.getStock(p.getId());
+                        if (s != null) {
+                            int qtyOut = s.getQuantityOut() + orderItem.getQuantity();
+                            database.updateEntry("stocks", "quantity_out", qtyOut, 
+                                    "id", s.getId());
+                        }
                     }
                 }
             }
@@ -170,7 +157,7 @@ public class AddOrderWindow extends AbstractWindowController {
         })).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(id -> {
             showProgress(false);
             if (id == -1) {
-                
+                showInfoDialog("Failed to add new Order entry.", "");
             }
             close();
             ordersPanel.onResume();

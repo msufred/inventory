@@ -22,12 +22,14 @@
       </HBox>
       <TableView fx:id="stocksTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
         <columns>
-          <TableColumn fx:id="colName" prefWidth="100.0" text="Name" />
-            <TableColumn fx:id="colUnit" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
-            <TableColumn fx:id="colSku" prefWidth="100.0" styleClass="table-cell-center-align" text="SKU" />
-            <TableColumn fx:id="colQuantity" prefWidth="100.0" styleClass="table-cell-center-align" text="Quantity" />
-            <TableColumn fx:id="colQuantityOut" prefWidth="100.0" styleClass="table-cell-center-align" text="Qty. Out" />
+            <TableColumn fx:id="colDate" prefWidth="100.0" text="Date" />
+          <TableColumn fx:id="colName" prefWidth="100.0" text="Product Name" />
           <TableColumn fx:id="colSupplier" prefWidth="100.0" text="Supplier" />
+            <TableColumn fx:id="colSku" prefWidth="100.0" styleClass="table-cell-center-align" text="SKU" />
+            <TableColumn fx:id="colUnit" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
+            <TableColumn fx:id="colQuantity" styleClass="table-cell-center-align" text="Quantity" />
+            <TableColumn fx:id="colQuantityOut" styleClass="table-cell-center-align" text="Ordered Qty" />
+            <TableColumn fx:id="colInStock" styleClass="table-cell-center-align" text="In Stock" />
         </columns>
       </TableView>
    </children>

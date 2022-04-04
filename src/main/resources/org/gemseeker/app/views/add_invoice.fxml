@@ -100,11 +100,7 @@
         <columns>
           <TableColumn fx:id="colName" prefWidth="75.0" text="Name" />
           <TableColumn fx:id="colUnit" prefWidth="75.0" styleClass="table-cell-center-align" text="Unit" />
-            <TableColumn prefWidth="75.0" text="Unit Price">
-               <columns>
-                  <TableColumn fx:id="colPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
-               </columns>
-            </TableColumn>
+            <TableColumn fx:id="colPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
             <TableColumn prefWidth="75.0" text="Discount">
                <columns>
                   <TableColumn fx:id="colDiscount" prefWidth="101.0" styleClass="table-cell-center-align" text="(per Unit)" />

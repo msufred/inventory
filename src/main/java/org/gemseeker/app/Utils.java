@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
 
 public final class Utils {
 
@@ -24,6 +25,9 @@ public final class Utils {
     public static final String IMAGES_FOLDER = "images";
 
     public static final String TABLE_DATE_FORMAT_STR = "MMM dd, yyyy";
+    
+    public static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+    public static final DateTimeFormatter dateTimeFormat2 = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
     public static String getSeparator() {
         return System.getProperty("file.separator");
@@ -72,6 +76,21 @@ public final class Utils {
             decCount++;
         }
         return sb.reverse().append(str.substring(startIndex)).toString();
+    }
+    
+    public static String getMoneyFormat(int value) {
+        String str = String.format("%d", value);
+        StringBuilder sb = new StringBuilder();
+        int decCount = 0;
+        for (int i=str.length()-1; i>=0; i--) {
+            if (decCount == 3) {
+                sb.append(',');
+                decCount = 0;
+            }
+            sb.append(str.charAt(i));
+            decCount++;
+        }
+        return sb.reverse().toString();
     }
 
     public static Image getImage(URL imageUrl) throws IOException {

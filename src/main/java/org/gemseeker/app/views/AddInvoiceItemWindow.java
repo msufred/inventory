@@ -139,6 +139,8 @@ public class AddInvoiceItemWindow extends AbstractWindowController {
         lblDiscount.setText("0");
         lblPriceAfter.setText("0.00");
         lblStock.setText("0");
+        tfQuantity.setText("1");
+        tfTotal.setText("0.00");
         showProgress(false);
     }
 

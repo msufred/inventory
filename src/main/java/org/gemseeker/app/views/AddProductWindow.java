@@ -5,10 +5,12 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import java.time.LocalDate;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -25,6 +27,7 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddProductWindow extends AbstractWindowController {
     
+    @FXML private DatePicker datePicker;
     @FXML private TextField tfName;
     @FXML private TextField tfSku;
     @FXML private TextField tfSupplier;
@@ -60,8 +63,9 @@ public class AddProductWindow extends AbstractWindowController {
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (tfName.getText().isEmpty() || cbUnits.getValue() == null ||
-                            tfPrice.getText().isEmpty() || tfQuantity.getText().isEmpty()) {
+                    if (datePicker.getValue() == null || tfName.getText().isEmpty() ||
+                            cbUnits.getValue() == null || tfPrice.getText().isEmpty() ||
+                            tfQuantity.getText().isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields: Product Name, "
                                 + "Unit, Unit Price (PHP), Stock Quantity");
                     } else {
@@ -73,11 +77,18 @@ public class AddProductWindow extends AbstractWindowController {
                 })
         );
     }
+
+    @Override
+    public void show() {
+        super.show();
+        datePicker.setValue(LocalDate.now());
+    }
     
     private void saveAndClose() {
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
             Product product = new Product();
+            product.setDate(datePicker.getValue());
             product.setName(tfName.getText());
             product.setSku(tfSku.getText());
             product.setSupplier(tfSupplier.getText());
@@ -116,10 +127,12 @@ public class AddProductWindow extends AbstractWindowController {
 
     @Override
     public void onClose() {
+        datePicker.setValue(null);
         tfName.clear();
         tfSku.clear();
         tfSupplier.clear();
-        tfPrice.clear();
+        tfPrice.setText("0");
+        tfQuantity.setText("0");
         cbUnits.setValue(null);
         showProgress(false);
     }

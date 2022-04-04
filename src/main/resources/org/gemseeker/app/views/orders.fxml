@@ -16,7 +16,7 @@
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
             <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Order" />
-            <Button fx:id="btnPrint" mnemonicParsing="false" text="Print List" />
+            <Button fx:id="btnPrint" mnemonicParsing="false" text="Print" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
@@ -26,16 +26,16 @@
          <items>
             <TableView fx:id="ordersTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="colOrderDate" prefWidth="120.0" styleClass="table-cell-center-align" text="Date" />
-                <TableColumn fx:id="colOrderName" prefWidth="300.0" styleClass="table-cell-center-align" text="Name" />
-                  <TableColumn fx:id="colTotal" prefWidth="120.0" styleClass="table-cell-right-align" text="Total Amount" />
+                <TableColumn fx:id="colOrderDate" prefWidth="100.0" styleClass="table-cell-center-align" text="Date" />
+                <TableColumn fx:id="colOrderName" prefWidth="200.0" styleClass="table-cell-center-align" text="Name" />
+                  <TableColumn fx:id="colTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total Amount" />
               </columns>
             </TableView>
             <VBox>
                <children>
                   <HBox alignment="CENTER_RIGHT" prefWidth="200.0">
                      <children>
-                        <HBox id="summary-3" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
+                        <HBox id="summary-4" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="text-big" text="Total" />
                               <Label fx:id="lblOrderTotal" text="P 0.00">
@@ -49,7 +49,7 @@
                               <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                            </padding>
                         </HBox>
-                        <HBox id="summary-4" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
+                        <HBox id="summary-3" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="text-big" text="Total Out" />
                               <Label fx:id="lblTotalOut" text="P 0.00">
@@ -70,11 +70,7 @@
                       <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
                         <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Unit Price">
-                           <columns>
-                              <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
-                           </columns>
-                        </TableColumn>
+                        <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
                            <columns>
                               <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
@@ -92,7 +88,7 @@
                               <String fx:value="table-cell-center-align" />
                               <String fx:value="table-cell-text-green" />
                            </styleClass></TableColumn>
-                        <TableColumn fx:id="colItemTotalOut" prefWidth="100.0" text="Total Out">
+                        <TableColumn fx:id="colItemTotalOut" prefWidth="75.0" text="Total Out">
                            <styleClass>
                               <String fx:value="table-cell-right-align" />
                               <String fx:value="table-cell-text-green" />
