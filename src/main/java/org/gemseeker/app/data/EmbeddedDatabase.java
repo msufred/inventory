@@ -89,6 +89,17 @@ public class EmbeddedDatabase {
         return false;
     }
     
+    public boolean deleteEntry(String table, String keyColumn, Object keyValue) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                String sql = String.format("DELETE FROM %s WHERE %s='%s'",
+                        table, keyColumn, keyValue);
+                return statement.executeUpdate(sql) > 0;
+            }
+        }
+        return false;
+    }
+    
     // =====================================================
     
     public ArrayList<Product> getProducts() throws SQLException {

@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="inventory.jar" size="99372" download="eager" />
+    <jar href="inventory.jar" size="100659" download="eager" />
     <jar href="lib\commons-io-2.11.0.jar" size="327135" download="eager" />
     <jar href="lib\h2-2.1.210.jar" size="2531599" download="eager" />
     <jar href="lib\reactive-streams-1.0.3.jar" size="11369" download="eager" />

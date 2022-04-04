@@ -33,7 +33,8 @@ public class DatabaseUtils {
                 + "quantity INT NOT NULL, "
                 + "quantity_out INT NOT NULL, "
                 + "PRIMARY KEY (id), "
-                + "CONSTRAINT fk_product_1 FOREIGN KEY (product_id) REFERENCES products (id)"
+                + "CONSTRAINT fk_product_1 FOREIGN KEY (product_id) REFERENCES products (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE"
                 + ")";
     }
     
@@ -59,8 +60,10 @@ public class DatabaseUtils {
                 + "quantity_out INT DEFAULT 0, "
                 + "total_out DOUBLE DEFAULT 0, "            // actual total of item out
                 + "PRIMARY KEY (id), "
-                + "CONSTRAINT fk_order_1 FOREIGN KEY (order_id) REFERENCES orders (id), "
-                + "CONSTRAINT fk_product_2 FOREIGN KEY (product_Id) REFERENCES products (id)"
+                + "CONSTRAINT fk_order_1 FOREIGN KEY (order_id) REFERENCES orders (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "CONSTRAINT fk_product_2 FOREIGN KEY (product_Id) REFERENCES products (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE"
                 + ")";
     }
     
@@ -74,7 +77,8 @@ public class DatabaseUtils {
                 + "total DOUBLE DEFAULT 0, "
                 + "payment_type VARCHAR(100) NOT NULL, "
                 + "PRIMARY KEY (id), "
-                + "CONSTRAINT fk_order_2 FOREIGN KEY (order_id) REFERENCES orders (id)"
+                + "CONSTRAINT fk_order_2 FOREIGN KEY (order_id) REFERENCES orders (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE"
                 + ")";
     }
     
@@ -88,8 +92,10 @@ public class DatabaseUtils {
                 + "discounted_price DOUBLE DEFAULT 0, "
                 + "list_price DOUBLE DEFAULT 0, "
                 + "PRIMARY KEY (id), "
-                + "CONSTRAINT fk_invoice_1 FOREIGN KEY (invoice_id) REFERENCES invoices (id), "
-                + "CONSTRAINT fk_product_3 FOREIGN KEY (product_id) REFERENCES products (id)"
+                + "CONSTRAINT fk_invoice_1 FOREIGN KEY (invoice_id) REFERENCES invoices (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "CONSTRAINT fk_product_3 FOREIGN KEY (product_id) REFERENCES products (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE"
                 + ")";
     }
 }

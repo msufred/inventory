@@ -70,11 +70,7 @@
                       <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
                         <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Unit Price">
-                           <columns>
-                              <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
-                           </columns>
-                        </TableColumn>
+                        <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
                            <columns>
                               <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
@@ -92,7 +88,7 @@
                               <String fx:value="table-cell-center-align" />
                               <String fx:value="table-cell-text-green" />
                            </styleClass></TableColumn>
-                        <TableColumn fx:id="colItemTotalOut" prefWidth="100.0" text="Total Out">
+                        <TableColumn fx:id="colItemTotalOut" prefWidth="75.0" text="Total Out">
                            <styleClass>
                               <String fx:value="table-cell-right-align" />
                               <String fx:value="table-cell-text-green" />
