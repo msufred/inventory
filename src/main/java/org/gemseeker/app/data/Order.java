@@ -1,6 +1,7 @@
 package org.gemseeker.app.data;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -53,4 +54,9 @@ public class Order implements IEntry {
                 date, name, total);
     }
 
+    @Override
+    public String toString() {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+        return String.format("%s - %s", dateFormat.format(date), name);
+    }
 }

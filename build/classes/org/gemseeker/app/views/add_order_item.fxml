@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -9,7 +10,6 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
 
 <VBox spacing="4.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <stylesheets>
@@ -23,9 +23,25 @@
             <VBox>
                <children>
                   <Label styleClass="form-label" text="Product" />
-                  <ComboBox fx:id="cbProducts" prefWidth="150.0" promptText="Select Product" styleClass="form-combo-box" />
+                  <ComboBox fx:id="cbProducts" prefWidth="300.0" promptText="Select Product" styleClass="form-combo-box" />
                </children>
             </VBox>
+            <VBox alignment="TOP_CENTER">
+               <children>
+                  <Label styleClass="form-label" text="In Stock" />
+                  <Label fx:id="lblStock" text="0">
+                     <styleClass>
+                        <String fx:value="form-label" />
+                        <String fx:value="text-bold" />
+                        <String fx:value="text-big" />
+                     </styleClass>
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox spacing="8.0">
+         <children>
             <VBox>
                <children>
                   <Label styleClass="form-label" text="Discount (%)" />
@@ -34,13 +50,13 @@
             </VBox>
             <VBox>
                <children>
-                  <Label styleClass="form-label" text="Price After/Unit" />
+                  <Label styleClass="form-label" text="Discounted Price" />
                   <TextField fx:id="tfPriceAfter" editable="false" prefWidth="100.0" />
                </children>
             </VBox>
             <VBox>
                <children>
-                  <Label styleClass="form-label" text="Qty" />
+                  <Label styleClass="form-label" text="Quantity" />
                   <TextField fx:id="tfQuantity" prefWidth="60.0" text="1" />
                </children>
             </VBox>
@@ -51,8 +67,11 @@
                </children>
             </VBox>
          </children>
+         <VBox.margin>
+            <Insets top="8.0" />
+         </VBox.margin>
       </HBox>
-      <ProgressBar fx:id="progressBar" prefWidth="540.0" visible="false">
+      <ProgressBar fx:id="progressBar" prefWidth="380.0" visible="false">
          <VBox.margin>
             <Insets />
          </VBox.margin>

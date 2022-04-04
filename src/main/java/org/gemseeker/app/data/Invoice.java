@@ -9,7 +9,7 @@ import org.gemseeker.app.data.frameworks.IEntry;
  */
 public class Invoice implements IEntry {
 
-    private int id;
+    private String id;
     private int orderId;
     private LocalDate date;
     private String customer;
@@ -17,11 +17,11 @@ public class Invoice implements IEntry {
     private double total;
     private String paymentType;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -76,9 +76,9 @@ public class Invoice implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO invoices "
-                + "(order_id, date, customer, address, total, payment_type) "
-                + "VALUES ('%d', '%s', '%s', '%s', '%f', '%s')",
-                orderId, date, customer, address, total, paymentType);
+                + "(id, order_id, date, customer, address, total, payment_type) "
+                + "VALUES ('%s', '%d', '%s', '%s', '%s', '%f', '%s')",
+                id, orderId, date, customer, address, total, paymentType);
     }
 
 }

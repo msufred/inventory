@@ -51,12 +51,12 @@ public class DatabaseUtils {
                 + "id INT NOT NULL AUTO_INCREMENT, "
                 + "order_id INT NOT NULL, "
                 + "product_id INT NOT NULL, "
-                + "discount DOUBLE DEFAULT 0, "     // discount per unit
-                + "unit_price DOUBLE DEFAULT 0, "   // product price * discount per unit
+                + "discount DOUBLE DEFAULT 0, "             // discount per unit
+                + "discounted_price DOUBLE DEFAULT 0, "     // product price * discount per unit
                 + "quantity INT DEFAULT 0, "
-                + "list_price DOUBLE DEFAULT 0, "   // unit price * quantity (projected total)
+                + "list_price DOUBLE DEFAULT 0, "           // discounted price * quantity (projected total)
                 + "quantity_out INT DEFAULT 0, "
-                + "total_out DOUBLE DEFAULT 0, "    // actual total of item out
+                + "total_out DOUBLE DEFAULT 0, "            // actual total of item out
                 + "PRIMARY KEY (id), "
                 + "CONSTRAINT fk_order_1 FOREIGN KEY (order_id) REFERENCES orders (id), "
                 + "CONSTRAINT fk_product_2 FOREIGN KEY (product_Id) REFERENCES products (id)"
@@ -84,6 +84,7 @@ public class DatabaseUtils {
                 + "product_id INT NOT NULL, "
                 + "quantity INT DEFAULT 0, "
                 + "discount DOUBLE DEFAULT 0, "
+                + "discounted_price DOUBLE DEFAULT 0, "
                 + "list_price DOUBLE DEFAULT 0, "
                 + "PRIMARY KEY (id), "
                 + "CONSTRAINT fk_invoice_1 FOREIGN KEY (invoice_id) REFERENCES invoices (id), "

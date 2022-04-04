@@ -8,46 +8,37 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
-<VBox prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
-            <Button mnemonicParsing="false" styleClass="primary" text="Add Invoice" />
-            <ToggleButton mnemonicParsing="false" selected="true" text="Hide Details" />
+            <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Invoice" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </padding>
       </HBox>
-      <SplitPane dividerPositions="0.6" VBox.vgrow="ALWAYS">
+      <SplitPane fx:id="splitPane" dividerPositions="0.5" VBox.vgrow="ALWAYS">
          <items>
-            <TableView prefHeight="200.0" prefWidth="200.0">
+            <TableView fx:id="invoicesTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn prefWidth="75.0" text="Date" />
-                <TableColumn prefWidth="75.0" text="Invoice No" />
-                  <TableColumn prefWidth="150.0" text="Customer" />
-                  <TableColumn prefWidth="75.0" text="Status" />
-                  <TableColumn prefWidth="100.0" text="Total Amount" />
+                <TableColumn fx:id="colDate" prefWidth="75.0" text="Date" />
+                <TableColumn fx:id="colId" prefWidth="75.0" styleClass="table-cell-center-align" text="Invoice No" />
+                  <TableColumn fx:id="colCustomer" prefWidth="100.0" text="Customer" />
+                  <TableColumn fx:id="colAddress" prefWidth="100.0" text="Address" />
+                  <TableColumn fx:id="colStatus" prefWidth="100.0" styleClass="table-cell-center-align" text="Status" />
+                  <TableColumn fx:id="colTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total Amount" />
               </columns>
             </TableView>
             <VBox>
                <children>
-                  <TableView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                    <columns>
-                      <TableColumn prefWidth="116.0" text="Item" />
-                      <TableColumn prefWidth="70.0" text="Quantity" />
-                        <TableColumn prefWidth="75.0" text="Total" />
-                    </columns>
-                  </TableView>
                   <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0">
                      <children>
                         <Label styleClass="text-big" text="Total" />
-                        <Label text="P 0.00">
+                        <Label fx:id="lblTotal" text="P 0.00">
                            <styleClass>
                               <String fx:value="text-big" />
                               <String fx:value="text-bold" />
@@ -58,6 +49,30 @@
                         <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                      </padding>
                   </HBox>
+                  <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                     <columns>
+                        <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
+                        <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
+                        <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
+                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Unit Price">
+                           <columns>
+                              <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
+                           </columns>
+                        </TableColumn>
+                        <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
+                           <columns>
+                              <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
+                           </columns>
+                        </TableColumn>
+                        <TableColumn fx:id="colOrderItemTotal32" prefWidth="75.0" text="Discounted Price">
+                           <columns>
+                              <TableColumn fx:id="colItemPriceAfter" prefWidth="100.0" styleClass="table-cell-right-align" text="(per Unit)" />
+                           </columns>
+                        </TableColumn>
+                        <TableColumn fx:id="colItemQuantity" prefWidth="40.0" styleClass="table-cell-center-align" text="Qty" />
+                        <TableColumn fx:id="colItemTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
+                     </columns>
+                  </TableView>
                </children>
             </VBox>
          </items>

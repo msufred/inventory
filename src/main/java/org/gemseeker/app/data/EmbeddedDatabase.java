@@ -186,7 +186,7 @@ public class EmbeddedDatabase {
                     item.setOrderId(rs.getInt(2));
                     item.setProductId(rs.getInt(3));
                     item.setDiscount(rs.getDouble(4));
-                    item.setUnitPrice(rs.getDouble(5));
+                    item.setDiscountedPrice(rs.getDouble(5));
                     item.setQuantity(rs.getInt(6));
                     item.setListPrice(rs.getDouble(7));
                     item.setQuantityOut(rs.getInt(8));
@@ -206,5 +206,59 @@ public class EmbeddedDatabase {
             }
         }
         return orderItems;
+    }
+    
+    public ArrayList<Invoice> getInvoices() throws SQLException {
+        ArrayList<Invoice> invoices = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM invoices");
+                while (rs.next()) {
+                    Invoice invoice = new Invoice();
+                    invoice.setId(rs.getString(1));
+                    invoice.setOrderId(rs.getInt(2));
+                    invoice.setDate(rs.getDate(3).toLocalDate());
+                    invoice.setCustomer(rs.getString(4));
+                    invoice.setAddress(rs.getString(5));
+                    invoice.setTotal(rs.getDouble(6));
+                    invoice.setPaymentType(rs.getString(7));
+                    invoices.add(invoice);
+                }
+            }
+        }
+        return invoices;
+    }
+    
+    public ArrayList<InvoiceItem> getInvoiceItems(String invoiceId) throws SQLException {
+        ArrayList<InvoiceItem> items = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                String sql = String.format("SELECT * FROM invoice_items INNER JOIN "
+                        + "products ON invoice_items.product_id = products.id WHERE invoice_id='%s'", invoiceId);
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    InvoiceItem item = new InvoiceItem();
+                    item.setId(rs.getInt(1));
+                    item.setInvoiceId(rs.getString(2));
+                    item.setProductId(rs.getInt(3));
+                    item.setQuantity(rs.getInt(4));
+                    item.setDiscount(rs.getDouble(5));
+                    item.setDiscountedPrice(rs.getDouble(6));
+                    item.setListPrice(rs.getDouble(7));
+                    
+                    Product product = new Product();
+                    product.setId(rs.getInt(8));
+                    product.setName(rs.getString(9));
+                    product.setSku(rs.getString(10));
+                    product.setSupplier(rs.getString(11));
+                    product.setUnit(rs.getString(12));
+                    product.setUnitPrice(rs.getDouble(13));
+                    
+                    item.setProduct(product);
+                    items.add(item);
+                }
+            }
+        }
+        return items;
     }
 }

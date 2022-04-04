@@ -9,10 +9,11 @@ import org.gemseeker.app.data.frameworks.IEntry;
 public class InvoiceItem implements IEntry {
 
     private int id;
-    private int invoiceId;
+    private String invoiceId;
     private int productId;
     private int quantity;
     private double discount;
+    private double discountedPrice;
     private double listPrice;
 
     private Product product;
@@ -25,11 +26,11 @@ public class InvoiceItem implements IEntry {
         this.id = id;
     }
 
-    public int getInvoiceId() {
+    public String getInvoiceId() {
         return invoiceId;
     }
 
-    public void setInvoiceId(int invoiceId) {
+    public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
     }
 
@@ -57,6 +58,14 @@ public class InvoiceItem implements IEntry {
         this.discount = discount;
     }
 
+    public double getDiscountedPrice() {
+        return discountedPrice;
+    }
+
+    public void setDiscountedPrice(double discountedPrice) {
+        this.discountedPrice = discountedPrice;
+    }
+
     public double getListPrice() {
         return listPrice;
     }
@@ -76,9 +85,9 @@ public class InvoiceItem implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO invoice_items "
-                + "(invoice_id, product_id, quantity, discount, list_price) "
-                + "VALUES ('%d', '%d', '%d', '%f', '%f')",
-                invoiceId, productId, quantity, discount, listPrice);
+                + "(invoice_id, product_id, quantity, discount, discounted_price, list_price) "
+                + "VALUES ('%s', '%d', '%d', '%f', '%f', '%f')",
+                invoiceId, productId, quantity, discount, discountedPrice, listPrice);
     }
 
 }

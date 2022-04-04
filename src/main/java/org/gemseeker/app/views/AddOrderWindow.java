@@ -5,6 +5,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import java.time.LocalDate;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -83,7 +84,7 @@ public class AddOrderWindow extends AbstractWindowController {
         colPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
         colPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
         colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
-        colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
+        colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
         colPriceAfter.setCellFactory(col -> new TableCell<OrderItem, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -126,6 +127,12 @@ public class AddOrderWindow extends AbstractWindowController {
                     close();
                 })
         );
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        datePicker.setValue(LocalDate.now());
     }
     
     private void saveAndClose() {

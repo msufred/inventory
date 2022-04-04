@@ -12,7 +12,7 @@ public class OrderItem implements IEntry {
     private int orderId;
     private int productId;
     private double discount;    // discount per unit
-    private double unitPrice;   // price per unit after discount
+    private double discountedPrice;   // price per unit after discount
     private int quantity;
     private double listPrice;   // quantity * unitPrice
     private int quantityOut;    // actual quantity of item out
@@ -52,12 +52,12 @@ public class OrderItem implements IEntry {
         this.discount = discount;
     }
 
-    public double getUnitPrice() {
-        return unitPrice;
+    public double getDiscountedPrice() {
+        return discountedPrice;
     }
 
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
+    public void setDiscountedPrice(double unitPrice) {
+        this.discountedPrice = unitPrice;
     }
 
     public int getQuantity() {
@@ -103,11 +103,15 @@ public class OrderItem implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO order_items ("
-                + "order_id, product_id, discount, unit_price, quantity, "
+                + "order_id, product_id, discount, discounted_price, quantity, "
                 + "list_price, quantity_out, total_out) VALUES ("
                 + "'%d', '%d', '%f', '%f', '%d', '%f', '%d', '%f')",
-                orderId, productId, discount, unitPrice, quantity,
+                orderId, productId, discount, discountedPrice, quantity,
                 listPrice, quantityOut, totalOut);
     }
-
+    
+    @Override
+    public String toString() {
+        return String.format("%s (%s)", product.getName(), product.getSupplier());
+    }
 }

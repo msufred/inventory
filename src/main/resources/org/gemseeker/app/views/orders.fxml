@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="500.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="1400.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
@@ -26,8 +26,9 @@
          <items>
             <TableView fx:id="ordersTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="colOrderDate" prefWidth="75.0" styleClass="table-cell-center-align" text="Date" />
-                <TableColumn fx:id="colOrderName" prefWidth="200.0" text="Name" />
+                <TableColumn fx:id="colOrderDate" prefWidth="120.0" styleClass="table-cell-center-align" text="Date" />
+                <TableColumn fx:id="colOrderName" prefWidth="300.0" styleClass="table-cell-center-align" text="Name" />
+                  <TableColumn fx:id="colTotal" prefWidth="120.0" styleClass="table-cell-right-align" text="Total Amount" />
               </columns>
             </TableView>
             <VBox>
@@ -51,7 +52,7 @@
                         <HBox id="summary-4" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                            <children>
                               <Label styleClass="text-big" text="Total Out" />
-                              <Label fx:id="lblOrderTotal1" text="P 0.00">
+                              <Label fx:id="lblTotalOut" text="P 0.00">
                                  <styleClass>
                                     <String fx:value="text-big" />
                                     <String fx:value="text-bold" />
@@ -69,7 +70,7 @@
                       <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
                         <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Price Before">
+                        <TableColumn fx:id="colOrderItemTotal3" prefWidth="110.0" text="Unit Price">
                            <columns>
                               <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
                            </columns>
@@ -79,15 +80,23 @@
                               <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
                            </columns>
                         </TableColumn>
-                        <TableColumn fx:id="colOrderItemTotal32" prefWidth="75.0" text="Price After">
+                        <TableColumn fx:id="colOrderItemTotal32" prefWidth="100.0" text="Discounted Price">
                            <columns>
-                              <TableColumn fx:id="colItemPriceAfter" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
+                              <TableColumn fx:id="colItemPriceAfter" prefWidth="100.0" styleClass="table-cell-right-align" text="(per Unit)" />
                            </columns>
                         </TableColumn>
-                      <TableColumn fx:id="colItemQuantity" prefWidth="40.0" styleClass="table-cell-center-align" text="Qty" />
-                        <TableColumn fx:id="colItemTotal" styleClass="table-cell-right-align" text="Total" />
-                        <TableColumn fx:id="colItemQuantityOut" prefWidth="60.0" styleClass="table-cell-center-align" text="Qty Out" />
-                        <TableColumn fx:id="colItemTotalOut" styleClass="table-cell-right-align" text="Total Out" />
+                      <TableColumn fx:id="colItemQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
+                        <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
+                        <TableColumn fx:id="colItemQuantityOut" prefWidth="50.0" text="Qty Out">
+                           <styleClass>
+                              <String fx:value="table-cell-center-align" />
+                              <String fx:value="table-cell-text-green" />
+                           </styleClass></TableColumn>
+                        <TableColumn fx:id="colItemTotalOut" prefWidth="100.0" text="Total Out">
+                           <styleClass>
+                              <String fx:value="table-cell-right-align" />
+                              <String fx:value="table-cell-text-green" />
+                           </styleClass></TableColumn>
                     </columns>
                   </TableView>
                </children>

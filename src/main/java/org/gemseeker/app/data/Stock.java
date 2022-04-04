@@ -63,4 +63,8 @@ public class Stock implements IEntry {
                 productId, quantity, quantityOut);
     }
 
+    @Override
+    public String toString() {
+        return product.getName();
+    }
 }

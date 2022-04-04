@@ -24,6 +24,8 @@ import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
+import org.gemseeker.app.views.tablecells.DateTableCell;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
@@ -39,6 +41,7 @@ public class OrdersPanel extends AbstractPanelController {
     @FXML private Button btnPrint;
     @FXML private TableView<Order> ordersTable;
     @FXML private TableColumn<Order, LocalDate> colOrderDate;
+    @FXML private TableColumn<Order, Double> colTotal;
     @FXML private TableColumn<Order, String> colOrderName;
     @FXML private TableView<OrderItem> orderItemsTable;
     @FXML private TableColumn<OrderItem, Product> colItemName;
@@ -52,6 +55,7 @@ public class OrdersPanel extends AbstractPanelController {
     @FXML private TableColumn<OrderItem, Integer> colItemQuantityOut; 
     @FXML private TableColumn<OrderItem, Double> colItemTotalOut; 
     @FXML private Label lblOrderTotal;
+    @FXML private Label lblTotalOut;
     @FXML private SplitPane splitPane;
     private SplitController splitController;
     
@@ -59,6 +63,7 @@ public class OrdersPanel extends AbstractPanelController {
     private final CompositeDisposable disposables;
     
     private final SimpleDoubleProperty mOrderTotal = new SimpleDoubleProperty(0);
+    private final SimpleDoubleProperty mTotalOut = new SimpleDoubleProperty(0);
     
     private FilteredList<Order> filteredList;
     
@@ -76,6 +81,9 @@ public class OrdersPanel extends AbstractPanelController {
     public void onLoad() {
         // Order Table Columns
         colOrderDate.setCellValueFactory(new PropertyValueFactory<>("date"));
+        colOrderDate.setCellFactory(col -> new DateTableCell<>());
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
         colOrderName.setCellValueFactory(new PropertyValueFactory<>("name"));
         
         // OrderItems Table Columns
@@ -88,7 +96,7 @@ public class OrdersPanel extends AbstractPanelController {
         colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
         colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
-        colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
+        colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
         colItemPriceAfter.setCellFactory(col -> new TableCell<OrderItem, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -121,7 +129,12 @@ public class OrdersPanel extends AbstractPanelController {
         disposables.addAll(
                 JavaFxObservable.changesOf(mOrderTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
-                        lblOrderTotal.setText(String.format("P %.2f", value.getNewVal()));
+                        lblOrderTotal.setText(Utils.getMoneyFormat(value.getNewVal().doubleValue()));
+                    }
+                }),
+                JavaFxObservable.changesOf(mTotalOut).subscribe(value -> {
+                    if (value.getNewVal() != null) {
+                        lblTotalOut.setText(Utils.getMoneyFormat(value.getNewVal().doubleValue()));
                     }
                 }),
                 JavaFxObservable.changesOf(ordersTable.getSelectionModel().selectedItemProperty()).subscribe(order -> {
@@ -175,7 +188,15 @@ public class OrdersPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orderItems -> {
             mainWindow.showProgress(false);
             orderItemsTable.setItems(FXCollections.observableArrayList(orderItems));
-            mOrderTotal.set(order.getTotal());
+            
+            double total = 0;
+            double totalOut = 0;
+            for (OrderItem item : orderItems) {
+                total += item.getListPrice();
+                totalOut += item.getTotalOut();
+            }
+            mOrderTotal.set(total);
+            mTotalOut.set(totalOut);
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Datbase Error", "Error occurred while fetching order items.", err);

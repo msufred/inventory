@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -17,6 +18,7 @@ import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
+import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 
 /**
@@ -25,7 +27,8 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddOrderItemWindow extends AbstractWindowController {
     
-    @FXML private ComboBox<Product> cbProducts;
+    @FXML private ComboBox<Stock> cbProducts;
+    @FXML private Label lblStock;
     @FXML private TextField tfDiscount;
     @FXML private TextField tfPriceAfter;
     @FXML private TextField tfQuantity;
@@ -79,8 +82,10 @@ public class AddOrderItemWindow extends AbstractWindowController {
     }
     
     private void recalculate() {
-        Product p = cbProducts.getValue();
-        if (p != null) {
+        Stock s = cbProducts.getValue();
+        if (s != null) {
+            lblStock.setText(String.format("%d", s.getQuantity() - s.getQuantityOut()));
+            Product p = s.getProduct();
             double price = p.getUnitPrice();
             double discount = 0;
             if (!tfDiscount.getText().isEmpty()) {
@@ -100,16 +105,16 @@ public class AddOrderItemWindow extends AbstractWindowController {
     }
     
     private void saveAndClose() {
-        Product product = cbProducts.getValue();
+        Product product = cbProducts.getValue().getProduct();
         OrderItem orderItem = new OrderItem();
         orderItem.setProductId(product.getId());
         double discount = Integer.parseInt(tfDiscount.getText().trim()) / 100;
         orderItem.setDiscount(discount);
-        double unitPrice = product.getUnitPrice() - (product.getUnitPrice() * discount);
-        orderItem.setUnitPrice(unitPrice);
+        double discountedPrice = product.getUnitPrice() - (product.getUnitPrice() * discount);
+        orderItem.setDiscountedPrice(discountedPrice);
         int qty = Integer.parseInt(tfQuantity.getText().trim());
         orderItem.setQuantity(qty);
-        orderItem.setListPrice(unitPrice * qty);
+        orderItem.setListPrice(discountedPrice * qty);
         orderItem.setQuantityOut(0);
         orderItem.setTotalOut(0);
         orderItem.setProduct(product);
@@ -123,10 +128,10 @@ public class AddOrderItemWindow extends AbstractWindowController {
         super.show();
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getProducts();
-        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
+            return EmbeddedDatabase.getInstance().getStocks();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(stocks -> {
             showProgress(false);
-            cbProducts.setItems(FXCollections.observableArrayList(products));
+            cbProducts.setItems(FXCollections.observableArrayList(stocks));
         }, err -> {
             showProgress(false);
             showErrorDialog("Database Error", "Failed to fetch products.", err);
