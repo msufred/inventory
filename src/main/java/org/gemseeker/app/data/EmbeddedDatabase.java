@@ -58,13 +58,17 @@ public class EmbeddedDatabase {
         }
     }
     
-    public boolean addEntry(IEntry entry) throws SQLException {
+    public boolean executeQuery(String sql) throws SQLException {
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                return statement.executeUpdate(entry.insertSQL()) > 0;
+                return statement.executeUpdate(sql) > 0;
             }
         }
         return false;
+    }
+    
+    public boolean addEntry(IEntry entry) throws SQLException {
+        return executeQuery(entry.insertSQL());
     }
     
     public int addEntryReturnId(IEntry entry) throws SQLException {
@@ -79,25 +83,13 @@ public class EmbeddedDatabase {
     }
     
     public boolean updateEntry(String table, String col, Object colValue, String keyCol, Object keyValue) throws SQLException {
-        if (connection != null) {
-            try (Statement statement = connection.createStatement()) {
-                String sql = String.format("UPDATE %s SET %s='%s' WHERE %s='%s'",
-                        table, col, colValue, keyCol, keyValue);
-                return statement.executeUpdate(sql) > 0;
-            }
-        }
-        return false;
+        String sql = String.format("UPDATE %s SET %s='%s' WHERE %s='%s'", table, col, colValue, keyCol, keyValue);
+        return executeQuery(sql);
     }
     
     public boolean deleteEntry(String table, String keyColumn, Object keyValue) throws SQLException {
-        if (connection != null) {
-            try (Statement statement = connection.createStatement()) {
-                String sql = String.format("DELETE FROM %s WHERE %s='%s'",
-                        table, keyColumn, keyValue);
-                return statement.executeUpdate(sql) > 0;
-            }
-        }
-        return false;
+        String sql = String.format("DELETE FROM %s WHERE %s='%s'", table, keyColumn, keyValue);
+        return executeQuery(sql);
     }
     
     // =====================================================
