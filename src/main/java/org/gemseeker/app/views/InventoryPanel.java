@@ -52,6 +52,7 @@ public class InventoryPanel extends AbstractPanelController {
     private FilteredList<Stock> filteredList;
     
     private final AddProductWindow addProductWindow;
+    private final EditProductWindow editProductWindow;
     
     public InventoryPanel(MainWindow mainWindow) {
         super(InventoryPanel.class.getResource("warehouse.fxml"));
@@ -59,6 +60,7 @@ public class InventoryPanel extends AbstractPanelController {
         disposables = new CompositeDisposable();
         
         addProductWindow = new AddProductWindow(this, mainWindow.getWindow());
+        editProductWindow = new EditProductWindow(this, mainWindow.getWindow());
     }
 
     @Override
@@ -91,9 +93,10 @@ public class InventoryPanel extends AbstractPanelController {
             }
         });
         
+        MenuItem mEdit = new MenuItem("Edit Product Details");
         MenuItem mDelete = new MenuItem("Delete Product");
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(mDelete);
+        contextMenu.getItems().addAll(mEdit, mDelete);
         stocksTable.setContextMenu(contextMenu);
         
         disposables.addAll(
@@ -105,6 +108,10 @@ public class InventoryPanel extends AbstractPanelController {
                 }),
                 JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {
                     
+                }),
+                JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
+                    Stock s = stocksTable.getSelectionModel().getSelectedItem();
+                    if (s != null) editProductWindow.show(s);
                 }),
                 JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
                     Stock s = stocksTable.getSelectionModel().getSelectedItem();
