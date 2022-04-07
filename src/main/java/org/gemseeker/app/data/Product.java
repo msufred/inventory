@@ -82,6 +82,12 @@ public class Product implements IEntry {
                 date, name, sku, supplier, unit, unitPrice);
     }
     
+    public String updateSQL() {
+        return String.format("UPDATE products SET date='%s', name='%s', sku='%s', "
+                + "supplier='%s', unit='%s', unit_price='%f' WHERE id='%d'", 
+                date, name, sku, supplier, unit, unitPrice, id);
+    }
+    
     @Override
     public String toString() {
         return name;
