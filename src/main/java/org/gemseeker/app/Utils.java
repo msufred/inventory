@@ -28,6 +28,7 @@ public final class Utils {
     
     public static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
     public static final DateTimeFormatter dateTimeFormat2 = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+    public static final DateTimeFormatter fileDateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
     public static String getSeparator() {
         return System.getProperty("file.separator");
