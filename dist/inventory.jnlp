@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="inventory.jar" size="103663" download="eager" />
+    <jar href="inventory.jar" size="128227" download="eager" />
     <jar href="lib\SparseBitSet-1.2.jar" size="24510" download="eager" />
     <jar href="lib\batik-anim-1.14.jar" size="485809" download="eager" />
     <jar href="lib\batik-awt-util-1.14.jar" size="424624" download="eager" />
@@ -40,18 +40,17 @@
     <jar href="lib\commons-math3-3.6.1.jar" size="2213560" download="eager" />
     <jar href="lib\curvesapi-1.07.jar" size="111978" download="eager" />
     <jar href="lib\fontbox-2.0.25.jar" size="1565437" download="eager" />
-    <jar href="lib\graphics2d-0.34.jar" size="75835" download="eager" />
+    <jar href="lib\graphics2d-0.35.jar" size="75652" download="eager" />
     <jar href="lib\h2-2.1.210.jar" size="2531599" download="eager" />
-    <jar href="lib\log4j-api-2.17.1.jar" size="301872" download="eager" />
+    <jar href="lib\log4j-api-2.17.2.jar" size="302511" download="eager" />
     <jar href="lib\pdfbox-2.0.25.jar" size="2768023" download="eager" />
-    <jar href="lib\poi-5.2.1.jar" size="2920161" download="eager" />
-    <jar href="lib\poi-examples-5.2.1.jar" size="384714" download="eager" />
-    <jar href="lib\poi-excelant-5.2.1.jar" size="28747" download="eager" />
-    <jar href="lib\poi-javadoc-5.2.1.jar" size="17941759" download="eager" />
-    <jar href="lib\poi-ooxml-5.2.1.jar" size="1976984" download="eager" />
-    <jar href="lib\poi-ooxml-full-5.2.1.jar" size="13060074" download="eager" />
-    <jar href="lib\poi-ooxml-lite-5.2.1.jar" size="5839950" download="eager" />
-    <jar href="lib\poi-scratchpad-5.2.1.jar" size="1897101" download="eager" />
+    <jar href="lib\poi-5.2.2.jar" size="2920513" download="eager" />
+    <jar href="lib\poi-examples-5.2.2.jar" size="384714" download="eager" />
+    <jar href="lib\poi-excelant-5.2.2.jar" size="28747" download="eager" />
+    <jar href="lib\poi-ooxml-5.2.2.jar" size="1977285" download="eager" />
+    <jar href="lib\poi-ooxml-full-5.2.2.jar" size="13060187" download="eager" />
+    <jar href="lib\poi-ooxml-lite-5.2.2.jar" size="5840063" download="eager" />
+    <jar href="lib\poi-scratchpad-5.2.2.jar" size="1897101" download="eager" />
     <jar href="lib\reactive-streams-1.0.3.jar" size="11369" download="eager" />
     <jar href="lib\rxjava-2.2.21.jar" size="2356379" download="eager" />
     <jar href="lib\rxjavafx-2.2.2.jar" size="61077" download="eager" />

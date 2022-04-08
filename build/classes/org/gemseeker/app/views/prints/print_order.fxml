@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1754.0" prefWidth="1240.0" stylesheets="@../css/prints.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER_RIGHT">
+         <children>
+            <Label fx:id="lblDate" styleClass="print-date" text="01/01/2022" />
+         </children>
+      </HBox>
+      <HBox>
+         <children>
+            <Label prefWidth="200.0" styleClass="print-label-bold" text="Order Date:" />
+            <Label fx:id="lblOrderDate" styleClass="print-label" text="01/01/2022" />
+         </children>
+         <VBox.margin>
+            <Insets top="32.0" />
+         </VBox.margin>
+      </HBox>
+      <HBox>
+         <children>
+            <Label prefWidth="200.0" styleClass="print-label-bold" text="Name:" />
+            <Label fx:id="lblName" styleClass="print-label" text="Order Name" />
+         </children>
+      </HBox>
+      <HBox>
+         <children>
+            <Label prefWidth="200.0" styleClass="print-label-bold" text="Amount:" />
+            <Label fx:id="lblAmount" styleClass="print-label" text="P 0.00" />
+         </children>
+      </HBox>
+      <HBox>
+         <children>
+            <Label prefWidth="200.0" styleClass="print-label-bold" text="Total Sale:" />
+            <Label fx:id="lblTotalSale" styleClass="print-label" text="P 0.00" />
+         </children>
+      </HBox>
+      <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="colName" editable="false" prefWidth="150.0" text="Item" />
+          <TableColumn fx:id="colSupplier" editable="false" prefWidth="150.0" text="Supplier" />
+            <TableColumn fx:id="colUnit" editable="false" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
+            <TableColumn fx:id="colUnitPrice" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Unit Price" />
+            <TableColumn fx:id="colDiscount" editable="false" prefWidth="100.0" styleClass="table-cell-center-align" text="Discount" />
+            <TableColumn fx:id="colDiscountedPrice" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Discounted Price" />
+            <TableColumn fx:id="colQuantity" editable="false" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
+            <TableColumn fx:id="colTotal" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
+            <TableColumn fx:id="colQuantityOut" editable="false" prefWidth="70.0" text="Qty Out">
+               <styleClass>
+                  <String fx:value="table-cell-center-align" />
+                  <String fx:value="table-cell-green" />
+               </styleClass>
+            </TableColumn>
+            <TableColumn fx:id="colTotalOut" editable="false" prefWidth="100.0" text="Total Out">
+               <styleClass>
+                  <String fx:value="table-cell-green" />
+                  <String fx:value="table-cell-right-align" />
+               </styleClass></TableColumn>
+        </columns>
+         <VBox.margin>
+            <Insets top="32.0" />
+         </VBox.margin>
+      </TableView>
+      <HBox alignment="CENTER_RIGHT">
+         <children>
+            <Label fx:id="lblPage" styleClass="print-date" text="Page 1/1" />
+         </children>
+         <VBox.margin>
+            <Insets top="16.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
+   </padding>
+</VBox>
