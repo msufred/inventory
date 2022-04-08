@@ -1,0 +1,52 @@
+.root {
+    -fx-background-color: white;
+}
+
+.print-date {
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+}
+
+.print-label-bold {
+    -fx-text-fill: black;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.print-label {
+    -fx-text-fill: black;
+    -fx-font-size: 18px;
+}
+
+/*table view columns*/
+.table-view .table-cell {
+    -fx-font-size: 16px;
+}
+.filler,.column-header,.show-hide-columns-button {
+    -fx-background-color: #dddddd, white, white;
+    -fx-font-size: 14px;
+}
+.show-hide-columns-button {
+    -fx-border-width: 0;
+    -fx-background-insets: 0 0 1 1;
+}
+.column-header:hover,.show-hide-columns-button:hover {
+    -fx-background-color: #dddddd, white, #f8f8f8;
+}
+.column-header-background > .filler {
+    -fx-border-color: transparent #dddddd transparent transparent;
+    -fx-border-insets: 0 1 0 0;
+}
+.column-drag-header {
+    -fx-background-color: #2fb254;
+}
+.table-cell-right-align {
+    -fx-alignment: CENTER-RIGHT;
+}
+.table-cell-center-align {
+    -fx-alignment: CENTER;
+}
+.table-cell-green {
+    -fx-text-fill: #006837;
+    -fx-font-weight: bold;
+}
