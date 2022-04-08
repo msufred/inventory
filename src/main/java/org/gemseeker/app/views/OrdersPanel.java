@@ -10,13 +10,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -27,7 +30,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -39,6 +41,8 @@ import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
+import org.gemseeker.app.views.prints.PrintOrder;
+import org.gemseeker.app.views.prints.PrintWindow;
 import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
@@ -54,7 +58,7 @@ import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 public class OrdersPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
-    @FXML private Button btnExport;
+    @FXML private Button btnPrintList;
     @FXML private TableView<Order> ordersTable;
     @FXML private TableColumn<Order, LocalDate> colOrderDate;
     @FXML private TableColumn<Order, Double> colTotal;
@@ -85,6 +89,7 @@ public class OrdersPanel extends AbstractPanelController {
     private FilteredList<Order> filteredList;
     
     private final AddOrderWindow addOrderWindow;
+    private final PrintWindow printWindow;
     
     private final DirectoryChooser dirChooser;
     
@@ -94,6 +99,7 @@ public class OrdersPanel extends AbstractPanelController {
         disposables = new CompositeDisposable();
         
         addOrderWindow = new AddOrderWindow(this, mainWindow.getWindow());
+        printWindow = new PrintWindow(mainWindow.getWindow());
         
         dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select Destination");
@@ -130,6 +136,12 @@ public class OrdersPanel extends AbstractPanelController {
         
         orderItemsTable.setItems(orderItems);
         
+        MenuItem mPrint = new MenuItem("Print");
+        MenuItem mExport = new MenuItem("Export");
+        ContextMenu cm = new ContextMenu();
+        cm.getItems().addAll(mPrint, mExport);
+        ordersTable.setContextMenu(cm);
+        
         disposables.addAll(JavaFxObservable.changesOf(mOrderTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
                         lblOrderTotal.setText(Utils.getMoneyFormat(value.getNewVal().doubleValue()));
@@ -142,24 +154,35 @@ public class OrdersPanel extends AbstractPanelController {
                 }),
                 JavaFxObservable.changesOf(ordersTable.getSelectionModel().selectedItemProperty()).subscribe(order -> {
                     if (order.getNewVal() != null) {
-                        btnExport.setDisable(false);
+                        mPrint.setDisable(false);
+                        mExport.setDisable(false);
                         if (!splitController.isTargetVisible()) {
                             splitController.showTarget();
                         }
                         getOrderItems(order.getNewVal());
                     } else {
-                        btnExport.setDisable(true);
+                        mPrint.setDisable(true);
+                        mExport.setDisable(true);
                         splitController.hideTarget();
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addOrderWindow.show();
                 }),
-                JavaFxObservable.actionEventsOf(btnExport).subscribe(evt -> {
+                JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
+                    Order order = ordersTable.getSelectionModel().getSelectedItem();
+                    if (order != null) {
+                        printOrder(order);
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(mExport).subscribe(evt -> {
                     Order order = ordersTable.getSelectionModel().getSelectedItem();
                     if (order != null) {
                         exportOrder(order);
                     }
+                }),
+                JavaFxObservable.actionEventsOf(btnPrintList).subscribe(evt -> {
+                    showInfoDialog("Invalid Action", "This feature is not implemented yet.");
                 })
         );
         
@@ -171,7 +194,6 @@ public class OrdersPanel extends AbstractPanelController {
     public void onPause() {
         ordersTable.getSelectionModel().clearSelection();
         splitController.hideTarget();
-        btnExport.setDisable(true);
     }
 
     @Override
@@ -210,6 +232,41 @@ public class OrdersPanel extends AbstractPanelController {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);
         }));
+    }
+    
+    private void printOrder(Order order) {
+        mainWindow.showProgress(true, "Preparing orders for printing...");
+        double totalOut = 0;
+        for (OrderItem item : orderItems) {
+            totalOut += item.getTotalOut();
+        }
+        ArrayList<PrintOrder> pos = new ArrayList<>();
+        int maxPerPage = 30;
+        int totalPage = (int) (orderItems.size() / maxPerPage);
+        if (totalPage > 1) {
+            int startIndex = 0;
+            for (int i = 1; i <= totalPage; i++) {
+                ArrayList<OrderItem> items = new ArrayList<>();
+                int endIndex = startIndex + maxPerPage - 1;
+                if (endIndex < orderItems.size()) {
+                    items.addAll(orderItems.subList(startIndex, endIndex));
+                } else {
+                    items.addAll(orderItems.subList(startIndex, orderItems.size() - 1));
+                }
+                PrintOrder po = new PrintOrder();
+                po.set(order.getDate(), order.getName(), order.getTotal(), totalOut, items, i, totalPage);
+                pos.add(po);
+                startIndex = endIndex;
+            }
+        } else {
+            PrintOrder po = new PrintOrder();
+            po.set(order.getDate(), order.getName(), order.getTotal(), totalOut,
+                    new ArrayList<>(orderItems), 1, 1);
+            pos.add(po);
+        }
+        
+        mainWindow.showProgress(false);
+        printWindow.show(pos);
     }
     
     private void exportOrder(Order order) {
@@ -372,6 +429,7 @@ public class OrdersPanel extends AbstractPanelController {
     public void onDispose() {
         disposables.dispose();
         addOrderWindow.onDispose();
+        printWindow.onDispose();
     }
 
 }
