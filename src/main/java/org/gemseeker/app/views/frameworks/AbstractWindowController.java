@@ -1,5 +1,6 @@
 package org.gemseeker.app.views.frameworks;
 
+import java.io.File;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
 
 public abstract class AbstractWindowController {
 
@@ -51,6 +53,8 @@ public abstract class AbstractWindowController {
     protected Stage getStage() {
         if (stage == null) stage = new Stage();
         if (!mStageCreated) {
+            File icon = new File("app-icon.png");
+            if (icon.exists()) stage.getIcons().add(new Image(icon.toURI().toString()));
             initWindow(stage);
             mStageCreated = true;
         }

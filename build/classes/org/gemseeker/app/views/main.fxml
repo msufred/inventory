@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
@@ -8,12 +9,21 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ToolBar prefHeight="40.0" prefWidth="200.0" />
+      <ToolBar prefHeight="40.0" prefWidth="200.0">
+         <items>
+            <Label text="Inventory System">
+               <styleClass>
+                  <String fx:value="text-big" />
+                  <String fx:value="text-bold" />
+               </styleClass>
+            </Label>
+         </items></ToolBar>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
             <VBox alignment="TOP_CENTER" prefWidth="120.0" spacing="16.0" styleClass="sidebar">
@@ -28,6 +38,8 @@
                   </ToggleButton>
                   <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Orders" toggleGroup="$toggleGroup" />
                   <ToggleButton fx:id="toggleInvoices" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Invoices" toggleGroup="$toggleGroup" />
+                  <Region VBox.vgrow="ALWAYS" />
+                  <Label style="-fx-text-fill: #dddddd;" text="1.0.0-Beta" />
                </children>
                <padding>
                   <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
