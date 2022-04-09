@@ -27,8 +27,9 @@
           <TableColumn fx:id="colSupplier" prefWidth="100.0" text="Supplier" />
             <TableColumn fx:id="colSku" prefWidth="100.0" styleClass="table-cell-center-align" text="SKU" />
             <TableColumn fx:id="colUnit" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
+            <TableColumn fx:id="colUnitPrice" prefWidth="100.0" styleClass="table-cell-right-align" text="Unit Price" />
             <TableColumn fx:id="colQuantity" styleClass="table-cell-center-align" text="Quantity" />
-            <TableColumn fx:id="colQuantityOut" styleClass="table-cell-center-align" text="Qty Out" />
+            <TableColumn fx:id="colQuantityOut" styleClass="table-cell-center-align" text="Ordered" />
             <TableColumn fx:id="colInStock" styleClass="table-cell-center-align" text="In Stock" />
         </columns>
       </TableView>
