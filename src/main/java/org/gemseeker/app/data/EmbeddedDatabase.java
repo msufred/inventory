@@ -25,6 +25,7 @@ public class EmbeddedDatabase {
         initProperties();
         openDatabase();
         createTables();
+        updateDatabase();
     }
 
     public static EmbeddedDatabase getInstance() throws ClassNotFoundException, SQLException {
@@ -51,6 +52,21 @@ public class EmbeddedDatabase {
     private void createTables() throws SQLException {
         if (connection != null) {
             for (String sql : DatabaseUtils.tables()) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute(sql);
+                }
+            }
+        }
+    }
+    
+    private void updateDatabase() throws SQLException {
+        if (connection != null) {
+            ArrayList<String> sqls = new ArrayList<>();
+            
+            // 1.0.0-beta-02
+            sqls.add("ALTER TABLE products ADD COLUMN IF NOT EXISTS total DOUBLE DEFAULT 0");
+            
+            for (String sql : sqls) {
                 try (Statement statement = connection.createStatement()) {
                     statement.execute(sql);
                 }
@@ -108,6 +124,7 @@ public class EmbeddedDatabase {
                     product.setSupplier(rs.getString(5));
                     product.setUnit(rs.getString(6));
                     product.setUnitPrice(rs.getDouble(7));
+                    product.setTotal(rs.getDouble(8));
                     products.add(product);
                 }
             }
@@ -130,12 +147,13 @@ public class EmbeddedDatabase {
                     product.setSupplier(rs.getString(5));
                     product.setUnit(rs.getString(6));
                     product.setUnitPrice(rs.getDouble(7));
+                    product.setTotal(rs.getDouble(8));
                     
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(8));
-                    stock.setProductId(rs.getInt(9));
-                    stock.setQuantity(rs.getInt(10));
-                    stock.setQuantityOut(rs.getInt(11));
+                    stock.setId(rs.getInt(9));
+                    stock.setProductId(rs.getInt(10));
+                    stock.setQuantity(rs.getInt(11));
+                    stock.setQuantityOut(rs.getInt(12));
                     stock.setProduct(product);
                     stocks.add(stock);
                 }
@@ -179,6 +197,26 @@ public class EmbeddedDatabase {
         return orders;
     }
     
+    public ArrayList<Order> getOrders(int productId) throws SQLException {
+        ArrayList<Order> orders = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                String sql = "SELECT * FROM orders WHERE orders.id IN "
+                        + "(SELECT order_id FROM order_items WHERE order_items.product_id = '"+ productId + "')";
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setId(rs.getInt(1));
+                    order.setDate(rs.getDate(2).toLocalDate());
+                    order.setName(rs.getString(3));
+                    order.setTotal(rs.getDouble(4));
+                    orders.add(order);
+                }
+            }
+        }
+        return orders;
+    }
+    
     public ArrayList<OrderItem> getOrderItems(int orderId) throws SQLException {
         ArrayList<OrderItem> orderItems = new ArrayList<>();
         if (connection != null) {
@@ -205,6 +243,7 @@ public class EmbeddedDatabase {
                     product.setSupplier(rs.getString(14));
                     product.setUnit(rs.getString(15));
                     product.setUnitPrice(rs.getDouble(16));
+                    product.setTotal(rs.getDouble(17));
                     
                     item.setProduct(product);
                     orderItems.add(item);
@@ -260,6 +299,7 @@ public class EmbeddedDatabase {
                     product.setSupplier(rs.getString(12));
                     product.setUnit(rs.getString(13));
                     product.setUnitPrice(rs.getDouble(14));
+                    product.setTotal(rs.getDouble(15));
                     
                     item.setProduct(product);
                     items.add(item);
@@ -267,5 +307,63 @@ public class EmbeddedDatabase {
             }
         }
         return items;
+    }
+    
+    public ArrayList<PurchaseInvoice> getAllPurchaseInvoices() throws SQLException {
+        ArrayList<PurchaseInvoice> invoices = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM purchase_invoices");
+                while (rs.next()) {
+                    PurchaseInvoice invoice = new PurchaseInvoice();
+                    invoice.setId(rs.getString(1));
+                    invoice.setDate(rs.getDate(2).toLocalDate());
+                    invoice.setSupplier(rs.getString(3));
+                    invoice.setTotal(rs.getDouble(4));
+                    invoices.add(invoice);
+                }
+            }
+        }
+        return invoices;
+    }
+    
+    public ArrayList<PurchaseProduct> getPurchaseProducts(String purchaseInvoiceId) throws SQLException {
+        ArrayList<PurchaseProduct> stocks = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                String sql = String.format("SELECT * FROM purchase_products "
+                        + "INNER JOIN products ON products.id = purchase_products.product_id "
+                        + "INNER JOIN stocks ON stocks.product_id = products.id");
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    PurchaseProduct pp = new PurchaseProduct();
+                    pp.setId(rs.getInt(1));
+                    pp.setProductId(rs.getInt(2));
+                    pp.setInvoiceId(rs.getString(3));
+                    
+                    Product product = new Product();
+                    product.setId(rs.getInt(4));
+                    product.setDate(rs.getDate(5).toLocalDate());
+                    product.setName(rs.getString(6));
+                    product.setSku(rs.getString(7));
+                    product.setSupplier(rs.getString(8));
+                    product.setUnit(rs.getString(9));
+                    product.setUnitPrice(rs.getDouble(10));
+                    product.setTotal(rs.getDouble(11));
+                    
+                    Stock stock = new Stock();
+                    stock.setId(rs.getInt(12));
+                    stock.setProductId(rs.getInt(13));
+                    stock.setQuantity(rs.getInt(14));
+                    stock.setQuantityOut(rs.getInt(15));
+                    stock.setProduct(product);
+                    
+                    pp.setProduct(product);
+                    pp.setStock(stock);
+                    stocks.add(pp);
+                }
+            }
+        }
+        return stocks;
     }
 }

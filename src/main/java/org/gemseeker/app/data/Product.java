@@ -1,7 +1,6 @@
 package org.gemseeker.app.data;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -17,6 +16,7 @@ public class Product implements IEntry {
     private String supplier;
     private String unit;
     private double unitPrice;
+    private double total;
 
     public int getId() {
         return id;
@@ -74,22 +74,30 @@ public class Product implements IEntry {
         this.unitPrice = unitPrice;
     }
 
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO products ("
-                + "date, name, sku, supplier, unit, unit_price) "
-                + "VALUES ('%s', '%s', '%s', '%s', '%s', '%f')",
-                date, name, sku, supplier, unit, unitPrice);
+                + "date, name, sku, supplier, unit, unit_price, total) "
+                + "VALUES ('%s', '%s', '%s', '%s', '%s', '%f', '%f')",
+                date, name, sku, supplier, unit, unitPrice, total);
     }
     
     public String updateSQL() {
         return String.format("UPDATE products SET date='%s', name='%s', sku='%s', "
-                + "supplier='%s', unit='%s', unit_price='%f' WHERE id='%d'", 
-                date, name, sku, supplier, unit, unitPrice, id);
+                + "supplier='%s', unit='%s', unit_price='%f', total='%f' WHERE id='%d'", 
+                date, name, sku, supplier, unit, unitPrice, total, id);
     }
     
     @Override
     public String toString() {
-        return name;
+        return String.format("%s (%s)", name, supplier);
     }
 }

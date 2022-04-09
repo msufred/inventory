@@ -5,6 +5,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import java.awt.CheckboxMenuItem;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,6 +140,7 @@ public class OrdersPanel extends AbstractPanelController {
         
         orderItemsTable.setItems(orderItems);
         
+        CheckboxMenuItem mShowDetails = new CheckboxMenuItem("Show Details");
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");

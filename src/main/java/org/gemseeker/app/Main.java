@@ -85,6 +85,15 @@ public class Main extends Application {
 
         startup.setOnSucceeded(evt -> {
             System.out.println("SUCCESS");
+            
+            // Call database for the first time. This will make sure to initialize
+            // the embedded database and execute necessary updates.
+            try {
+                EmbeddedDatabase.getInstance();
+            } catch (ClassNotFoundException | SQLException e) {
+                System.err.println("Failed to update database.");
+            }
+            
             mainWindow.show();
         });
     }

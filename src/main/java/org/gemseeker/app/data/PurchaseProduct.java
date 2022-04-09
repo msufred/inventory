@@ -6,13 +6,13 @@ import org.gemseeker.app.data.frameworks.IEntry;
  *
  * @author Gem
  */
-public class Stock implements IEntry {
+public class PurchaseProduct implements IEntry {
     
     private int id;
     private int productId;
-    private int quantity = 0;
-    private int quantityOut = 0;
+    private String invoiceId; // purchase invoice
     
+    private Stock stock;
     private Product product;
 
     public int getId() {
@@ -31,20 +31,20 @@ public class Stock implements IEntry {
         this.productId = productId;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public String getInvoiceId() {
+        return invoiceId;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
-    public int getQuantityOut() {
-        return quantityOut;
+    public Stock getStock() {
+        return stock;
     }
 
-    public void setQuantityOut(int quantityOut) {
-        this.quantityOut = quantityOut;
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     public Product getProduct() {
@@ -57,14 +57,8 @@ public class Stock implements IEntry {
 
     @Override
     public String insertSQL() {
-        return String.format("INSERT INTO stocks ("
-                + "product_id, quantity, quantity_out) "
-                + "VALUES ('%d', '%d', '%d')",
-                productId, quantity, quantityOut);
+        return String.format("INSERT INTO purchase_products (product_id, invoice_id) VALUES ('%d', '%s')",
+                productId, invoiceId);
     }
 
-    @Override
-    public String toString() {
-        return product.toString();
-    }
 }

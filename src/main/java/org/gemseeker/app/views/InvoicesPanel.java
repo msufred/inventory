@@ -291,7 +291,7 @@ public class InvoicesPanel extends AbstractPanelController {
         mainWindow.showProgress(true, "Preparing invoices for printing...");
         
         ArrayList<PrintInvoiceList> pils = new ArrayList<>();
-        int maxPerPage = 42;
+        int maxPerPage = 47;
         int totalPage = (int) (filteredList.size() / maxPerPage);
         if (totalPage > 0) {
             int startIndex = 0;
@@ -566,6 +566,7 @@ public class InvoicesPanel extends AbstractPanelController {
     @Override
     public void onDispose() {
         disposables.dispose();
+        addInvoiceWindow.onDispose();
         printWindow.onDispose();
     }
 

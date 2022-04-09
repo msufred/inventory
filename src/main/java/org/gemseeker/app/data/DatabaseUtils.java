@@ -9,7 +9,8 @@ public class DatabaseUtils {
     public static String[] tables() {
         return new String[] {
             createProductsTable(), createStocksTable(), createOrdersTable(),
-            createOrderItemsTable(), createInvoicesTable(), createInvoiceItemsTable()
+            createOrderItemsTable(), createInvoicesTable(), createInvoiceItemsTable(),
+            createPurchaseInvoicesTable(), createPurchaseProductsTable()
         };
     }
     
@@ -95,6 +96,29 @@ public class DatabaseUtils {
                 + "CONSTRAINT fk_invoice_1 FOREIGN KEY (invoice_id) REFERENCES invoices (id) "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
                 + "CONSTRAINT fk_product_3 FOREIGN KEY (product_id) REFERENCES products (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE"
+                + ")";
+    }
+    
+    public static String createPurchaseInvoicesTable() {
+        return "CREATE TABLE IF NOT EXISTS purchase_invoices ("
+                + "id VARCHAR(100) NOT NULL, "
+                + "date DATE NOT NULL, "
+                + "supplier VARCHAR(255) NOT NULL, "
+                + "total DOUBLE DEFAULT 0, "
+                + "PRIMARY KEY (id)"
+                + ")";
+    }
+    
+    public static String createPurchaseProductsTable() {
+        return "CREATE TABLE IF NOT EXISTS purchase_products ("
+                + "id INT NOT NULL AUTO_INCREMENT, "
+                + "product_id INT NOT NULL, "
+                + "invoice_id VARCHAR(100) NOT NULL, "
+                + "PRIMARY KEY (id), "
+                + "CONSTRAINT fk_product_4 FOREIGN KEY (product_id) REFERENCES products (id) "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "CONSTRAINT fk_purchase_invoice_1 FOREIGN KEY (invoice_id) REFERENCES purchase_invoices (id) "
                 + "ON UPDATE CASCADE ON DELETE CASCADE"
                 + ")";
     }
