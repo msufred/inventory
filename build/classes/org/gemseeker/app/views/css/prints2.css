@@ -22,9 +22,13 @@
 .table-view .table-cell {
     -fx-font-size: 16px;
 }
+.table-column {
+    -fx-border-width: 0.3;
+    -fx-border-color: black;
+}
 .filler,.column-header,.show-hide-columns-button {
-    -fx-background-color: #dddddd, white, white;
-    -fx-font-size: 14px;
+    -fx-background-color: #dddddd, #dddddd, #dddddd;
+    -fx-font-size: 12px;
 }
 .show-hide-columns-button {
     -fx-border-width: 0;

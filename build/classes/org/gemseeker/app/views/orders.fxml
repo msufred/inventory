@@ -51,7 +51,7 @@
                         </HBox>
                         <HBox id="summary-3" alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Label styleClass="text-big" text="Total Out" />
+                              <Label styleClass="text-big" text="Total Sales" />
                               <Label fx:id="lblTotalOut" text="P 0.00">
                                  <styleClass>
                                     <String fx:value="text-big" />
@@ -83,16 +83,22 @@
                         </TableColumn>
                       <TableColumn fx:id="colItemQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
                         <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
-                        <TableColumn fx:id="colItemQuantityOut" prefWidth="50.0" text="Qty Out">
-                           <styleClass>
-                              <String fx:value="table-cell-center-align" />
-                              <String fx:value="table-cell-text-green" />
-                           </styleClass></TableColumn>
-                        <TableColumn fx:id="colItemTotalOut" prefWidth="75.0" text="Total Out">
-                           <styleClass>
-                              <String fx:value="table-cell-right-align" />
-                              <String fx:value="table-cell-text-green" />
-                           </styleClass></TableColumn>
+                        <TableColumn prefWidth="100.0" text="Delivered">
+                           <columns>
+                              <TableColumn fx:id="colItemQuantityOut" prefWidth="50.0" text="Qty">
+                                 <styleClass>
+                                    <String fx:value="table-cell-center-align" />
+                                    <String fx:value="table-cell-text-green" />
+                                 </styleClass>
+                              </TableColumn>
+                              <TableColumn fx:id="colItemTotalOut" prefWidth="75.0" text="Total">
+                                 <styleClass>
+                                    <String fx:value="table-cell-right-align" />
+                                    <String fx:value="table-cell-text-green" />
+                                 </styleClass>
+                              </TableColumn>
+                           </columns>
+                        </TableColumn>
                     </columns>
                   </TableView>
                </children>

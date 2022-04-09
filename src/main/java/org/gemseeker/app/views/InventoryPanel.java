@@ -5,6 +5,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import java.util.ArrayList;
 import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
@@ -18,11 +19,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.data.EmbeddedDatabase;
+import org.gemseeker.app.data.Invoice;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
+import org.gemseeker.app.views.icons.PrintIcon;
+import org.gemseeker.app.views.icons.RefreshIcon;
+import org.gemseeker.app.views.prints.PrintInventoryList;
+import org.gemseeker.app.views.prints.PrintInvoiceList;
+import org.gemseeker.app.views.prints.PrintWindow;
 import org.gemseeker.app.views.tablecells.ProductDateTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
+import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSkuTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
@@ -40,6 +48,7 @@ public class InventoryPanel extends AbstractPanelController {
     @FXML private TableColumn<Stock, Product> colDate;
     @FXML private TableColumn<Stock, Product> colName;
     @FXML private TableColumn<Stock, Product> colUnit;
+    @FXML private TableColumn<Stock, Product> colUnitPrice;
     @FXML private TableColumn<Stock, Product> colSku;
     @FXML private TableColumn<Stock, Integer> colQuantity;
     @FXML private TableColumn<Stock, Integer> colQuantityOut;
@@ -53,6 +62,7 @@ public class InventoryPanel extends AbstractPanelController {
     
     private final AddProductWindow addProductWindow;
     private final EditProductWindow editProductWindow;
+    private final PrintWindow printWindow;
     
     public InventoryPanel(MainWindow mainWindow) {
         super(InventoryPanel.class.getResource("warehouse.fxml"));
@@ -61,10 +71,15 @@ public class InventoryPanel extends AbstractPanelController {
         
         addProductWindow = new AddProductWindow(this, mainWindow.getWindow());
         editProductWindow = new EditProductWindow(this, mainWindow.getWindow());
+        printWindow = new PrintWindow(mainWindow.getWindow());
     }
 
     @Override
     public void onLoad() {
+        // setup icons
+        btnRefresh.setGraphic(new RefreshIcon(14));
+        btnPrint.setGraphic(new PrintIcon(14));
+        
         // setup table
         colDate.setCellValueFactory(new PropertyValueFactory<>("product"));
         colDate.setCellFactory(col -> new ProductDateTableCell<>());
@@ -72,6 +87,8 @@ public class InventoryPanel extends AbstractPanelController {
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
+        colUnitPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colUnitPrice.setCellFactory(col -> new ProductPriceTableCell<>());
         colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
         colSku.setCellFactory(col -> new ProductSkuTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
@@ -107,7 +124,7 @@ public class InventoryPanel extends AbstractPanelController {
                     onResume();
                 }),
                 JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {
-                    
+                    printList();
                 }),
                 JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
                     Stock s = stocksTable.getSelectionModel().getSelectedItem();
@@ -158,10 +175,42 @@ public class InventoryPanel extends AbstractPanelController {
         }));
     }
 
+    private void printList() {
+        mainWindow.showProgress(true, "Preparing products for printing...");
+        
+        ArrayList<PrintInventoryList> pils = new ArrayList<>();
+        int maxPerPage = 42;
+        int totalPage = (int) (filteredList.size() / maxPerPage);
+        if (totalPage > 0) {
+            int startIndex = 0;
+            for (int i = 1; i <= totalPage; i++) {
+                ArrayList<Stock> items = new ArrayList<>();
+                int endIndex = startIndex + maxPerPage - 1;
+                if (endIndex < filteredList.size()) {
+                    items.addAll(filteredList.subList(startIndex, endIndex));
+                } else {
+                    items.addAll(filteredList.subList(startIndex, filteredList.size() - 1));
+                }
+                PrintInventoryList pil = new PrintInventoryList();
+                pil.set(items, i, totalPage);
+                pils.add(pil);
+                startIndex = endIndex;
+            }
+        } else {
+            PrintInventoryList pil = new PrintInventoryList();
+            pil.set(new ArrayList<>(filteredList), 1, 1);
+            pils.add(pil);
+        }
+        
+        mainWindow.showProgress(false);
+        printWindow.show(pils);
+    }
+    
     @Override
     public void onDispose() {
         disposables.dispose();
         addProductWindow.onDispose();
+        printWindow.onDispose();
     }
 
 }

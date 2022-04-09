@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
+import org.gemseeker.app.views.icons.PrintIcon;
 
 /**
  *
@@ -51,6 +52,13 @@ public class PrintWindow extends AbstractWindowController {
     @Override
     public void onLoad() {
         Utils.setAsIntegerTextField(tfCopies);
+        
+        Scale scale = new Scale();
+        scale.xProperty().bind(zoomSlider.valueProperty());
+        scale.yProperty().bind(zoomSlider.valueProperty());
+        pages.getTransforms().add(scale);
+        
+        btnPrint.setGraphic(new PrintIcon(14));
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {

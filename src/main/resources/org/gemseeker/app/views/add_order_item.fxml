@@ -32,13 +32,13 @@
             <HBox>
                <children>
                   <Label prefWidth="110.0" styleClass="form-label" text="Date Purchased:" />
-                  <Label fx:id="lblDate" styleClass="form-label" />
+                  <Label fx:id="lblDate" styleClass="form-label" text="No Product Selected" />
                </children>
             </HBox>
             <HBox>
                <children>
                   <Label prefWidth="110.0" styleClass="form-label" text="Supplier:" />
-                  <Label fx:id="lblSupplier" styleClass="form-label" />
+                  <Label fx:id="lblSupplier" styleClass="form-label" text="No Product Selected" />
                </children>
             </HBox>
             <HBox>

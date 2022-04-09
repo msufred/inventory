@@ -16,7 +16,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -51,7 +50,6 @@ public class AddInvoiceWindow extends AbstractWindowController {
     @FXML private TextField tfAddress;
     @FXML private Button btnAdd;
     @FXML private Button btnSave;
-    @FXML private Button btnPrint;
     @FXML private Button btnCancel;
     @FXML private Label lblTotal;
     @FXML private TableView<InvoiceItem> itemsTable;
@@ -108,7 +106,9 @@ public class AddInvoiceWindow extends AbstractWindowController {
         
         disposables.addAll(
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
-                    if (value.getNewVal() != null) lblTotal.setText(String.format("P %.2f", value.getNewVal()));
+                    if (value.getNewVal() != null) {
+                        lblTotal.setText("P " + Utils.getMoneyFormat(value.getNewVal().doubleValue()));
+                    }
                 }), 
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     Order order = cbOrders.getValue();
@@ -123,9 +123,6 @@ public class AddInvoiceWindow extends AbstractWindowController {
                     } else {
                         saveAndClose();
                     }
-                }),
-                JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {
-                    
                 }),
                 JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
                     close();

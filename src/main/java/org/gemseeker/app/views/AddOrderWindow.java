@@ -14,7 +14,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -98,7 +97,7 @@ public class AddOrderWindow extends AbstractWindowController {
         disposables.addAll(
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
-                        lblTotal.setText(String.format("P %.2f", value.getNewVal()));
+                        lblTotal.setText("P " + Utils.getMoneyFormat(value.getNewVal().doubleValue()));
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {

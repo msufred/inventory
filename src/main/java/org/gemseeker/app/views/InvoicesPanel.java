@@ -11,15 +11,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
@@ -42,6 +45,7 @@ import org.gemseeker.app.data.InvoiceItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
+import org.gemseeker.app.views.icons.PrintIcon;
 import org.gemseeker.app.views.prints.PrintInvoice;
 import org.gemseeker.app.views.prints.PrintInvoiceList;
 import org.gemseeker.app.views.prints.PrintWindow;
@@ -144,9 +148,18 @@ public class InvoicesPanel extends AbstractPanelController {
         
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
+        MenuItem mDelete = new MenuItem("Delete");
+        Menu menuUpdate = new Menu("Change Type/Status");
+        MenuItem mCash = new MenuItem("Cash");
+        MenuItem mCheque = new MenuItem("Cheque");
+        MenuItem mReceivable = new MenuItem("Receivable");
+        menuUpdate.getItems().addAll(mCash, mCheque, mReceivable);
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mPrint, mExport);
+        cm.getItems().addAll(mPrint, mExport, mDelete, menuUpdate);
         invoicesTable.setContextMenu(cm);
+        
+        // setup icons
+        btnPrintList.setGraphic(new PrintIcon(14));
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
@@ -159,6 +172,34 @@ public class InvoicesPanel extends AbstractPanelController {
                 JavaFxObservable.actionEventsOf(mExport).subscribe(evt -> {
                     Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null) exportInvoice(invoice);
+                }),
+                JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
+                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    if (invoice != null) {
+                        Optional<ButtonType> result = showConfirmDialog("Delete Invoice?",
+                                "You are about to delete this Invoice entry permanently. Proceed?");
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                            deleteInvoice(invoice);
+                        }
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(mCash).subscribe(evt -> {
+                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    if (invoice != null && !invoice.getPaymentType().equals("Cash")) {
+                        updateInvoiceStatus(invoice, "Cash");
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(mCheque).subscribe(evt -> {
+                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    if (invoice != null && !invoice.getPaymentType().equals("Cheque")) {
+                        updateInvoiceStatus(invoice, "Cheque");
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(mReceivable).subscribe(evt -> {
+                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    if (invoice != null && !invoice.getPaymentType().equals("Receivable")) {
+                        updateInvoiceStatus(invoice, "Receivable");
+                    }
                 }),
                 JavaFxObservable.changesOf(cbStatus.valueProperty()).subscribe(status -> {
                     if (status.getNewVal() != null) {
@@ -484,6 +525,42 @@ public class InvoicesPanel extends AbstractPanelController {
                 showErrorDialog("Error", "Error occurred while exporting invoice information.", e);
             }
         }
+    }
+    
+    private void deleteInvoice(Invoice invoice) {
+        mainWindow.showProgress(true, "Deleting invoice entry...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().deleteEntry("invoices", "id", invoice.getId());
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
+            mainWindow.showProgress(false);
+            if (!success) {
+                showInfoDialog("Failed", "Failed to delete invoice entry.");
+            }
+            onResume();
+            splitController.hideTarget();
+            invoiceItems.clear();
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error occurred while deleting invoice entry.", err);
+        }));
+    }
+    
+    private void updateInvoiceStatus(Invoice invoice, String status) {
+        mainWindow.showProgress(true, "Updating invoice status...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().updateEntry("invoices", "payment_type", status, "id", invoice.getId());
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
+            mainWindow.showProgress(false);
+            if (!success) {
+                showInfoDialog("Failed", "Failed to update invoice entry.");
+            }
+            onResume();
+            splitController.hideTarget();
+            invoiceItems.clear();
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error occurred while updating invoice entry.", err);
+        }));
     }
 
     @Override

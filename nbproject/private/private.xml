@@ -7,11 +7,16 @@
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/Utils.java</file>
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/InventoryPanel.java</file>
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/data/DatabaseUtils.java</file>
-            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/AddProductWindow.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/EditProductWindow.java</file>
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/OrdersPanel.java</file>
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/InvoicesPanel.java</file>
-            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/data/EmbeddedDatabase.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/resources/org/gemseeker/app/views/css/prints.css</file>
             <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/data/OrderItem.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/prints/PrintWindow.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/AddProductWindow.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/AddOrderWindow.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/views/AddInvoiceWindow.java</file>
+            <file>file:/F:/Documents/NetBeansProjects/inventory/src/main/java/org/gemseeker/app/data/Product.java</file>
         </group>
     </open-files>
 </project-private>

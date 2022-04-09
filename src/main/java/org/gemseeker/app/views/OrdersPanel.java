@@ -11,12 +11,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -41,6 +43,7 @@ import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
+import org.gemseeker.app.views.icons.PrintIcon;
 import org.gemseeker.app.views.prints.PrintOrder;
 import org.gemseeker.app.views.prints.PrintWindow;
 import org.gemseeker.app.views.tablecells.DateTableCell;
@@ -138,9 +141,13 @@ public class OrdersPanel extends AbstractPanelController {
         
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
+        MenuItem mDelete = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mPrint, mExport);
+        cm.getItems().addAll(mPrint, mExport, mDelete);
         ordersTable.setContextMenu(cm);
+        
+        // setup icons
+        btnPrintList.setGraphic(new PrintIcon(14));
         
         disposables.addAll(JavaFxObservable.changesOf(mOrderTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
@@ -179,6 +186,16 @@ public class OrdersPanel extends AbstractPanelController {
                     Order order = ordersTable.getSelectionModel().getSelectedItem();
                     if (order != null) {
                         exportOrder(order);
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
+                    Order order = ordersTable.getSelectionModel().getSelectedItem();
+                    if (order != null) {
+                        Optional<ButtonType> result = showConfirmDialog("Delete Order?",
+                                "You are about to delete this Order entry permanently. Proceed?");
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                            deleteOrder(order);
+                        }
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnPrintList).subscribe(evt -> {
@@ -423,6 +440,24 @@ public class OrdersPanel extends AbstractPanelController {
                 showErrorDialog("Error", "Error occurred while exporting order information.", e);
             }
         }
+    }
+    
+    private void deleteOrder(Order order) {
+        mainWindow.showProgress(true, "Deleting order entry...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().deleteEntry("orders", "id", order.getId());
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
+            mainWindow.showProgress(false);
+            if (!success) {
+                showInfoDialog("Failed", "Failed to delete order entry.");
+            }
+            onResume();
+            splitController.hideTarget();
+            orderItems.clear();
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error occurred while deleting order entry.", err);
+        }));
     }
     
     @Override

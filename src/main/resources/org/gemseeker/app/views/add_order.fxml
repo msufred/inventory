@@ -87,7 +87,6 @@
       <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="5.0">
          <children>
             <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" styleClass="primary" text="Save" />
-            <Button fx:id="btnPrint" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Print" />
             <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Cancel" />
          </children>
          <VBox.margin>

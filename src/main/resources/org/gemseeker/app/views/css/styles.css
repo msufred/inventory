@@ -15,10 +15,6 @@
     -fx-background-color: -col-base2;
 }
 
-.material-icon {
-    -fx-background-color: -col-dark;
-}
-
 .top-bar {
     -fx-background-color: -col-base;
 }
@@ -155,4 +151,17 @@
 
 .text-bold {
     -fx-font-weight: bold;
+}
+
+/*icons*/
+.material-icon {
+    -fx-background-color: -col-dark;
+}
+
+.material-print-icon {
+    
+}
+
+.material-refresh-icon {
+    
 }

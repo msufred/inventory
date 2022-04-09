@@ -96,7 +96,7 @@
             </Label>
          </children>
       </HBox>
-      <TableView fx:id="itemsTable" prefHeight="300.0" prefWidth="200.0">
+      <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0">
         <columns>
           <TableColumn fx:id="colName" prefWidth="75.0" text="Name" />
           <TableColumn fx:id="colUnit" prefWidth="75.0" styleClass="table-cell-center-align" text="Unit" />
@@ -123,7 +123,6 @@
       <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="5.0">
          <children>
             <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" styleClass="primary" text="Save" />
-            <Button fx:id="btnPrint" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Print" />
             <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Cancel" />
          </children>
          <VBox.margin>

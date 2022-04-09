@@ -22,8 +22,12 @@
 .table-view .table-cell {
     -fx-font-size: 16px;
 }
+.table-column {
+    -fx-border-width: 0.3;
+    -fx-border-color: black;
+}
 .filler,.column-header,.show-hide-columns-button {
-    -fx-background-color: #dddddd, white, white;
+    -fx-background-color: #dddddd, #dddddd, #dddddd;
     -fx-font-size: 12px;
 }
 .show-hide-columns-button {
@@ -34,7 +38,7 @@
     -fx-background-color: #dddddd, white, #f8f8f8;
 }
 .column-header-background > .filler {
-    -fx-border-color: transparent #dddddd transparent transparent;
+    -fx-border-color: transparent black transparent transparent;
     -fx-border-insets: 0 1 0 0;
 }
 .column-drag-header {
@@ -49,4 +53,8 @@
 .table-cell-green {
     -fx-text-fill: #006837;
     -fx-font-weight: bold;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #262626;
 }

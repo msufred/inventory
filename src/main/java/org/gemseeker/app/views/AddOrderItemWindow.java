@@ -155,8 +155,8 @@ public class AddOrderItemWindow extends AbstractWindowController {
     @Override
     public void onClose() {
         cbProducts.getItems().clear();
-        lblDate.setText("");
-        lblSupplier.setText("");
+        lblDate.setText("No Product Selected");
+        lblSupplier.setText("No Product Selected");
         lblStock.setText("0");
         lblPrice.setText("0");
         tfDiscount.setText("0");

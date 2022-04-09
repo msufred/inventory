@@ -18,7 +18,7 @@
          <children>
             <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Invoice" />
             <Button fx:id="btnPrintList" mnemonicParsing="false" text="Print List" />
-            <Label styleClass="form-label" text="Payment Status">
+            <Label styleClass="form-label" text="Payment Type/Status">
                <HBox.margin>
                   <Insets left="16.0" />
                </HBox.margin>
@@ -85,7 +85,7 @@
                       <TableColumn fx:id="colId" prefWidth="75.0" styleClass="table-cell-center-align" text="Invoice No" />
                         <TableColumn fx:id="colCustomer" prefWidth="100.0" text="Customer" />
                         <TableColumn fx:id="colAddress" prefWidth="100.0" text="Address" />
-                        <TableColumn fx:id="colStatus" prefWidth="100.0" styleClass="table-cell-center-align" text="Status" />
+                        <TableColumn fx:id="colStatus" prefWidth="100.0" styleClass="table-cell-center-align" text="Type/Status" />
                         <TableColumn fx:id="colTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total Amount" />
                     </columns>
                   </TableView>
