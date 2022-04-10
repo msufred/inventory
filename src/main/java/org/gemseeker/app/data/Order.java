@@ -12,8 +12,11 @@ public class Order implements IEntry {
 
     private int id;
     private LocalDate date;
-    private String name;
+    private int shipperId;
     private double total;
+    private double sales;
+    
+    private Shipper shipper;
 
     public int getId() {
         return id;
@@ -31,12 +34,12 @@ public class Order implements IEntry {
         this.date = date;
     }
 
-    public String getName() {
-        return name;
+    public int getShipperId() {
+        return shipperId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setShipperId(int shipperId) {
+        this.shipperId = shipperId;
     }
 
     public double getTotal() {
@@ -46,17 +49,33 @@ public class Order implements IEntry {
     public void setTotal(double total) {
         this.total = total;
     }
+
+    public double getSales() {
+        return sales;
+    }
+
+    public void setSales(double sales) {
+        this.sales = sales;
+    }
+
+    public Shipper getShipper() {
+        return shipper;
+    }
+
+    public void setShipper(Shipper shipper) {
+        this.shipper = shipper;
+    }
     
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO orders ("
-                + "date, name, total) VALUES ('%s', '%s', '%f')",
-                date, name, total);
+                + "date, shipper_id, total, sales) VALUES ('%s', '%d', '%f', '%f')",
+                date, shipperId, total, sales);
     }
 
     @Override
     public String toString() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-        return String.format("%s - %s", dateFormat.format(date), name);
+        return String.format("%s - %s", dateFormat.format(date), shipper.getName());
     }
 }

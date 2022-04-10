@@ -11,12 +11,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -25,12 +25,15 @@ import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Order;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
+import org.gemseeker.app.data.Shipper;
+import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
@@ -39,16 +42,14 @@ import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
  */
 public class AddOrderWindow extends AbstractWindowController {
     
-    @FXML private TextField tfName;
+    @FXML private ComboBox<Shipper> cbShippers;
     @FXML private DatePicker datePicker;
     @FXML private Button btnAdd;
     @FXML private Label lblTotal;
     @FXML private TableView<OrderItem> itemsTable;
     @FXML private TableColumn<OrderItem, Product> colName;
     @FXML private TableColumn<OrderItem, Product> colUnit;
-    @FXML private TableColumn<OrderItem, Product> colPriceBefore;
-    @FXML private TableColumn<OrderItem, Double> colDiscount;
-    @FXML private TableColumn<OrderItem, Double> colPriceAfter;
+    @FXML private TableColumn<OrderItem, Product> colRetailPrice;
     @FXML private TableColumn<OrderItem, Integer> colQuantity;
     @FXML private TableColumn<OrderItem, Double> colTotal;
     @FXML private ProgressBar progressBar;
@@ -78,16 +79,13 @@ public class AddOrderWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
+        Utils.setSafeTextField(cbShippers.getEditor());
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
-        colPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
-        colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
-        colDiscount.setCellFactory(col -> new DiscountTableCell<>());
-        colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        colPriceAfter.setCellFactory(col -> new PriceTableCell<>());
+        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
         colTotal.setCellFactory(col -> new PriceTableCell<>());
@@ -104,7 +102,7 @@ public class AddOrderWindow extends AbstractWindowController {
                     addOrderItemWindow.show();
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (tfName.getText().isEmpty() || datePicker.getValue() == null ||
+                    if (cbShippers.getEditor().getText().isEmpty() || datePicker.getValue() == null ||
                             itemsTable.getItems().isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields.");
                     } else {
@@ -120,40 +118,84 @@ public class AddOrderWindow extends AbstractWindowController {
     @Override
     public void show() {
         super.show();
-        datePicker.setValue(LocalDate.now());
+        showProgress(true);
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getShippers();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(shippers -> {
+            showProgress(false);
+            cbShippers.setItems(FXCollections.observableArrayList(shippers));
+            datePicker.setValue(LocalDate.now());
+        }, err -> {
+            showProgress(false);
+            showErrorDialog("Database Error", "Error while fetching shippers data", err);
+        }));
     }
     
     private void saveAndClose() {
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
+            EmbeddedDatabase database = EmbeddedDatabase.getInstance();
+            
+            // Save Shipper entry if not yet saved
+            String shipperName = cbShippers.getEditor().getText();
+            Shipper shipper = database.getShipper(shipperName);
+            if (shipper == null) {
+                shipper = new Shipper();
+                shipper.setName(cbShippers.getEditor().getText());
+                int shipperId = database.addEntryReturnId(shipper);
+                if (shipperId == -1) return -1; // return if not saved
+                shipper.setId(shipperId);
+            }
+            
             // Save Order entry
             Order order = new Order();
-            order.setName(tfName.getText());
             order.setDate(datePicker.getValue());
+            order.setShipperId(shipper.getId());
+            order.setShipper(shipper);
             order.setTotal(mTotal.get());
-            return EmbeddedDatabase.getInstance().addEntryReturnId(order);
-        }).flatMap(id -> Single.fromCallable(() -> {
-            if (id != -1) {
-                EmbeddedDatabase database = EmbeddedDatabase.getInstance();
-                for (OrderItem orderItem : orderItems) {
-                    // add OrderItems
-                    orderItem.setOrderId(id);
-                    boolean added = database.addEntry(orderItem);
+            int orderId = database.addEntryReturnId(order);
+            if (orderId == -1) return -1; // return if not saved
+            
+            // Save order items
+            for (OrderItem item : orderItems) {
+                item.setOrderId(orderId);
+                boolean added = database.addEntry(item);
+                if(added) {
+                    // Check if product already exists in Shipper's inventory
+                    ShipperStock shipperStock = database.getShipperStock(shipper.getId(), item.getProductId());
+                    boolean success;
+                    if (shipperStock == null) {
+                        shipperStock = new ShipperStock();
+                        shipperStock.setShipperId(shipper.getId());
+                        shipperStock.setProductId(item.getProductId());
+                        shipperStock.setQuantity(item.getQuantity());
+                        shipperStock.setTotal(item.getListPrice());
+                        shipperStock.setQuantityOut(0);
+                        shipperStock.setTotalOut(0);
+                        success = database.addEntry(shipperStock);
+                    } else {
+                        int newQty = shipperStock.getQuantity() + item.getQuantity();
+                        shipperStock.setQuantity(newQty);
+                        double newTotal = shipperStock.getTotal() + item.getListPrice();
+                        shipperStock.setTotal(newTotal);
+                        success = database.executeQuery(shipperStock.updateSQL());
+                    }
                     
                     // update Stocks
-                    if (added) {
-                        Product p = orderItem.getProduct();
-                        Stock s = database.getStock(p.getId());
-                        if (s != null) {
-                            int qtyOut = s.getQuantityOut() + orderItem.getQuantity();
-                            database.updateEntry("stocks", "quantity_out", qtyOut, 
-                                    "id", s.getId());
+                    if (success) {
+                        Stock stock = database.getStock(item.getProductId());
+                        if (stock != null) {
+                            int qtyOut = stock.getQuantityOut() + item.getQuantity();
+                            database.updateEntry("stocks", "quantity_out", qtyOut, "id", stock.getId());
+                            
+                            int inStock = stock.getInStock() - item.getQuantity();
+                            database.updateEntry("stocks", "in_stock", inStock, "id", stock.getId());
                         }
                     }
                 }
             }
-            return id;
-        })).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(id -> {
+            return orderId;
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(id -> {
             showProgress(false);
             if (id == -1) {
                 showInfoDialog("Failed to add new Order entry.", "");
@@ -178,7 +220,7 @@ public class AddOrderWindow extends AbstractWindowController {
     
     @Override
     public void onClose() {
-        tfName.clear();
+        cbShippers.setValue(null);
         datePicker.setValue(null);
         itemsTable.setItems(null);
         orderItems.clear();

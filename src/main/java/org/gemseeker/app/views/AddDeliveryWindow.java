@@ -24,26 +24,26 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
-import org.gemseeker.app.data.Invoice;
-import org.gemseeker.app.data.InvoiceItem;
-import org.gemseeker.app.data.Order;
-import org.gemseeker.app.data.OrderItem;
+import org.gemseeker.app.data.DeliveryInvoice;
+import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.data.Product;
+import org.gemseeker.app.data.Shipper;
+import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
  *
  * @author RAFIS-DIMAISIP
  */
-public class AddInvoiceWindow extends AbstractWindowController {
+public class AddDeliveryWindow extends AbstractWindowController {
     
     @FXML private TextField tfInvoiceId;
-    @FXML private ComboBox<Order> cbOrders;
+    @FXML private ComboBox<Shipper> cbShippers;
     @FXML private DatePicker datePicker;
     @FXML private ComboBox<String> cbPaymentTypes;
     @FXML private TextField tfCustomer;
@@ -52,30 +52,31 @@ public class AddInvoiceWindow extends AbstractWindowController {
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
     @FXML private Label lblTotal;
-    @FXML private TableView<InvoiceItem> itemsTable;
-    @FXML private TableColumn<InvoiceItem, Product> colName;
-    @FXML private TableColumn<InvoiceItem, Product> colUnit;
-    @FXML private TableColumn<InvoiceItem, Product> colPriceBefore;
-    @FXML private TableColumn<InvoiceItem, Double> colDiscount;
-    @FXML private TableColumn<InvoiceItem, Double> colPriceAfter;
-    @FXML private TableColumn<InvoiceItem, Integer> colQuantity;
-    @FXML private TableColumn<InvoiceItem, Double> colTotal;
+    
+    @FXML private TableView<DeliveryInvoiceItem> itemsTable;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colName;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colUnit;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colPriceBefore;
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colDiscount;
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colPriceAfter;
+    @FXML private TableColumn<DeliveryInvoiceItem, Integer> colQuantity;
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colTotal;
     @FXML private ProgressBar progressBar;
     
-    private final InvoicesPanel invoicesPanel;
+    private final DeliveriesPanel invoicesPanel;
     private final CompositeDisposable disposables;
     
-    private final ObservableList<InvoiceItem> items = FXCollections.observableArrayList();
+    private final ObservableList<DeliveryInvoiceItem> items = FXCollections.observableArrayList();
     private final SimpleDoubleProperty mTotal = new SimpleDoubleProperty(0);
     
-    private final AddInvoiceItemWindow addInvoiceItemWindow;
+    private final AddDeliveryItemWindow addInvoiceItemWindow;
     
-    public AddInvoiceWindow(InvoicesPanel invoicesPanel, Stage mainStage) {
-        super("Add Invoice", AddInvoiceWindow.class.getResource("add_invoice.fxml"), mainStage);
+    public AddDeliveryWindow(DeliveriesPanel invoicesPanel, Stage mainStage) {
+        super("Add Invoice", AddDeliveryWindow.class.getResource("add_invoice.fxml"), mainStage);
         this.invoicesPanel = invoicesPanel;
         disposables = new CompositeDisposable();
         
-        addInvoiceItemWindow = new AddInvoiceItemWindow(this);
+        addInvoiceItemWindow = new AddDeliveryItemWindow(this);
     }
 
     @Override
@@ -86,6 +87,10 @@ public class AddInvoiceWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
+        Utils.setSafeTextField(tfInvoiceId);
+        Utils.setSafeTextField(tfCustomer);
+        Utils.setSafeTextField(tfAddress);
+        
         cbPaymentTypes.setItems(FXCollections.observableArrayList("Cash", "Cheque", "Receivable"));
         
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -93,7 +98,7 @@ public class AddInvoiceWindow extends AbstractWindowController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
+        colPriceBefore.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
         colDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
@@ -111,17 +116,17 @@ public class AddInvoiceWindow extends AbstractWindowController {
                     }
                 }), 
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
-                    Order order = cbOrders.getValue();
-                    if (order != null) addInvoiceItemWindow.show(order);
+                    Shipper shipper = cbShippers.getValue();
+                    if (shipper != null) addInvoiceItemWindow.show(shipper);
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (tfInvoiceId.getText().isEmpty() || cbOrders.getValue() == null ||
+                    if (tfInvoiceId.getText().isEmpty() || cbShippers.getValue() == null ||
                             datePicker.getValue() == null || cbPaymentTypes.getValue() == null ||
                             tfCustomer.getText().isEmpty() || tfAddress.getText().isEmpty() ||
                             items.isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields.");
                     } else {
-                        saveAndClose();
+                        checkIdAndSave();
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
@@ -135,19 +140,19 @@ public class AddInvoiceWindow extends AbstractWindowController {
         super.show();
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getOrders();
+            return EmbeddedDatabase.getInstance().getShippers();
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
             showProgress(false);
-            cbOrders.setItems(FXCollections.observableArrayList(orders));
+            cbShippers.setItems(FXCollections.observableArrayList(orders));
             datePicker.setValue(LocalDate.now());
         }, err -> {
             showProgress(false);
-            showErrorDialog("Database Error", "Error occurred while fetching orders.", err);
+            showErrorDialog("Database Error", "Error occurred while fetching shippers.", err);
         }));
         
     }
     
-    public void addInvoiceItem(InvoiceItem item) {
+    public void addInvoiceItem(DeliveryInvoiceItem item) {
         if (item != null) {
             double newTotal = mTotal.get() + item.getListPrice();
             mTotal.set(newTotal);
@@ -155,13 +160,27 @@ public class AddInvoiceWindow extends AbstractWindowController {
         }
     }
     
+    private void checkIdAndSave() {
+        showProgress(true);
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().deliveryInvoiceExists(tfInvoiceId.getText().trim());
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(exists -> {
+            showProgress(false);
+            if (exists) showInfoDialog("Invoice Exists", "Delivery Invoice ID already in used. Try again.");
+            else saveAndClose();
+        }, err -> {
+            showProgress(false);
+            showErrorDialog("Database Error", "Error while doing database query.", err);
+        }));
+    }
+    
     private void saveAndClose() {
         showProgress(true);
         
-        Invoice invoice = new Invoice();
+        DeliveryInvoice invoice = new DeliveryInvoice();
         invoice.setId(tfInvoiceId.getText().trim());
         invoice.setDate(datePicker.getValue());
-        invoice.setOrderId(cbOrders.getValue().getId());
+        invoice.setShipperId(cbShippers.getValue().getId());
         invoice.setCustomer(tfCustomer.getText());
         invoice.setAddress(tfAddress.getText());
         invoice.setPaymentType(cbPaymentTypes.getValue());
@@ -173,26 +192,26 @@ public class AddInvoiceWindow extends AbstractWindowController {
             if (success) {
                 EmbeddedDatabase database = EmbeddedDatabase.getInstance();
                 
-                ArrayList<OrderItem> orderItems = database.getOrderItems(cbOrders.getValue().getId());
+                ArrayList<ShipperStock> stocks = database.getShipperStocks(cbShippers.getValue().getId());
                 
-                for (InvoiceItem item : items) {
+                for (DeliveryInvoiceItem item : items) {
                     // Add Invoice entry
                     item.setInvoiceId(invoice.getId());
                     boolean added = database.addEntry(item);
                     
                     // Update OrderItem of Order
                     if (added) {
-                        OrderItem orderItem = orderItems.stream()
-                                .filter(oi -> oi.getProduct().getId() == item.getProductId())
+                        ShipperStock stock = stocks.stream()
+                                .filter(s -> s.getProductId() == item.getProductId())
                                 .findAny()
                                 .orElse(null);
-                        if (orderItem != null) {
+                        if (stock != null) {
                             // update Quantity Out
-                            int qtyOut = orderItem.getQuantityOut() + item.getQuantity();
-                            database.updateEntry("order_items", "quantity_out", qtyOut, "id", orderItem.getId());
+                            int qtyOut = stock.getQuantityOut() + item.getQuantity();
+                            database.updateEntry("shipper_stocks", "quantity_out", qtyOut, "id", stock.getId());
                             // update Total Out
-                            double totalOut = orderItem.getTotalOut() + item.getListPrice();
-                            database.updateEntry("order_items", "total_out", totalOut, "id", orderItem.getId());
+                            double totalOut = stock.getTotalOut() + item.getListPrice();
+                            database.updateEntry("shipper_stocks", "total_out", totalOut, "id", stock.getId());
                         }
                     }
                 }
@@ -217,7 +236,7 @@ public class AddInvoiceWindow extends AbstractWindowController {
 
     @Override
     public void onClose() {
-        cbOrders.setValue(null);
+        cbShippers.setValue(null);
         cbPaymentTypes.setValue(null);
         tfCustomer.clear();
         tfAddress.clear();

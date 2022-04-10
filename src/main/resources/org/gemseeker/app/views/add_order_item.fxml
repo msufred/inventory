@@ -22,19 +22,13 @@
          <children>
             <VBox>
                <children>
-                  <ComboBox fx:id="cbProducts" prefWidth="380.0" promptText="Select Product" styleClass="form-combo-box" />
+                  <ComboBox fx:id="cbProducts" prefWidth="250.0" promptText="Select Product" styleClass="form-combo-box" />
                </children>
             </VBox>
          </children>
       </HBox>
       <VBox>
          <children>
-            <HBox>
-               <children>
-                  <Label prefWidth="110.0" styleClass="form-label" text="Date Purchased:" />
-                  <Label fx:id="lblDate" styleClass="form-label" text="No Product Selected" />
-               </children>
-            </HBox>
             <HBox>
                <children>
                   <Label prefWidth="110.0" styleClass="form-label" text="Supplier:" />
@@ -54,7 +48,7 @@
             </HBox>
             <HBox>
                <children>
-                  <Label prefWidth="110.0" styleClass="form-label" text="Unit Price:" />
+                  <Label prefWidth="110.0" styleClass="form-label" text="Retail Price" />
                   <Label fx:id="lblPrice" text="0">
                      <styleClass>
                         <String fx:value="form-label" />
@@ -70,25 +64,13 @@
       </VBox>
       <HBox spacing="8.0">
          <children>
-            <VBox>
-               <children>
-                  <Label styleClass="form-label" text="Discount (%)" />
-                  <TextField fx:id="tfDiscount" prefWidth="100.0" text="0" />
-               </children>
-            </VBox>
-            <VBox>
-               <children>
-                  <Label styleClass="form-label" text="Discounted Price" />
-                  <TextField fx:id="tfPriceAfter" editable="false" prefWidth="100.0" />
-               </children>
-            </VBox>
-            <VBox>
+            <VBox HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="form-label" text="Quantity" />
-                  <TextField fx:id="tfQuantity" prefWidth="60.0" text="1" />
+                  <TextField fx:id="tfQuantity" prefWidth="100.0" text="1" />
                </children>
             </VBox>
-            <VBox>
+            <VBox HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="form-label" text="Total Price" />
                   <TextField fx:id="tfTotal" editable="false" prefWidth="100.0" />
@@ -99,12 +81,12 @@
             <Insets top="16.0" />
          </VBox.margin>
       </HBox>
-      <ProgressBar fx:id="progressBar" prefWidth="380.0" visible="false">
+      <ProgressBar fx:id="progressBar" prefWidth="250.0" visible="false">
          <VBox.margin>
             <Insets />
          </VBox.margin>
       </ProgressBar>
-      <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="5.0">
+      <HBox alignment="CENTER_RIGHT" spacing="5.0">
          <children>
             <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" styleClass="primary" text="Add Item" />
             <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Cancel" />

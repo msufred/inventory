@@ -29,9 +29,9 @@
       </HBox>
       <HBox spacing="16.0">
          <children>
-            <VBox alignment="TOP_CENTER">
+            <VBox alignment="TOP_CENTER" HBox.hgrow="ALWAYS">
                <children>
-                  <Label styleClass="form-label" text="Unit Price" />
+                  <Label styleClass="form-label" text="Retail Price" />
                   <Label fx:id="lblPrice" text="0.00">
                      <styleClass>
                         <String fx:value="form-label" />
@@ -41,31 +41,7 @@
                   </Label>
                </children>
             </VBox>
-            <VBox alignment="TOP_CENTER">
-               <children>
-                  <Label styleClass="form-label" text="Discount (%)" />
-                  <Label fx:id="lblDiscount" text="0">
-                     <styleClass>
-                        <String fx:value="form-label" />
-                        <String fx:value="text-bold" />
-                        <String fx:value="text-big" />
-                     </styleClass>
-                  </Label>
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER">
-               <children>
-                  <Label styleClass="form-label" text="Discounted Price" />
-                  <Label fx:id="lblPriceAfter" text="0.00">
-                     <styleClass>
-                        <String fx:value="form-label" />
-                        <String fx:value="text-bold" />
-                        <String fx:value="text-big" />
-                     </styleClass>
-                  </Label>
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER">
+            <VBox alignment="TOP_CENTER" HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="form-label" text="In Stock" />
                   <Label fx:id="lblStock" text="0">
@@ -83,6 +59,25 @@
          <children>
             <VBox>
                <children>
+                  <Label styleClass="form-label" text="Discount" />
+                  <TextField fx:id="tfDiscount" prefWidth="176.0" text="0" />
+               </children>
+            </VBox>
+            <VBox>
+               <children>
+                  <Label styleClass="form-label" text="Discounted Price" />
+                  <TextField fx:id="tfDiscountedPrice" editable="false" prefWidth="176.0" text="0.00" />
+               </children>
+            </VBox>
+         </children>
+         <VBox.margin>
+            <Insets top="16.0" />
+         </VBox.margin>
+      </HBox>
+      <HBox spacing="8.0">
+         <children>
+            <VBox>
+               <children>
                   <Label styleClass="form-label" text="Quantity" />
                   <TextField fx:id="tfQuantity" prefWidth="176.0" text="1" />
                </children>
@@ -90,12 +85,12 @@
             <VBox>
                <children>
                   <Label styleClass="form-label" text="Total Price" />
-                  <TextField fx:id="tfTotal" editable="false" prefWidth="176.0" />
+                  <TextField fx:id="tfTotal" editable="false" prefWidth="176.0" text="0.00" />
                </children>
             </VBox>
          </children>
          <VBox.margin>
-            <Insets top="16.0" />
+            <Insets />
          </VBox.margin>
       </HBox>
       <ProgressBar fx:id="progressBar" prefWidth="360.0" visible="false">

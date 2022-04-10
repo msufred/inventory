@@ -10,10 +10,9 @@ public class Stock implements IEntry {
     
     private int id;
     private int productId;
-    private int quantity = 0;
-    private int quantityOut = 0;
-    
-    private Product product;
+    private int quantity;
+    private int quantityOut;
+    private int inStock;
 
     public int getId() {
         return id;
@@ -47,24 +46,20 @@ public class Stock implements IEntry {
         this.quantityOut = quantityOut;
     }
 
-    public Product getProduct() {
-        return product;
+    public int getInStock() {
+        return inStock;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setInStock(int inStock) {
+        this.inStock = inStock;
     }
 
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO stocks ("
-                + "product_id, quantity, quantity_out) "
-                + "VALUES ('%d', '%d', '%d')",
-                productId, quantity, quantityOut);
+                + "product_id, quantity, quantity_out, in_stock) "
+                + "VALUES ('%d', '%d', '%d', '%d')",
+                productId, quantity, quantityOut, inStock);
     }
 
-    @Override
-    public String toString() {
-        return product.toString();
-    }
 }

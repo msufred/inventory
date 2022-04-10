@@ -21,7 +21,7 @@
       <URL value="@css/styles.css" />
    </stylesheets>
    <children>
-      <Label styleClass="form-title" text="New Invoice" />
+      <Label styleClass="form-title" text="Delivery Invoice" />
       <HBox alignment="CENTER_LEFT" spacing="8.0">
          <children>
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
@@ -32,8 +32,8 @@
             </VBox>
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                <children>
-                  <Label styleClass="form-label" text="Order" />
-                  <ComboBox fx:id="cbOrders" prefWidth="300.0" promptText="Select Order" styleClass="form-combo-box" />
+                  <Label styleClass="form-label" text="Shipper" />
+                  <ComboBox fx:id="cbShippers" prefWidth="300.0" promptText="Select Shipper" styleClass="form-combo-box" />
                </children>
             </VBox>
          </children>

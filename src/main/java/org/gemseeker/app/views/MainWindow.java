@@ -21,27 +21,30 @@ import javafx.stage.Stage;
 public class MainWindow extends AbstractWindowController {
     
     @FXML private ToggleGroup toggleGroup;
-    @FXML private ToggleButton toggleWarehouse;
+    @FXML private ToggleButton toggleInventory;
+    @FXML private ToggleButton togglePurchases;
     @FXML private ToggleButton toggleOrders;
-    @FXML private ToggleButton toggleInvoices;
+    @FXML private ToggleButton toggleDeliveries;
     @FXML private StackPane contentView;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
     
     private final CompositeDisposable disposables;
     
-    private final InventoryPanel inventoryPanel;
+//    private final InventoryPanel inventoryPanel;
+    private final PurchasesPanel purchasesPanel;
     private final OrdersPanel ordersPanel;
-    private final InvoicesPanel invoicesPanel;
+    private final DeliveriesPanel deliveriesPanel;
     private AbstractPanelController mPanelController;
     
     public MainWindow(Stage stage) {
         super("Inventory", MainWindow.class.getResource("main.fxml"), stage, null);
         disposables = new CompositeDisposable();
         
-        inventoryPanel = new InventoryPanel(this);
+//        inventoryPanel = new InventoryPanel(this);
+        purchasesPanel = new PurchasesPanel(this);
         ordersPanel = new OrdersPanel(this);
-        invoicesPanel = new InvoicesPanel(this);
+        deliveriesPanel = new DeliveriesPanel(this);
     }
 
     @Override
@@ -52,19 +55,23 @@ public class MainWindow extends AbstractWindowController {
     
     @Override
     public void onLoad() {
-        addToggleEventFilter(toggleWarehouse);
+        addToggleEventFilter(toggleInventory);
+        addToggleEventFilter(togglePurchases);
         addToggleEventFilter(toggleOrders);
-        addToggleEventFilter(toggleInvoices);
+        addToggleEventFilter(toggleDeliveries);
         
         disposables.addAll(
-                JavaFxObservable.actionEventsOf(toggleWarehouse).subscribe(evt -> {
-                    changeContent(inventoryPanel);
+                JavaFxObservable.actionEventsOf(toggleInventory).subscribe(evt -> {
+//                    changeContent(inventoryPanel);
+                }),
+                JavaFxObservable.actionEventsOf(togglePurchases).subscribe(evt -> {
+                    changeContent(purchasesPanel);
                 }),
                 JavaFxObservable.actionEventsOf(toggleOrders).subscribe(evt -> {
                     changeContent(ordersPanel);
                 }),
-                JavaFxObservable.actionEventsOf(toggleInvoices).subscribe(evt -> {
-                    changeContent(invoicesPanel);
+                JavaFxObservable.actionEventsOf(toggleDeliveries).subscribe(evt -> {
+                    changeContent(deliveriesPanel);
                 })
         );
     }
@@ -97,14 +104,14 @@ public class MainWindow extends AbstractWindowController {
         });
     }
 
-    public Stage getWindow() {
+    public Stage getMainStage() {
         return stage;
     }
     
     @Override
     public void show() {
         super.show();
-        changeContent(inventoryPanel);
+//        changeContent(inventoryPanel);
     }
     
     @Override
@@ -115,9 +122,9 @@ public class MainWindow extends AbstractWindowController {
     @Override
     public void onDispose() {
         disposables.dispose();
-        inventoryPanel.onDispose();
+//        inventoryPanel.onDispose();
         ordersPanel.onDispose();
-        invoicesPanel.onDispose();
+        deliveriesPanel.onDispose();
     }
 
 }

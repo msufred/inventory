@@ -6,7 +6,7 @@ import org.gemseeker.app.data.frameworks.IEntry;
  *
  * @author Gem
  */
-public class InvoiceItem implements IEntry {
+public class DeliveryInvoiceItem implements IEntry {
 
     private int id;
     private String invoiceId;
@@ -84,7 +84,7 @@ public class InvoiceItem implements IEntry {
     
     @Override
     public String insertSQL() {
-        return String.format("INSERT INTO invoice_items "
+        return String.format("INSERT INTO delivery_invoice_items "
                 + "(invoice_id, product_id, quantity, discount, discounted_price, list_price) "
                 + "VALUES ('%s', '%d', '%d', '%f', '%f', '%f')",
                 invoiceId, productId, quantity, discount, discountedPrice, listPrice);

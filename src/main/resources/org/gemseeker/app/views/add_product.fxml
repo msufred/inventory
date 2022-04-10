@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
@@ -17,6 +18,8 @@
    </stylesheets>
    <children>
       <Label styleClass="form-title" text="Add Product" />
+      <CheckBox fx:id="checkExisting" mnemonicParsing="false" styleClass="form-label" text="Add Existing Product" />
+      <ComboBox fx:id="cbProducts" disable="true" prefWidth="372.0" promptText="Select Existing Product" styleClass="form-combo-box" />
       <Label styleClass="form-label" text="Product Name">
          <VBox.margin>
             <Insets />
@@ -30,7 +33,7 @@
             <VBox spacing="4.0">
                <children>
                   <Label styleClass="form-label" text="Unit" />
-                  <ComboBox fx:id="cbUnits" editable="true" prefWidth="200.0" promptText="Select Unit" styleClass="form-combo-box" />
+                  <ComboBox fx:id="cbUnits" editable="true" prefWidth="200.0" promptText="Select or Enter Unit" styleClass="form-combo-box" />
                </children>
             </VBox>
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
@@ -41,10 +44,28 @@
             </VBox>
          </children>
       </HBox>
-      <Label styleClass="form-label" text="Stock Quantity" />
-      <TextField fx:id="tfQuantity" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
-      <Label styleClass="form-label" text="Total Amount" />
-      <TextField fx:id="tfTotal" editable="false" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
+      <VBox spacing="4.0">
+         <children>
+            <Label styleClass="form-label" text="Retail Price (PHP)" />
+            <TextField fx:id="tfRetailPrice" prefWidth="200.0" styleClass="form-text-field" text="0" />
+         </children>
+      </VBox>
+      <HBox spacing="8.0">
+         <children>
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="form-label" text="Quantity" />
+                  <TextField fx:id="tfQuantity" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
+               </children>
+            </VBox>
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="form-label" text="Total Amount" />
+                  <TextField fx:id="tfTotal" editable="false" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
       <ProgressBar fx:id="progressBar" prefWidth="400.0" visible="false">
          <VBox.margin>
             <Insets top="16.0" />

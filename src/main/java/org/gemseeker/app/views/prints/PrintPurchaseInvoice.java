@@ -11,14 +11,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
-import org.gemseeker.app.data.PurchaseProduct;
-import org.gemseeker.app.data.Stock;
+import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
-import org.gemseeker.app.views.tablecells.ProductTotalTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
-import org.gemseeker.app.views.tablecells.StockQuantityTableCell;
 
 /**
  *
@@ -34,15 +32,15 @@ public class PrintPurchaseInvoice extends AbstractPanelController {
     @FXML private Label lblSupplier;
     @FXML private Label lblAmount;
     
-    @FXML private TableView<PurchaseProduct> itemsTable;
-    @FXML private TableColumn<PurchaseProduct, Product> colItem;
-    @FXML private TableColumn<PurchaseProduct, Product> colUnit; 
-    @FXML private TableColumn<PurchaseProduct, Product> colPrice; 
-    @FXML private TableColumn<PurchaseProduct, Stock> colQuantity;
-    @FXML private TableColumn<PurchaseProduct, Product> colTotal;
+    @FXML private TableView<PurchaseInvoiceItem> itemsTable;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colItem;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colUnit; 
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colPrice; 
+    @FXML private TableColumn<PurchaseInvoiceItem, Integer> colQuantity;
+    @FXML private TableColumn<PurchaseInvoiceItem, Double> colTotal;
     
     private PurchaseInvoice mInvoice;
-    private ArrayList<PurchaseProduct> mItems;
+    private ArrayList<PurchaseInvoiceItem> mItems;
     private int mPage;
     private int mTotalPage;
     
@@ -57,14 +55,13 @@ public class PrintPurchaseInvoice extends AbstractPanelController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colPrice.setCellFactory(col -> new ProductPriceTableCell<>());
-        colQuantity.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        colQuantity.setCellFactory(col -> new StockQuantityTableCell<>());
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colTotal.setCellFactory(col -> new ProductTotalTableCell<>());
+        colPrice.setCellFactory(col -> new ProductUnitPriceTableCell<>());
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
     }
     
-    public void set(PurchaseInvoice invoice, ArrayList<PurchaseProduct> items, int page, int totalPage) {
+    public void set(PurchaseInvoice invoice, ArrayList<PurchaseInvoiceItem> items, int page, int totalPage) {
         mInvoice = invoice;
         mItems = items;
         mPage = page;

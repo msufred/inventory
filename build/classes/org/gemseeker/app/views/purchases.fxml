@@ -39,7 +39,7 @@
                         <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                      </VBox.margin>
                   </Label>
-                  <TableView fx:id="stocksTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                  <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                     <columns>
                       <TableColumn fx:id="colName" prefWidth="100.0" text="Product Name" />
                         <TableColumn fx:id="colSku" prefWidth="100.0" styleClass="table-cell-center-align" text="SKU" />
@@ -47,8 +47,13 @@
                         <TableColumn fx:id="colUnitPrice" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colQuantity" prefWidth="70.0" styleClass="table-cell-center-align" text="Quantity" />
                         <TableColumn fx:id="colTotal" styleClass="table-cell-right-align" text="Amount" />
-                        <TableColumn fx:id="colOrdered" prefWidth="70.0" styleClass="table-cell-center-align" text="Ordered" />
-                        <TableColumn fx:id="colInStock" prefWidth="70.0" styleClass="table-cell-center-align" text="In Stock" />
+                        <TableColumn maxWidth="10.0" prefWidth="10.0" />
+                        <TableColumn prefWidth="75.0" text="Inventory">
+                           <columns>
+                              <TableColumn fx:id="colInStock" prefWidth="70.0" styleClass="table-cell-center-align" text="In Stock" />
+                              <TableColumn fx:id="colOrdered" prefWidth="70.0" styleClass="table-cell-center-align" text="Ordered" />
+                           </columns>
+                        </TableColumn>
                     </columns>
                   </TableView>
                </children>

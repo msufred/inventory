@@ -18,13 +18,14 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
-import org.gemseeker.app.data.PurchaseProduct;
+import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
@@ -36,39 +37,39 @@ import org.gemseeker.app.views.prints.PrintWindow;
 import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSkuTableCell;
-import org.gemseeker.app.views.tablecells.ProductTotalTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
-import org.gemseeker.app.views.tablecells.StockOrderedTableCell;
-import org.gemseeker.app.views.tablecells.StockQuantityTableCell;
-import org.gemseeker.app.views.tablecells.StockRemainingTableCell;
 
 /**
  *
  * @author Gem
  */
-public class InventoryPanel extends AbstractPanelController {
+public class PurchasesPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
     @FXML private Button btnRefresh;
     @FXML private Button btnPrint;
     
+    // Purchase Invoices Table
     @FXML private TableView<PurchaseInvoice> purchaseTable;
     @FXML private TableColumn<PurchaseInvoice, LocalDate> colPurchaseDate;
     @FXML private TableColumn<PurchaseInvoice, String> colPurchaseNo;
     @FXML private TableColumn<PurchaseInvoice, String> colPurchaseSupplier;
     @FXML private TableColumn<PurchaseInvoice, Double> colPurchaseTotal;
     
-    @FXML private TableView<PurchaseProduct> stocksTable;
-    @FXML private TableColumn<PurchaseProduct, Product> colName;
-    @FXML private TableColumn<PurchaseProduct, Product> colUnit;
-    @FXML private TableColumn<PurchaseProduct, Product> colUnitPrice;
-    @FXML private TableColumn<PurchaseProduct, Product> colSku;
-    @FXML private TableColumn<PurchaseProduct, Stock> colQuantity;
-    @FXML private TableColumn<PurchaseProduct, Product> colTotal;
-    @FXML private TableColumn<PurchaseProduct, Stock> colOrdered;
-    @FXML private TableColumn<PurchaseProduct, Stock> colInStock;
+    // Purchase Invoice Items Table
+    @FXML private TableView<PurchaseInvoiceItem> itemsTable;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colName;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colSku;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colUnit;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colUnitPrice;
+    @FXML private TableColumn<PurchaseInvoiceItem, Integer> colQuantity;
+    @FXML private TableColumn<PurchaseInvoiceItem, Double> colTotal;
+    // NOT RELATED TO PURCHASE INVOICE ITEMS
+    // This columns represents the current stock and ordered quantity of the product
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colOrdered;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colInStock;
     
     @FXML private SplitPane splitPane;
     private SplitController splitController;
@@ -77,26 +78,26 @@ public class InventoryPanel extends AbstractPanelController {
     private final CompositeDisposable disposables;
     
     private FilteredList<PurchaseInvoice> filteredList;
-    private final ObservableList<PurchaseProduct> productItems = FXCollections.observableArrayList();
+    private final ObservableList<PurchaseInvoiceItem> productItems = FXCollections.observableArrayList();
     
     private final AddPurchaseWindow addPurchaseWindow;
-    
-    private final AddProductWindow addProductWindow;
-    private final EditProductWindow editProductWindow;
-    private final ShowOrdersWindow showOrdersWindow;
     private final PrintWindow printWindow;
     
-    public InventoryPanel(MainWindow mainWindow) {
-        super(InventoryPanel.class.getResource("warehouse.fxml"));
+//    private final AddProductWindow addProductWindow;
+    private final EditProductWindow editProductWindow;
+    private final ShowOrdersWindow showOrdersWindow;
+    
+    public PurchasesPanel(MainWindow mainWindow) {
+        super(PurchasesPanel.class.getResource("purchases.fxml"));
         this.mainWindow = mainWindow;
         disposables = new CompositeDisposable();
         
         addPurchaseWindow = new AddPurchaseWindow(this, mainWindow.getWindow());
+        printWindow = new PrintWindow(mainWindow.getWindow());
         
-        addProductWindow = new AddProductWindow(this, mainWindow.getWindow());
+//        addProductWindow = new AddProductWindow(this, mainWindow.getWindow());
         editProductWindow = new EditProductWindow(this, mainWindow.getWindow());
         showOrdersWindow = new ShowOrdersWindow(mainWindow.getWindow());
-        printWindow = new PrintWindow(mainWindow.getWindow());
     }
 
     @Override
@@ -115,22 +116,39 @@ public class InventoryPanel extends AbstractPanelController {
         
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
+        colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colSku.setCellFactory(col -> new ProductSkuTableCell<>());
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colUnitPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colUnitPrice.setCellFactory(col -> new ProductPriceTableCell<>());
-        colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colSku.setCellFactory(col -> new ProductSkuTableCell<>());
-        colQuantity.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        colQuantity.setCellFactory(col -> new StockQuantityTableCell<>());
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colTotal.setCellFactory(col -> new ProductTotalTableCell<>());
-        colOrdered.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        colOrdered.setCellFactory(col -> new StockOrderedTableCell<>());
-        colInStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        colInStock.setCellFactory(col -> new StockRemainingTableCell<>());
+        colUnitPrice.setCellFactory(col -> new ProductUnitPriceTableCell<>());
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
+        colOrdered.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colOrdered.setCellFactory(col -> new TableCell<PurchaseInvoiceItem, Product>() {
+            @Override
+            protected void updateItem(Product item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    Stock s = item.getStock();
+                    setText(s.getQuantityOut() + "");
+                } else setText("");
+            }
+        });
+        colInStock.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colInStock.setCellFactory(col -> new TableCell<PurchaseInvoiceItem, Product>() {
+            @Override
+            protected void updateItem(Product item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    Stock s = item.getStock();
+                    setText(s.getInStock()+ "");
+                } else setText("");
+            }
+        });
         
-        stocksTable.setItems(productItems);
+        itemsTable.setItems(productItems);
         
         // purchase invoice context menu
         MenuItem mPrint = new MenuItem("Print");
@@ -145,10 +163,9 @@ public class InventoryPanel extends AbstractPanelController {
         MenuItem mOrders = new MenuItem("Show Orders");
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.getItems().addAll(mEdit, mDelete, mOrders);
-        stocksTable.setContextMenu(contextMenu);
+        itemsTable.setContextMenu(contextMenu);
         
-        disposables.addAll(
-                JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
+        disposables.addAll(JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addPurchaseWindow.show();
                 }),
                 JavaFxObservable.actionEventsOf(btnRefresh).subscribe(evt -> {
@@ -179,21 +196,21 @@ public class InventoryPanel extends AbstractPanelController {
                     }
                 }),
                 JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
-                    PurchaseProduct p = stocksTable.getSelectionModel().getSelectedItem();
-                    if (p != null) editProductWindow.show(p.getStock());
+                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
+                    if (p != null) editProductWindow.show(p.getProduct());
                 }),
                 JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
-                    PurchaseProduct p = stocksTable.getSelectionModel().getSelectedItem();
+                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
                     if (p != null) {
                         Optional<ButtonType> result = showConfirmDialog("Delete Product?", "Deleting this entry will also "
                                 + "delete any related data. Continue?");
                         if (result.isPresent() && result.get() == ButtonType.OK) {
-                            deleteProduct(p.getStock());
+                            deleteProduct(p.getProduct());
                         }
                     }
                 }),
                 JavaFxObservable.actionEventsOf(mOrders).subscribe(evt -> {
-                    PurchaseProduct p = stocksTable.getSelectionModel().getSelectedItem();
+                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
                     if (p != null) {
                         showOrdersWindow.show(p.getProductId());
                     }
@@ -210,7 +227,6 @@ public class InventoryPanel extends AbstractPanelController {
     @Override
     public void onPause() {
         purchaseTable.getSelectionModel().clearSelection();
-//        splitController.hideTarget();
         productItems.clear();
     }
 
@@ -218,11 +234,12 @@ public class InventoryPanel extends AbstractPanelController {
     public void onResume() {
         mainWindow.showProgress(true, "Fetching purchase invoices...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getAllPurchaseInvoices();
+            return EmbeddedDatabase.getInstance().getPurchaseInvoices();
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(invoices -> {
             mainWindow.showProgress(false);
             filteredList = new FilteredList<>(FXCollections.observableArrayList(invoices), s -> true);
             purchaseTable.setItems(filteredList);
+            productItems.clear();
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching inventory data.", err);
@@ -232,14 +249,14 @@ public class InventoryPanel extends AbstractPanelController {
     public void refreshSelectedInvoice() {
         PurchaseInvoice pi = purchaseTable.getSelectionModel().getSelectedItem();
         if (pi != null) {
-            getPurchaseProducts(pi);
+            getPurchaseInvoiceItems(pi);
         }
     }
     
-    private void deleteProduct(Stock stock) {
+    private void deleteProduct(Product product) {
         mainWindow.showProgress(true, "Deleting product...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().deleteEntry("products", "id", stock.getProductId());
+            return EmbeddedDatabase.getInstance().deleteEntry("products", "id", product.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
             mainWindow.showProgress(false);
             onResume();
@@ -262,10 +279,10 @@ public class InventoryPanel extends AbstractPanelController {
         }));
     }
     
-    private void getPurchaseProducts(PurchaseInvoice invoice) {
-        mainWindow.showProgress(true, "Fetching purchase products...");
+    private void getPurchaseInvoiceItems(PurchaseInvoice invoice) {
+        mainWindow.showProgress(true, "Fetching purchase invoice items...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getPurchaseProducts(invoice.getId());
+            return EmbeddedDatabase.getInstance().getPurchaseInvoiceItems(invoice.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
             mainWindow.showProgress(false);
             productItems.setAll(products);
@@ -284,7 +301,7 @@ public class InventoryPanel extends AbstractPanelController {
         if (totalPage > 0) {
             int startIndex = 0;
             for (int i = 1; i <= totalPage; i++) {
-                ArrayList<PurchaseProduct> items = new ArrayList<>();
+                ArrayList<PurchaseInvoiceItem> items = new ArrayList<>();
                 int endIndex = startIndex + maxPerPage - 1;
                 if (endIndex < productItems.size()) {
                     items.addAll(productItems.subList(startIndex, endIndex));
@@ -341,7 +358,7 @@ public class InventoryPanel extends AbstractPanelController {
     public void onDispose() {
         disposables.dispose();
         addPurchaseWindow.onDispose();
-        addProductWindow.onDispose();
+//        addProductWindow.onDispose();
         editProductWindow.onDispose();
         showOrdersWindow.onDispose();
         printWindow.onDispose();

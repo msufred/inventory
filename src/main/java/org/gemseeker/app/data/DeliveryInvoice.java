@@ -7,10 +7,10 @@ import org.gemseeker.app.data.frameworks.IEntry;
  *
  * @author Gem
  */
-public class Invoice implements IEntry {
+public class DeliveryInvoice implements IEntry {
 
     private String id;
-    private int orderId;
+    private int shipperId;
     private LocalDate date;
     private String customer;
     private String address;
@@ -25,14 +25,13 @@ public class Invoice implements IEntry {
         this.id = id;
     }
 
-    public int getOrderId() {
-        return orderId;
+    public int getShipperId() {
+        return shipperId;
     }
 
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
+    public void setShipperId(int shipperId) {
+        this.shipperId = shipperId;
     }
-
     public LocalDate getDate() {
         return date;
     }
@@ -75,10 +74,10 @@ public class Invoice implements IEntry {
     
     @Override
     public String insertSQL() {
-        return String.format("INSERT INTO invoices "
-                + "(id, order_id, date, customer, address, total, payment_type) "
+        return String.format("INSERT INTO delivery_invoices "
+                + "(id, shipper_id, date, customer, address, total, payment_type) "
                 + "VALUES ('%s', '%d', '%s', '%s', '%s', '%f', '%s')",
-                id, orderId, date, customer, address, total, paymentType);
+                id, shipperId, date, customer, address, total, paymentType);
     }
 
 }

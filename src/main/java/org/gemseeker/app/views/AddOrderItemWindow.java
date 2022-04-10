@@ -27,13 +27,10 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddOrderItemWindow extends AbstractWindowController {
     
-    @FXML private ComboBox<Stock> cbProducts;
-    @FXML private Label lblDate;
+    @FXML private ComboBox<Product> cbProducts;
     @FXML private Label lblSupplier;
     @FXML private Label lblStock;
-    @FXML private Label lblPrice;
-    @FXML private TextField tfDiscount;
-    @FXML private TextField tfPriceAfter;
+    @FXML private Label lblPrice; // retail price
     @FXML private TextField tfQuantity;
     @FXML private TextField tfTotal;
     @FXML private Button btnSave;
@@ -57,22 +54,17 @@ public class AddOrderItemWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
-        Utils.setAsIntegerTextField(tfDiscount);
         Utils.setAsIntegerTextField(tfQuantity);
         
         disposables.addAll(
                 JavaFxObservable.changesOf(cbProducts.valueProperty()).subscribe(product -> {
                     recalculate();
                 }),
-                JavaFxObservable.changesOf(tfDiscount.textProperty()).subscribe(text -> {
-                    recalculate();
-                }),
                 JavaFxObservable.changesOf(tfQuantity.textProperty()).subscribe(text -> {
                     recalculate();
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (cbProducts.getValue() == null || tfQuantity.getText().isEmpty() ||
-                            tfDiscount.getText().isEmpty()) {
+                    if (cbProducts.getValue() == null || tfQuantity.getText().isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields.");
                     } else {
                         saveAndClose();
@@ -85,48 +77,34 @@ public class AddOrderItemWindow extends AbstractWindowController {
     }
     
     private void recalculate() {
-        Stock s = cbProducts.getValue();
-        if (s != null) {
-            Product p = s.getProduct();
+        Product p = cbProducts.getValue();
+        if (p != null) {
+            Stock s = p.getStock();
             
             // display product details
-            lblDate.setText(Utils.dateTimeFormat.format(p.getDate()));
             lblSupplier.setText(p.getSupplier());
-            lblStock.setText(Utils.getMoneyFormat((int) s.getQuantity() - s.getQuantityOut()));
-            lblPrice.setText("P " + Utils.getMoneyFormat(p.getUnitPrice()));
+            lblStock.setText(s.getInStock() + "");
+            lblPrice.setText("P " + Utils.getMoneyFormat(p.getRetailPrice()));
             
             // calculate
-            double price = p.getUnitPrice();
-            double discount = 0;
-            if (!tfDiscount.getText().isEmpty()) {
-                discount = Double.parseDouble(tfDiscount.getText().trim()) / 100;
-            }
-            double priceAfter = price - (price * discount);
-            tfPriceAfter.setText(String.format("%.2f", priceAfter));
-            
+            double price = p.getRetailPrice();
             int quantity = 0;
             if (!tfQuantity.getText().isEmpty()) {
                 quantity = Integer.parseInt(tfQuantity.getText().trim());
             }
             
-            double total = priceAfter * quantity;
+            double total = price * quantity;
             tfTotal.setText(String.format("%.2f", total));
         }
     }
     
     private void saveAndClose() {
-        Product product = cbProducts.getValue().getProduct();
+        Product product = cbProducts.getValue();
         OrderItem orderItem = new OrderItem();
         orderItem.setProductId(product.getId());
-        double discount = Integer.parseInt(tfDiscount.getText().trim()) / 100;
-        orderItem.setDiscount(discount);
-        double discountedPrice = product.getUnitPrice() - (product.getUnitPrice() * discount);
-        orderItem.setDiscountedPrice(discountedPrice);
         int qty = Integer.parseInt(tfQuantity.getText().trim());
         orderItem.setQuantity(qty);
-        orderItem.setListPrice(discountedPrice * qty);
-        orderItem.setQuantityOut(0);
-        orderItem.setTotalOut(0);
+        orderItem.setListPrice(product.getRetailPrice() * qty);
         orderItem.setProduct(product);
         
         addOrderWindow.addOrderItem(orderItem);
@@ -138,7 +116,7 @@ public class AddOrderItemWindow extends AbstractWindowController {
         super.show();
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getStocks();
+            return EmbeddedDatabase.getInstance().getProducts();
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(stocks -> {
             showProgress(false);
             cbProducts.setItems(FXCollections.observableArrayList(stocks));
@@ -155,12 +133,9 @@ public class AddOrderItemWindow extends AbstractWindowController {
     @Override
     public void onClose() {
         cbProducts.getItems().clear();
-        lblDate.setText("No Product Selected");
         lblSupplier.setText("No Product Selected");
         lblStock.setText("0");
         lblPrice.setText("0");
-        tfDiscount.setText("0");
-        tfPriceAfter.clear();
         tfQuantity.setText("1");
         tfTotal.clear();
     }

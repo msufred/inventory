@@ -61,7 +61,7 @@ public final class Utils {
     public static String getDatabasePath() {
         return getDataFolder() + getSeparator() + DB_NAME;
     }
-
+    
     public static String getMoneyFormat(double value) {
         String str = String.format("%.2f", value);
         StringBuilder sb = new StringBuilder();
@@ -97,6 +97,15 @@ public final class Utils {
     public static Image getImage(URL imageUrl) throws IOException {
         BufferedImage bi = ImageIO.read(imageUrl);
         return SwingFXUtils.toFXImage(bi, null);
+    }
+    
+    public static void setSafeTextField(TextField textField) {
+        if (textField != null) {
+            textField.addEventFilter(KeyEvent.KEY_TYPED, evt -> {
+                String unsafe = "{}|\\^`~[]\'?!";
+                if (unsafe.contains(evt.getCharacter())) evt.consume();
+            });
+        }
     }
 
     public static void setAsNumericalTextField(TextField textField) {

@@ -13,9 +13,8 @@ import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
-import org.gemseeker.app.views.tablecells.ProductDateTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -48,8 +47,6 @@ public class PrintInventoryList extends AbstractPanelController {
 
     @Override
     public void onLoad() {
-        colDate.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colDate.setCellFactory(col -> new ProductDateTableCell<>());
         colItem.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItem.setCellFactory(col -> new ProductNameTableCell<>());
         colSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -57,7 +54,7 @@ public class PrintInventoryList extends AbstractPanelController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colPrice.setCellFactory(col -> new ProductPriceTableCell<>());
+        colPrice.setCellFactory(col -> new ProductUnitPriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colQuantityOut.setCellValueFactory(new PropertyValueFactory<>("quantityOut"));
         colInStock.setCellValueFactory(new PropertyValueFactory<>("product"));

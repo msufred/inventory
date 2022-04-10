@@ -25,7 +25,7 @@ import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -82,7 +82,7 @@ public class ShowOrdersWindow extends AbstractWindowController {
         colItemUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
+        colItemPriceBefore.setCellFactory(col -> new ProductUnitPriceTableCell<>());
         colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
         colItemDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));

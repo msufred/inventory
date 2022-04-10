@@ -5,7 +5,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
-import java.awt.CheckboxMenuItem;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,17 +12,17 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -42,16 +41,17 @@ import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Order;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
+import org.gemseeker.app.data.Shipper;
+import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
 import org.gemseeker.app.views.icons.PrintIcon;
 import org.gemseeker.app.views.prints.PrintOrder;
 import org.gemseeker.app.views.prints.PrintWindow;
 import org.gemseeker.app.views.tablecells.DateTableCell;
-import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -63,23 +63,27 @@ public class OrdersPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
     @FXML private Button btnPrintList;
+    
+    // Orders Table
     @FXML private TableView<Order> ordersTable;
-    @FXML private TableColumn<Order, LocalDate> colOrderDate;
+    @FXML private TableColumn<Order, LocalDate> colDate;
+    @FXML private TableColumn<Order, Shipper> colShipperName;
     @FXML private TableColumn<Order, Double> colTotal;
-    @FXML private TableColumn<Order, String> colOrderName;
+    
+    // Order Items Table
     @FXML private TableView<OrderItem> orderItemsTable;
     @FXML private TableColumn<OrderItem, Product> colItemName;
     @FXML private TableColumn<OrderItem, Product> colItemSupplier;
-    @FXML private TableColumn<OrderItem, Product> colItemUnit; 
-    @FXML private TableColumn<OrderItem, Product> colItemPriceBefore; 
-    @FXML private TableColumn<OrderItem, Double> colItemDiscount; 
-    @FXML private TableColumn<OrderItem, Double> colItemPriceAfter; 
-    @FXML private TableColumn<OrderItem, Integer> colItemQuantity; 
-    @FXML private TableColumn<OrderItem, Double> colItemTotal; 
-    @FXML private TableColumn<OrderItem, Integer> colItemQuantityOut; 
-    @FXML private TableColumn<OrderItem, Double> colItemTotalOut; 
-    @FXML private Label lblOrderTotal;
-    @FXML private Label lblTotalOut;
+    @FXML private TableColumn<OrderItem, Product> colItemUnit;
+    @FXML private TableColumn<OrderItem, Product> colItemUnitPrice;
+    @FXML private TableColumn<OrderItem, Integer> colItemQuantity;
+    @FXML private TableColumn<OrderItem, Double> colItemTotal;
+    // NOT RELATED TO ORDERS TABLE
+    // represents the current stocks in shipper's inventory
+    @FXML private TableColumn<OrderItem, ShipperStock> colItemInStock;
+    @FXML private TableColumn<OrderItem, ShipperStock> colItemQuantityOut;
+    @FXML private TableColumn<OrderItem, ShipperStock> colItemTotalOut;
+
     @FXML private SplitPane splitPane;
     private SplitController splitController;
     
@@ -87,8 +91,6 @@ public class OrdersPanel extends AbstractPanelController {
     private final CompositeDisposable disposables;
     
     private final ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
-    private final SimpleDoubleProperty mOrderTotal = new SimpleDoubleProperty(0);
-    private final SimpleDoubleProperty mTotalOut = new SimpleDoubleProperty(0);
     
     private FilteredList<Order> filteredList;
     
@@ -98,7 +100,7 @@ public class OrdersPanel extends AbstractPanelController {
     private final DirectoryChooser dirChooser;
     
     public OrdersPanel(MainWindow mainWindow) {
-        super(InventoryPanel.class.getResource("orders.fxml"));
+        super(PurchasesPanel.class.getResource("orders.fxml"));
         this.mainWindow = mainWindow;
         disposables = new CompositeDisposable();
         
@@ -112,11 +114,20 @@ public class OrdersPanel extends AbstractPanelController {
     @Override
     public void onLoad() {
         // Order Table Columns
-        colOrderDate.setCellValueFactory(new PropertyValueFactory<>("date"));
-        colOrderDate.setCellFactory(col -> new DateTableCell<>());
+        colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
+        colDate.setCellFactory(col -> new DateTableCell<>());
+        colShipperName.setCellValueFactory(new PropertyValueFactory<>("shipper"));
+        colShipperName.setCellFactory(col -> new TableCell<Order, Shipper>() {
+            @Override
+            protected void updateItem(Shipper item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item.getName());
+                } else setText("");
+            }
+        });
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colTotal.setCellFactory(col -> new PriceTableCell<>());
-        colOrderName.setCellValueFactory(new PropertyValueFactory<>("name"));
         
         // OrderItems Table Columns
         colItemName.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -125,58 +136,74 @@ public class OrdersPanel extends AbstractPanelController {
         colItemSupplier.setCellFactory(col -> new ProductSupplierTableCell<>());
         colItemUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemUnit.setCellFactory(col -> new ProductUnitTableCell<>());
-        colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
-        colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
-        colItemDiscount.setCellFactory(col -> new DiscountTableCell<>());
-        colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        colItemPriceAfter.setCellFactory(col -> new PriceTableCell<>());
+        colItemUnitPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colItemUnitPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colItemQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
         colItemTotal.setCellFactory(col -> new PriceTableCell<>());
-        colItemQuantityOut.setCellValueFactory(new PropertyValueFactory<>("quantityOut"));
-        colItemTotalOut.setCellValueFactory(new PropertyValueFactory<>("totalOut"));
-        colItemTotalOut.setCellFactory(col -> new PriceTableCell<>());
+        
+        colItemInStock.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
+        colItemInStock.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
+            @Override
+            protected void updateItem(ShipperStock item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item.getQuantity() - item.getQuantityOut() + "");
+                } else setText("");
+            }
+        });
+        colItemQuantityOut.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
+        colItemQuantityOut.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
+            @Override
+            protected void updateItem(ShipperStock item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item.getQuantityOut()+ "");
+                } else setText("");
+            }
+        });
+        colItemTotalOut.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
+        colItemTotalOut.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
+            @Override
+            protected void updateItem(ShipperStock item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    double sales = item.getProduct().getUnitPrice() * item.getQuantityOut();
+                    setText(Utils.getMoneyFormat(sales));
+                } else setText("");
+            }
+        });
         
         orderItemsTable.setItems(orderItems);
         
-        CheckboxMenuItem mShowDetails = new CheckboxMenuItem("Show Details");
+        CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
+        MenuItem mShowInventory = new MenuItem("Show Inventory");
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mPrint, mExport, mDelete);
+        cm.getItems().addAll(mShowDetails, mShowInventory, mPrint, mExport, mDelete);
         ordersTable.setContextMenu(cm);
         
         // setup icons
         btnPrintList.setGraphic(new PrintIcon(14));
         
-        disposables.addAll(JavaFxObservable.changesOf(mOrderTotal).subscribe(value -> {
-                    if (value.getNewVal() != null) {
-                        lblOrderTotal.setText(Utils.getMoneyFormat(value.getNewVal().doubleValue()));
-                    }
-                }),
-                JavaFxObservable.changesOf(mTotalOut).subscribe(value -> {
-                    if (value.getNewVal() != null) {
-                        lblTotalOut.setText(Utils.getMoneyFormat(value.getNewVal().doubleValue()));
-                    }
-                }),
+        disposables.addAll(
                 JavaFxObservable.changesOf(ordersTable.getSelectionModel().selectedItemProperty()).subscribe(order -> {
-                    if (order.getNewVal() != null) {
-                        mPrint.setDisable(false);
-                        mExport.setDisable(false);
-                        if (!splitController.isTargetVisible()) {
-                            splitController.showTarget();
-                        }
-                        getOrderItems(order.getNewVal());
-                    } else {
-                        mPrint.setDisable(true);
-                        mExport.setDisable(true);
-                        splitController.hideTarget();
-                    }
+                    refreshSelectedOrder();
                 }),
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addOrderWindow.show();
+                }),
+                JavaFxObservable.actionEventsOf(mShowDetails).subscribe(evt -> {
+                    if (!splitController.isTargetVisible() && mShowDetails.isSelected()) splitController.showTarget();
+                    else splitController.hideTarget();
+                }),
+                JavaFxObservable.actionEventsOf(mShowInventory).subscribe(evt -> {
+                    Order order = ordersTable.getSelectionModel().getSelectedItem();
+                    if (order != null) {
+                        // TODO show shippers inventory
+                    }
                 }),
                 JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
                     Order order = ordersTable.getSelectionModel().getSelectedItem();
@@ -212,7 +239,7 @@ public class OrdersPanel extends AbstractPanelController {
     @Override
     public void onPause() {
         ordersTable.getSelectionModel().clearSelection();
-        splitController.hideTarget();
+        orderItems.clear();
     }
 
     @Override
@@ -230,6 +257,11 @@ public class OrdersPanel extends AbstractPanelController {
             showErrorDialog("Database Error", "Error occurred while fetching orders data.", err);
         }));
     }
+    
+    private void refreshSelectedOrder() {
+        Order order = ordersTable.getSelectionModel().getSelectedItem();
+        if (order != null) getOrderItems(order);
+    }
 
     private void getOrderItems(Order order) {
         mainWindow.showProgress(true, "Fetching order items..");
@@ -238,15 +270,6 @@ public class OrdersPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             mainWindow.showProgress(false);
             orderItems.setAll(items);
-            
-            double total = 0;
-            double totalOut = 0;
-            for (OrderItem item : orderItems) {
-                total += item.getListPrice();
-                totalOut += item.getTotalOut();
-            }
-            mOrderTotal.set(total);
-            mTotalOut.set(totalOut);
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);
@@ -255,10 +278,6 @@ public class OrdersPanel extends AbstractPanelController {
     
     private void printOrder(Order order) {
         mainWindow.showProgress(true, "Preparing orders for printing...");
-        double totalOut = 0;
-        for (OrderItem item : orderItems) {
-            totalOut += item.getTotalOut();
-        }
         ArrayList<PrintOrder> pos = new ArrayList<>();
         int maxPerPage = 30;
         int totalPage = (int) (orderItems.size() / maxPerPage);
@@ -273,13 +292,13 @@ public class OrdersPanel extends AbstractPanelController {
                     items.addAll(orderItems.subList(startIndex, orderItems.size() - 1));
                 }
                 PrintOrder po = new PrintOrder();
-                po.set(order.getDate(), order.getName(), order.getTotal(), totalOut, items, i, totalPage);
+                po.set(order.getDate(), order.getShipper().getName(), order.getTotal(), items, i, totalPage);
                 pos.add(po);
                 startIndex = endIndex;
             }
         } else {
             PrintOrder po = new PrintOrder();
-            po.set(order.getDate(), order.getName(), order.getTotal(), totalOut,
+            po.set(order.getDate(), order.getShipper().getName(), order.getTotal(),
                     new ArrayList<>(orderItems), 1, 1);
             pos.add(po);
         }
@@ -344,7 +363,7 @@ public class OrdersPanel extends AbstractPanelController {
                 customerCellTitle.setCellStyle(boldCell);
                 customerCellTitle.setCellValue("Customer:");
                 XSSFCell customerCell = customerRow.createCell(1);
-                customerCell.setCellValue(order.getName());
+                customerCell.setCellValue(order.getShipper().getName());
                 
                 XSSFRow totalRow = sheet.createRow(2);
                 XSSFCell totalCellTitle = totalRow.createCell(0);
@@ -354,8 +373,7 @@ public class OrdersPanel extends AbstractPanelController {
                 totalCell.setCellValue(String.format("PhP %.2f", order.getTotal()));
                 
                 // Title/Header row
-                String[] headers = new String[]{"Item", "Supplier", "Unit", "Unit Price", "Discount", "Discounted Price", 
-                "Qty", "Total", "Qty. Out", "Total Out"};
+                String[] headers = new String[]{"Item", "Supplier", "Unit", "Unit Price", "Qty", "Total"};
                 XSSFRow headerRow = sheet.createRow(4);
                 for (int i = 0; i < headers.length; i++) {
                     XSSFCell cell = headerRow.createCell(i, CellType.STRING);
@@ -393,31 +411,12 @@ public class OrdersPanel extends AbstractPanelController {
                                 cell.setCellStyle(borderCell);
                                 break;
                             case 4:
-                                cell.setCellType(CellType.NUMERIC);
-                                cell.setCellValue(item.getDiscount() * 100 + "%");
-                                cell.setCellStyle(borderCell);
-                                break;
-                            case 5:
-                                cell.setCellType(CellType.NUMERIC);
-                                cell.setCellValue(item.getDiscountedPrice());
-                                cell.setCellStyle(borderCell);
-                                break;
-                            case 6:
                                 cell.setCellValue(item.getQuantity());
                                 cell.setCellStyle(borderCenterCell);
                                 break;
-                            case 7:
+                            case 5:
                                 cell.setCellType(CellType.NUMERIC);
                                 cell.setCellValue(item.getListPrice());
-                                cell.setCellStyle(borderCell);
-                                break;
-                            case 8:
-                                cell.setCellValue(item.getQuantityOut());
-                                cell.setCellStyle(borderCenterCell);
-                                break;
-                            case 9:
-                                cell.setCellType(CellType.NUMERIC);
-                                cell.setCellValue(item.getTotalOut());
                                 cell.setCellStyle(borderCell);
                                 break;
                         }

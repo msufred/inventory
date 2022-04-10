@@ -8,13 +8,13 @@ import org.gemseeker.app.data.Product;
  *
  * @author Gem
  */
-public class ProductTotalTableCell<T> extends TableCell<T, Product> {
+public class ProductUnitPriceTableCell<T> extends TableCell<T, Product> {
 
     @Override
     protected void updateItem(Product item, boolean empty) {
         super.updateItem(item, empty);
         if (!empty && item != null) {
-            setText(Utils.getMoneyFormat(item.getTotal()));
+            setText(Utils.getMoneyFormat(item.getUnitPrice()));
         } else {
             setText("");
         }

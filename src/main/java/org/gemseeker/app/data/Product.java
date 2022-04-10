@@ -1,6 +1,5 @@
 package org.gemseeker.app.data;
 
-import java.time.LocalDate;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -10,13 +9,14 @@ import org.gemseeker.app.data.frameworks.IEntry;
 public class Product implements IEntry {
 
     private int id;
-    private LocalDate date;
     private String name;
     private String sku;
     private String supplier;
     private String unit;
     private double unitPrice;
-    private double total;
+    private double retailPrice;
+    
+    private Stock stock;
 
     public int getId() {
         return id;
@@ -24,14 +24,6 @@ public class Product implements IEntry {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
     }
 
     public String getName() {
@@ -74,26 +66,40 @@ public class Product implements IEntry {
         this.unitPrice = unitPrice;
     }
 
-    public double getTotal() {
-        return total;
+    public double getRetailPrice() {
+        return retailPrice;
     }
 
-    public void setTotal(double total) {
-        this.total = total;
+    public void setRetailPrice(double retailPrice) {
+        this.retailPrice = retailPrice;
+    }
+
+    /*
+     * NON-DATABASE METHOD
+     */
+    public Stock getStock() {
+        return stock;
+    }
+
+    /*
+     * NON-DATABASE METHOD
+     */
+    public void setStock(Stock stock) {
+        this.stock = stock;
     }
 
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO products ("
-                + "date, name, sku, supplier, unit, unit_price, total) "
-                + "VALUES ('%s', '%s', '%s', '%s', '%s', '%f', '%f')",
-                date, name, sku, supplier, unit, unitPrice, total);
+                + "name, sku, supplier, unit, unit_price, retail_price) "
+                + "VALUES ('%s', '%s', '%s', '%s', '%f', '%f')",
+                name, sku, supplier, unit, unitPrice, retailPrice);
     }
     
     public String updateSQL() {
-        return String.format("UPDATE products SET date='%s', name='%s', sku='%s', "
-                + "supplier='%s', unit='%s', unit_price='%f', total='%f' WHERE id='%d'", 
-                date, name, sku, supplier, unit, unitPrice, total, id);
+        return String.format("UPDATE products SET name='%s', sku='%s', "
+                + "supplier='%s', unit='%s', unit_price='%f', retail_price='%f' WHERE id='%d'", 
+                name, sku, supplier, unit, unitPrice, retailPrice, id);
     }
     
     @Override

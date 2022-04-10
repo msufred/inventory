@@ -5,12 +5,14 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import java.util.Optional;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -18,8 +20,7 @@ import javafx.stage.Stage;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
-import org.gemseeker.app.data.PurchaseInvoice;
-import org.gemseeker.app.data.Stock;
+import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 
 /**
@@ -28,9 +29,12 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddProductWindow extends AbstractWindowController {
     
+    @FXML private CheckBox checkExisting;
+    @FXML private ComboBox<Product> cbProducts;
     @FXML private TextField tfName;
     @FXML private TextField tfSku;
     @FXML private TextField tfPrice;
+    @FXML private TextField tfRetailPrice;
     @FXML private TextField tfQuantity;
     @FXML private TextField tfTotal;
     @FXML private ComboBox<String> cbUnits;
@@ -38,25 +42,14 @@ public class AddProductWindow extends AbstractWindowController {
     @FXML private Button btnCancel;
     @FXML private ProgressBar progressBar;
     
-    private final InventoryPanel inventoryPanel;
     private final AddPurchaseWindow addPurchaseWindow;
     private final CompositeDisposable disposables;
     
     private final SimpleDoubleProperty mTotal = new SimpleDoubleProperty(0);
     
-    private PurchaseInvoice mInvoice;
-    
     public AddProductWindow(AddPurchaseWindow addPurchaseWindow) {
         super("Add Product", AddProductWindow.class.getResource("add_product.fxml"), addPurchaseWindow.getWindow());
-        this.inventoryPanel = null;
         this.addPurchaseWindow = addPurchaseWindow;
-        disposables = new CompositeDisposable();
-    }
-    
-    public AddProductWindow(InventoryPanel inventoryPanel, Stage mainStage) {
-        super("Add Product", AddProductWindow.class.getResource("add_product.fxml"), mainStage);
-        this.inventoryPanel = inventoryPanel;
-        this.addPurchaseWindow = null;
         disposables = new CompositeDisposable();
     }
 
@@ -68,20 +61,38 @@ public class AddProductWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
+        Utils.setSafeTextField(tfName);
+        Utils.setSafeTextField(tfSku);
         Utils.setAsNumericalTextField(tfPrice);
+        Utils.setAsNumericalTextField(tfRetailPrice);
         Utils.setAsIntegerTextField(tfQuantity);
+        
         cbUnits.setItems(FXCollections.observableArrayList(
                 "Piece", "Box", "Pack", "Tray", "Sack", "Kilogram", "Gram",  "Litre"
         ));
         
         disposables.addAll(
+                JavaFxObservable.changesOf(checkExisting.selectedProperty()).subscribe(select -> {
+                    disableInputs(select.getNewVal());
+                }),
+                JavaFxObservable.changesOf(cbProducts.valueProperty()).subscribe(product -> {
+                    Product p = product.getNewVal();
+                    if (p != null) fillInFields(p);
+                }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
                     if (tfName.getText().isEmpty() || cbUnits.getValue() == null ||
-                            tfPrice.getText().isEmpty() || tfQuantity.getText().isEmpty()) {
+                            tfPrice.getText().isEmpty() || tfRetailPrice.getText().isEmpty() ||
+                            tfQuantity.getText().isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields: Product Name, "
-                                + "Unit, Unit Price (PHP), Stock Quantity");
+                                + "Unit, Unit Price (PHP), Retail Price (PHP), Stock Quantity");
                     } else {
-                        saveAndClose();
+                        if (checkExisting.isSelected()) {
+                            Optional<ButtonType> result = showConfirmDialog("Purchase Product", "Selected product's Retail Price might be changed "
+                                + "afte this operation. Confirm?");
+                            if (result.isPresent() && result.get() == ButtonType.OK) saveAndClose();
+                        } else {
+                            saveAndClose();
+                        }
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
@@ -101,9 +112,35 @@ public class AddProductWindow extends AbstractWindowController {
         );
     }
 
-    public void show(PurchaseInvoice invoice) {
+    @Override
+    public void show() {
         super.show();
-        mInvoice = invoice;
+        showProgress(true);
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getProducts();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
+            showProgress(false);
+            cbProducts.setItems(FXCollections.observableArrayList(products));
+        }, err -> {
+            showProgress(false);
+            showErrorDialog("Database Error", "Error occurred while fetching products.", err);
+        }));
+    }
+    
+    private void disableInputs(boolean disable) {
+        tfName.setDisable(disable);
+        tfSku.setDisable(disable);
+        cbUnits.setDisable(disable);
+        tfRetailPrice.setDisable(disable);
+        cbProducts.setDisable(!disable);
+    }
+    
+    private void fillInFields(Product product) {
+        tfName.setText(product.getName());
+        tfSku.setText(product.getSku());
+        cbUnits.setValue(product.getUnit());
+        tfPrice.setText(String.format("%.2f", product.getUnitPrice()));
+        tfRetailPrice.setText(String.format("%.2f", product.getRetailPrice()));
     }
     
     private void recalculate() {
@@ -118,47 +155,25 @@ public class AddProductWindow extends AbstractWindowController {
     }
 
     private void saveAndClose() {
-        Product product = new Product();
-        product.setName(tfName.getText());
-        product.setSku(tfSku.getText());
-        product.setUnit(cbUnits.getValue());
-        product.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
-        product.setTotal(mTotal.get());
-        
-        if (mInvoice != null) {
-            product.setDate(mInvoice.getDate());
-            product.setSupplier(mInvoice.getSupplier());
+        PurchaseInvoiceItem item = new PurchaseInvoiceItem();
+        item.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
+        item.setQuantity(Integer.parseInt(tfQuantity.getText().trim()));
+        item.setTotal(mTotal.get());
+        Product product;
+        if (checkExisting.isSelected() && cbProducts.getValue() != null) {
+            product = cbProducts.getValue();
+            item.setProductId(product.getId());
+        } else {
+            product = new Product();
+            product.setName(tfName.getText());
+            product.setSku(tfSku.getText());
+            product.setUnit(cbUnits.getValue());
+            product.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
+            product.setRetailPrice(Double.parseDouble(tfRetailPrice.getText().trim()));
         }
-        
-        if (inventoryPanel != null) {
-            showProgress(true);
-            disposables.add(Single.fromCallable(() -> {
-                return EmbeddedDatabase.getInstance().addEntryReturnId(product);
-            }).flatMap(id -> Single.fromCallable(() -> {
-                if (id != -1) {
-                    Stock stock = new Stock();
-                    stock.setProductId(id);
-                    stock.setQuantity(Integer.parseInt(tfQuantity.getText().trim()));
-                    stock.setQuantityOut(0);
-                    EmbeddedDatabase.getInstance().addEntry(stock);
-                }
-                return id;
-            })).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(id -> {
-                showProgress(false);
-                if (id != -1) showInfoDialog("Failed to add Product entry", "");
-                close();
-                inventoryPanel.refreshSelectedInvoice();
-            }));
-        }
-        
-        if (addPurchaseWindow != null) {
-            Stock stock = new Stock();
-            stock.setQuantity(Integer.parseInt(tfQuantity.getText().trim()));
-            stock.setQuantityOut(0);
-            stock.setProduct(product);
-            addPurchaseWindow.addProduct(stock);
-            close();
-        }
+        item.setProduct(product);
+        addPurchaseWindow.addProduct(item);
+        close();
     }
     
     private void showProgress(boolean show) {
@@ -167,14 +182,16 @@ public class AddProductWindow extends AbstractWindowController {
 
     @Override
     public void onClose() {
+        checkExisting.setSelected(false);
+        cbProducts.setValue(null);
         tfName.clear();
         tfSku.clear();
         tfPrice.setText("0");
+        tfRetailPrice.setText("0");
         tfQuantity.setText("0");
         tfTotal.setText("0");
         cbUnits.setValue(null);
         showProgress(false);
-        mInvoice = null;
     }
 
     @Override

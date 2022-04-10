@@ -40,8 +40,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
-import org.gemseeker.app.data.Invoice;
-import org.gemseeker.app.data.InvoiceItem;
+import org.gemseeker.app.data.DeliveryInvoice;
+import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
@@ -53,7 +53,7 @@ import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -61,7 +61,7 @@ import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
  *
  * @author Gem
  */
-public class InvoicesPanel extends AbstractPanelController {
+public class DeliveriesPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
     @FXML private Button btnPrintList;
@@ -70,44 +70,46 @@ public class InvoicesPanel extends AbstractPanelController {
     @FXML private Label lblCash;
     @FXML private Label lblCheque;
     @FXML private Label lblReceivables;
-    @FXML private TableView<Invoice> invoicesTable;
-    @FXML private TableColumn<Invoice, LocalDate> colDate;
-    @FXML private TableColumn<Invoice, String> colId;
-    @FXML private TableColumn<Invoice, String> colCustomer;
-    @FXML private TableColumn<Invoice, String> colAddress;
-    @FXML private TableColumn<Invoice, String> colStatus;
-    @FXML private TableColumn<Invoice, Double> colTotal;
-    @FXML private TableView<InvoiceItem> itemsTable;
-    @FXML private TableColumn<InvoiceItem, Product> colItemName;
-    @FXML private TableColumn<InvoiceItem, Product> colItemSupplier;
-    @FXML private TableColumn<InvoiceItem, Product> colItemUnit; 
-    @FXML private TableColumn<InvoiceItem, Product> colItemPriceBefore; 
-    @FXML private TableColumn<InvoiceItem, Double> colItemDiscount; 
-    @FXML private TableColumn<InvoiceItem, Double> colItemPriceAfter; 
-    @FXML private TableColumn<InvoiceItem, Integer> colItemQuantity; 
-    @FXML private TableColumn<InvoiceItem, Double> colItemTotal;
+    
+    @FXML private TableView<DeliveryInvoice> invoicesTable;
+    @FXML private TableColumn<DeliveryInvoice, LocalDate> colDate;
+    @FXML private TableColumn<DeliveryInvoice, String> colId;
+    @FXML private TableColumn<DeliveryInvoice, String> colCustomer;
+    @FXML private TableColumn<DeliveryInvoice, String> colAddress;
+    @FXML private TableColumn<DeliveryInvoice, String> colStatus;
+    @FXML private TableColumn<DeliveryInvoice, Double> colTotal;
+    
+    @FXML private TableView<DeliveryInvoiceItem> itemsTable;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colItemName;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colItemSupplier;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colItemUnit; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colItemPriceBefore; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colItemDiscount; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colItemPriceAfter; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Integer> colItemQuantity; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colItemTotal;
     @FXML private SplitPane splitPane;
     private SplitController splitController;
     
-    private final ObservableList<InvoiceItem> invoiceItems = FXCollections.observableArrayList();
+    private final ObservableList<DeliveryInvoiceItem> invoiceItems = FXCollections.observableArrayList();
     private final SimpleDoubleProperty mTotal = new SimpleDoubleProperty(0);
     
     private final MainWindow mainWindow;
     private final CompositeDisposable disposables;
     
-    private FilteredList<Invoice> filteredList;
+    private FilteredList<DeliveryInvoice> filteredList;
     
-    private final AddInvoiceWindow addInvoiceWindow;
+    private final AddDeliveryWindow addInvoiceWindow;
     private final PrintWindow printWindow;
     
     private final DirectoryChooser dirChooser;
     
-    public InvoicesPanel(MainWindow mainWindow) {
-        super(InventoryPanel.class.getResource("invoices.fxml"));
+    public DeliveriesPanel(MainWindow mainWindow) {
+        super(PurchasesPanel.class.getResource("deliveries.fxml"));
         this.mainWindow = mainWindow;
         disposables = new CompositeDisposable();
         
-        addInvoiceWindow = new AddInvoiceWindow(this, mainWindow.getWindow());
+        addInvoiceWindow = new AddDeliveryWindow(this, mainWindow.getWindow());
         printWindow = new PrintWindow(mainWindow.getWindow());
         
         dirChooser = new DirectoryChooser();
@@ -135,7 +137,7 @@ public class InvoicesPanel extends AbstractPanelController {
         colItemUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemPriceBefore.setCellFactory(col -> new ProductPriceTableCell<>());
+        colItemPriceBefore.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
         colItemDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
@@ -161,20 +163,19 @@ public class InvoicesPanel extends AbstractPanelController {
         // setup icons
         btnPrintList.setGraphic(new PrintIcon(14));
         
-        disposables.addAll(
-                JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
+        disposables.addAll(JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addInvoiceWindow.show();
                 }), 
                 JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null) printInvoice(invoice);
                 }), 
                 JavaFxObservable.actionEventsOf(mExport).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null) exportInvoice(invoice);
                 }),
                 JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null) {
                         Optional<ButtonType> result = showConfirmDialog("Delete Invoice?",
                                 "You are about to delete this Invoice entry permanently. Proceed?");
@@ -184,19 +185,19 @@ public class InvoicesPanel extends AbstractPanelController {
                     }
                 }),
                 JavaFxObservable.actionEventsOf(mCash).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null && !invoice.getPaymentType().equals("Cash")) {
                         updateInvoiceStatus(invoice, "Cash");
                     }
                 }),
                 JavaFxObservable.actionEventsOf(mCheque).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null && !invoice.getPaymentType().equals("Cheque")) {
                         updateInvoiceStatus(invoice, "Cheque");
                     }
                 }),
                 JavaFxObservable.actionEventsOf(mReceivable).subscribe(evt -> {
-                    Invoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
+                    DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
                     if (invoice != null && !invoice.getPaymentType().equals("Receivable")) {
                         updateInvoiceStatus(invoice, "Receivable");
                     }
@@ -243,13 +244,13 @@ public class InvoicesPanel extends AbstractPanelController {
     public void onResume() {
         mainWindow.showProgress(true, "Fetching invoices...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getInvoices();
+            return EmbeddedDatabase.getInstance().getDeliveryInvoices();
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(invoices -> {
             mainWindow.showProgress(false);
             double totalCash = 0;
             double totalCheque = 0;
             double totalReceivables = 0;
-            for (Invoice i : invoices) {
+            for (DeliveryInvoice i : invoices) {
                 switch (i.getPaymentType()) {
                     case "Cash": totalCash += i.getTotal(); break;
                     case "Cheque": totalCheque += i.getTotal(); break;
@@ -269,15 +270,15 @@ public class InvoicesPanel extends AbstractPanelController {
         }));
     }
     
-    private void getInvoiceItems(Invoice invoice) {
+    private void getInvoiceItems(DeliveryInvoice invoice) {
         mainWindow.showProgress(true, "Fetching invoice items...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getInvoiceItems(invoice.getId());
+            return EmbeddedDatabase.getInstance().getDeliveryInvoiceItems(invoice.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             mainWindow.showProgress(false);
             invoiceItems.setAll(items);
             double total = 0;
-            for (InvoiceItem item : items) {
+            for (DeliveryInvoiceItem item : items) {
                 total += item.getListPrice();
             }
             mTotal.set(total);
@@ -296,7 +297,7 @@ public class InvoicesPanel extends AbstractPanelController {
         if (totalPage > 0) {
             int startIndex = 0;
             for (int i = 1; i <= totalPage; i++) {
-                ArrayList<Invoice> items = new ArrayList<>();
+                ArrayList<DeliveryInvoice> items = new ArrayList<>();
                 int endIndex = startIndex + maxPerPage - 1;
                 if (endIndex < filteredList.size()) {
                     items.addAll(filteredList.subList(startIndex, endIndex));
@@ -318,7 +319,7 @@ public class InvoicesPanel extends AbstractPanelController {
         printWindow.show(pils);
     }
     
-    private void printInvoice(Invoice invoice) {
+    private void printInvoice(DeliveryInvoice invoice) {
         mainWindow.showProgress(true, "Preparing invoice for printing...");
 
         ArrayList<PrintInvoice> pis = new ArrayList<>();
@@ -327,7 +328,7 @@ public class InvoicesPanel extends AbstractPanelController {
         if (totalPage > 1) {
             int startIndex = 0;
             for (int i = 1; i <= totalPage; i++) {
-                ArrayList<InvoiceItem> items = new ArrayList<>();
+                ArrayList<DeliveryInvoiceItem> items = new ArrayList<>();
                 int endIndex = startIndex + maxPerPage - 1;
                 if (endIndex < invoiceItems.size()) {
                     items.addAll(invoiceItems.subList(startIndex, endIndex));
@@ -349,7 +350,7 @@ public class InvoicesPanel extends AbstractPanelController {
         printWindow.show(pis);
     }
     
-    private void exportInvoice(Invoice invoice) {
+    private void exportInvoice(DeliveryInvoice invoice) {
         File folder = dirChooser.showDialog(mainWindow.getWindow());
         if (folder != null) {
             try {
@@ -458,7 +459,7 @@ public class InvoicesPanel extends AbstractPanelController {
                 int index = 0;
                 for (int i = rowIndex; i < invoiceItems.size() + rowIndex; i++) {
                     row = sheet.createRow(i);
-                    InvoiceItem item = invoiceItems.get(index);
+                    DeliveryInvoiceItem item = invoiceItems.get(index);
                     Product p = item.getProduct();
                     for (int j = 0; j < headers.length; j++) {
                         XSSFCell cell = row.createCell(j);
@@ -527,7 +528,7 @@ public class InvoicesPanel extends AbstractPanelController {
         }
     }
     
-    private void deleteInvoice(Invoice invoice) {
+    private void deleteInvoice(DeliveryInvoice invoice) {
         mainWindow.showProgress(true, "Deleting invoice entry...");
         disposables.add(Single.fromCallable(() -> {
             return EmbeddedDatabase.getInstance().deleteEntry("invoices", "id", invoice.getId());
@@ -545,7 +546,7 @@ public class InvoicesPanel extends AbstractPanelController {
         }));
     }
     
-    private void updateInvoiceStatus(Invoice invoice, String status) {
+    private void updateInvoiceStatus(DeliveryInvoice invoice, String status) {
         mainWindow.showProgress(true, "Updating invoice status...");
         disposables.add(Single.fromCallable(() -> {
             return EmbeddedDatabase.getInstance().updateEntry("invoices", "payment_type", status, "id", invoice.getId());

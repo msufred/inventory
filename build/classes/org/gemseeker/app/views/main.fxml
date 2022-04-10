@@ -28,16 +28,18 @@
          <children>
             <VBox alignment="TOP_CENTER" prefWidth="120.0" spacing="16.0" styleClass="sidebar">
                <children>
-                  <ToggleButton fx:id="toggleWarehouse" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" selected="true" styleClass="sidebar-toggle" text="Inventory">
+                  <ToggleButton fx:id="toggleInventory" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" selected="true" styleClass="sidebar-toggle" text="Inventory" textAlignment="CENTER" wrapText="true">
                      <toggleGroup>
                         <ToggleGroup fx:id="toggleGroup" />
                      </toggleGroup>
+                  </ToggleButton>
+                  <ToggleButton fx:id="togglePurchases" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Purchase Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Orders" toggleGroup="$toggleGroup" />
-                  <ToggleButton fx:id="toggleInvoices" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Invoices" toggleGroup="$toggleGroup" />
+                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Orders" textAlignment="CENTER" toggleGroup="$toggleGroup" />
+                  <ToggleButton fx:id="toggleDeliveries" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Delivery Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
                   <Region VBox.vgrow="ALWAYS" />
                   <Label style="-fx-text-fill: #dddddd;" text="1.0.0-Beta" />
                </children>

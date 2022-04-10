@@ -5,22 +5,14 @@ import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
-import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
-import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
-import org.gemseeker.app.views.tablecells.ProductDateTableCell;
-import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
-import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
-import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
  *

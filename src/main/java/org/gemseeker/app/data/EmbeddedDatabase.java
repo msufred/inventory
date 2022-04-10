@@ -114,52 +114,34 @@ public class EmbeddedDatabase {
         ArrayList<Product> products = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rs = statement.executeQuery("SELECT * FROM products");
-                while (rs.next()) {
-                    Product product = new Product();
-                    product.setId(rs.getInt(1));
-                    product.setDate(rs.getDate(2).toLocalDate());
-                    product.setName(rs.getString(3));
-                    product.setSku(rs.getString(4));
-                    product.setSupplier(rs.getString(5));
-                    product.setUnit(rs.getString(6));
-                    product.setUnitPrice(rs.getDouble(7));
-                    product.setTotal(rs.getDouble(8));
-                    products.add(product);
-                }
-            }
-        }
-        return products;
-    }
-    
-    public ArrayList<Stock> getStocks() throws SQLException {
-        ArrayList<Stock> stocks = new ArrayList<>();
-        if (connection != null) {
-            try (Statement statement = connection.createStatement()) {
                 ResultSet rs = statement.executeQuery("SELECT * FROM products INNER JOIN stocks ON "
                         + "stocks.product_id = products.id");
                 while (rs.next()) {
                     Product product = new Product();
                     product.setId(rs.getInt(1));
-                    product.setDate(rs.getDate(2).toLocalDate());
-                    product.setName(rs.getString(3));
-                    product.setSku(rs.getString(4));
-                    product.setSupplier(rs.getString(5));
-                    product.setUnit(rs.getString(6));
-                    product.setUnitPrice(rs.getDouble(7));
-                    product.setTotal(rs.getDouble(8));
+                    product.setName(rs.getString(2));
+                    product.setSku(rs.getString(3));
+                    product.setSupplier(rs.getString(4));
+                    product.setUnit(rs.getString(5));
+                    product.setUnitPrice(rs.getDouble(6));
+                    product.setRetailPrice(rs.getDouble(7));
+                    
+                    // TODO fix
+                    // for some reason, Product has 1 extra column
                     
                     Stock stock = new Stock();
                     stock.setId(rs.getInt(9));
                     stock.setProductId(rs.getInt(10));
                     stock.setQuantity(rs.getInt(11));
                     stock.setQuantityOut(rs.getInt(12));
-                    stock.setProduct(product);
-                    stocks.add(stock);
+                    stock.setInStock(rs.getInt(13));
+                    product.setStock(stock);
+                    
+                    products.add(product);
                 }
             }
         }
-        return stocks;
+        return products;
     }
     
     public Stock getStock(int productId) throws SQLException {
@@ -172,6 +154,126 @@ public class EmbeddedDatabase {
                     stock.setProductId(rs.getInt(2));
                     stock.setQuantity(rs.getInt(3));
                     stock.setQuantityOut(rs.getInt(4));
+                    stock.setInStock(rs.getInt(5));
+                    return stock;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public Shipper getShipper(String name) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM shippers WHERE name='" + name + "' LIMIT 1");
+                if (rs.next()) {
+                    Shipper s = new Shipper();
+                    s.setId(rs.getInt(1));
+                    s.setName(rs.getString(2));
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public ArrayList<Shipper> getShippers() throws SQLException {
+        ArrayList<Shipper> shippers = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM shippers");
+                while (rs.next()) {
+                    Shipper s = new Shipper();
+                    s.setId(rs.getInt(1));
+                    s.setName(rs.getString(2));
+                    shippers.add(s);
+                }
+            }
+        }
+        return shippers;
+    }
+    
+    public ArrayList<ShipperStock> getShipperStocks() throws SQLException {
+        ArrayList<ShipperStock> stocks = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM shipper_stocks INNER JOIN products ON "
+                        + "products.id = shipper_stocks.product_id");
+                while (rs.next()) {
+                    ShipperStock stock = new ShipperStock();
+                    stock.setId(rs.getInt(1));
+                    stock.setShipperId(rs.getInt(2));
+                    stock.setProductId(rs.getInt(3));
+                    stock.setQuantity(rs.getInt(4));
+                    stock.setTotal(rs.getDouble(5));
+                    stock.setQuantityOut(rs.getInt(6));
+                    stock.setTotalOut(rs.getDouble(7));
+                    
+                    Product product = new Product();
+                    product.setId(rs.getInt(8));
+                    product.setName(rs.getString(9));
+                    product.setSku(rs.getString(10));
+                    product.setSupplier(rs.getString(11));
+                    product.setUnit(rs.getString(12));
+                    product.setUnitPrice(rs.getDouble(13));
+                    product.setRetailPrice(rs.getDouble(14));
+                    stock.setProduct(product);
+                    
+                    stocks.add(stock);
+                }
+            }
+        }
+        return stocks;
+    }
+    
+    public ArrayList<ShipperStock> getShipperStocks(int shipperId) throws SQLException {
+        ArrayList<ShipperStock> stocks = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM shipper_stocks INNER JOIN products ON "
+                        + "products.id = shipper_stocks.product_id WHERE shipper_stocks.shipper_id = '" + shipperId + "'");
+                while (rs.next()) {
+                    ShipperStock stock = new ShipperStock();
+                    stock.setId(rs.getInt(1));
+                    stock.setShipperId(rs.getInt(2));
+                    stock.setProductId(rs.getInt(3));
+                    stock.setQuantity(rs.getInt(4));
+                    stock.setTotal(rs.getDouble(5));
+                    stock.setQuantityOut(rs.getInt(6));
+                    stock.setTotalOut(rs.getDouble(7));
+                    
+                    Product product = new Product();
+                    product.setId(rs.getInt(8));
+                    product.setName(rs.getString(9));
+                    product.setSku(rs.getString(10));
+                    product.setSupplier(rs.getString(11));
+                    product.setUnit(rs.getString(12));
+                    product.setUnitPrice(rs.getDouble(13));
+                    product.setRetailPrice(rs.getDouble(14));
+                    stock.setProduct(product);
+                    
+                    stocks.add(stock);
+                }
+            }
+        }
+        return stocks;
+    }
+    
+    public ShipperStock getShipperStock(int shipperId, int productId) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                String sql = String.format("SELECT * FROM shipper_stocks WHERE shipper_id = '%d' AND "
+                        + "product_id = '%d'", shipperId, productId);
+                ResultSet rs = statement.executeQuery(sql);
+                if (rs.next()) {
+                    ShipperStock stock = new ShipperStock();
+                    stock.setId(rs.getInt(1));
+                    stock.setShipperId(rs.getInt(2));
+                    stock.setProductId(rs.getInt(3));
+                    stock.setQuantity(rs.getInt(4));
+                    stock.setTotal(rs.getDouble(5));
+                    stock.setQuantityOut(rs.getInt(6));
+                    stock.setTotalOut(rs.getDouble(7));
                     return stock;
                 }
             }
@@ -183,13 +285,21 @@ public class EmbeddedDatabase {
         ArrayList<Order> orders = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rs = statement.executeQuery("SELECT * FROM orders");
+                ResultSet rs = statement.executeQuery("SELECT * FROM orders INNER JOIN shippers ON "
+                        + "shippers.id = orders.shipper_id");
                 while (rs.next()) {
                     Order order = new Order();
                     order.setId(rs.getInt(1));
                     order.setDate(rs.getDate(2).toLocalDate());
-                    order.setName(rs.getString(3));
+                    order.setShipperId(rs.getInt(3));
                     order.setTotal(rs.getDouble(4));
+                    order.setSales(rs.getDouble(5));
+                    
+                    Shipper shipper = new Shipper();
+                    shipper.setId(rs.getInt(6));
+                    shipper.setName(rs.getString(7));
+                    order.setShipper(shipper);
+                    
                     orders.add(order);
                 }
             }
@@ -201,15 +311,29 @@ public class EmbeddedDatabase {
         ArrayList<Order> orders = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                String sql = "SELECT * FROM orders WHERE orders.id IN "
+                String sql = "SELECT * FROM orders INNER JOIN shippers ON shippers.id = orders.shipper_id WHERE orders.id IN "
                         + "(SELECT order_id FROM order_items WHERE order_items.product_id = '"+ productId + "')";
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
+                    int index = 1;
                     Order order = new Order();
-                    order.setId(rs.getInt(1));
-                    order.setDate(rs.getDate(2).toLocalDate());
-                    order.setName(rs.getString(3));
-                    order.setTotal(rs.getDouble(4));
+                    order.setId(rs.getInt(index++));
+                    order.setDate(rs.getDate(index++).toLocalDate());
+                    order.setShipperId(rs.getInt(index++));
+                    order.setTotal(rs.getDouble(index++));
+                    order.setSales(rs.getDouble(index++));
+                    
+                    Shipper shipper = new Shipper();
+                    shipper.setId(rs.getInt(index++));
+                    shipper.setName(rs.getString(index++));
+                    order.setShipper(shipper);
+                    
+                    for (int i = 1; i < 7; i++) {
+                        System.out.print(rs.getObject(i).toString());
+                        System.out.print(" ");
+                    }
+                    System.out.println("");
+                    
                     orders.add(order);
                 }
             }
@@ -221,31 +345,40 @@ public class EmbeddedDatabase {
         ArrayList<OrderItem> orderItems = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rs = statement.executeQuery(String.format("SELECT * FROM order_items "
-                        + "INNER JOIN products ON order_items.product_id = products.id WHERE order_id='%d'", orderId));
+                String sql = "SELECT * FROM order_items "
+                        + "INNER JOIN shipper_stocks ON shipper_stocks.product_id = order_items.product_id "
+                        + "INNER JOIN products ON products.id = order_items.product_id "
+                        + "WHERE order_items.order_id = '" + orderId + "'";
+                ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
                     OrderItem item = new OrderItem();
                     item.setId(rs.getInt(1));
                     item.setOrderId(rs.getInt(2));
                     item.setProductId(rs.getInt(3));
-                    item.setDiscount(rs.getDouble(4));
-                    item.setDiscountedPrice(rs.getDouble(5));
-                    item.setQuantity(rs.getInt(6));
-                    item.setListPrice(rs.getDouble(7));
-                    item.setQuantityOut(rs.getInt(8));
-                    item.setTotalOut(rs.getDouble(9));
+                    item.setQuantity(rs.getInt(4));
+                    item.setListPrice(rs.getDouble(5));
+                    
+                    ShipperStock stock = new ShipperStock();
+                    stock.setId(rs.getInt(6));
+                    stock.setShipperId(rs.getInt(7));
+                    stock.setProductId(rs.getInt(8));
+                    stock.setQuantity(rs.getInt(9));
+                    stock.setTotal(rs.getDouble(10));
+                    stock.setQuantityOut(rs.getInt(11));
+                    stock.setTotalOut(rs.getDouble(12));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(10));
-                    product.setDate(rs.getDate(11).toLocalDate());
-                    product.setName(rs.getString(12));
-                    product.setSku(rs.getString(13));
-                    product.setSupplier(rs.getString(14));
-                    product.setUnit(rs.getString(15));
-                    product.setUnitPrice(rs.getDouble(16));
-                    product.setTotal(rs.getDouble(17));
+                    product.setId(rs.getInt(13));
+                    product.setName(rs.getString(14));
+                    product.setSku(rs.getString(15));
+                    product.setSupplier(rs.getString(16));
+                    product.setUnit(rs.getString(17));
+                    product.setUnitPrice(rs.getDouble(18));
+                    product.setRetailPrice(rs.getDouble(19));
                     
+                    stock.setProduct(product);
                     item.setProduct(product);
+                    item.setShipperStock(stock);
                     orderItems.add(item);
                 }
             }
@@ -253,20 +386,31 @@ public class EmbeddedDatabase {
         return orderItems;
     }
     
-    public ArrayList<Invoice> getInvoices() throws SQLException {
-        ArrayList<Invoice> invoices = new ArrayList<>();
+    public boolean deliveryInvoiceExists(String id) throws SQLException {
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                ResultSet rs = statement.executeQuery("SELECT * FROM invoices");
+                ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM delivery_invoices WHERE id='" + id + "'");
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+    
+    public ArrayList<DeliveryInvoice> getDeliveryInvoices() throws SQLException {
+        ArrayList<DeliveryInvoice> invoices = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM delivery_invoices");
                 while (rs.next()) {
-                    Invoice invoice = new Invoice();
-                    invoice.setId(rs.getString(1));
-                    invoice.setOrderId(rs.getInt(2));
-                    invoice.setDate(rs.getDate(3).toLocalDate());
-                    invoice.setCustomer(rs.getString(4));
-                    invoice.setAddress(rs.getString(5));
-                    invoice.setTotal(rs.getDouble(6));
-                    invoice.setPaymentType(rs.getString(7));
+                    int index = 1;
+                    DeliveryInvoice invoice = new DeliveryInvoice();
+                    invoice.setId(rs.getString(index++));
+                    invoice.setShipperId(index++);
+                    invoice.setDate(rs.getDate(index++).toLocalDate());
+                    invoice.setCustomer(rs.getString(index++));
+                    invoice.setAddress(rs.getString(index++));
+                    invoice.setTotal(rs.getDouble(index++));
+                    invoice.setPaymentType(rs.getString(index++));
                     invoices.add(invoice);
                 }
             }
@@ -274,32 +418,32 @@ public class EmbeddedDatabase {
         return invoices;
     }
     
-    public ArrayList<InvoiceItem> getInvoiceItems(String invoiceId) throws SQLException {
-        ArrayList<InvoiceItem> items = new ArrayList<>();
+    public ArrayList<DeliveryInvoiceItem> getDeliveryInvoiceItems(String invoiceId) throws SQLException {
+        ArrayList<DeliveryInvoiceItem> items = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                String sql = String.format("SELECT * FROM invoice_items INNER JOIN "
-                        + "products ON invoice_items.product_id = products.id WHERE invoice_id='%s'", invoiceId);
+                String sql = String.format("SELECT * FROM delivery_invoice_items INNER JOIN "
+                        + "products ON delivery_invoice_items.product_id = products.id WHERE invoice_id='%s'", invoiceId);
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
-                    InvoiceItem item = new InvoiceItem();
-                    item.setId(rs.getInt(1));
-                    item.setInvoiceId(rs.getString(2));
-                    item.setProductId(rs.getInt(3));
-                    item.setQuantity(rs.getInt(4));
-                    item.setDiscount(rs.getDouble(5));
-                    item.setDiscountedPrice(rs.getDouble(6));
-                    item.setListPrice(rs.getDouble(7));
+                    int index = 1;
+                    DeliveryInvoiceItem item = new DeliveryInvoiceItem();
+                    item.setId(rs.getInt(index++));
+                    item.setInvoiceId(rs.getString(index++));
+                    item.setProductId(rs.getInt(index++));
+                    item.setQuantity(rs.getInt(index++));
+                    item.setDiscount(rs.getDouble(index++));
+                    item.setDiscountedPrice(rs.getDouble(index++));
+                    item.setListPrice(rs.getDouble(index++));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(8));
-                    product.setDate(rs.getDate(9).toLocalDate());
-                    product.setName(rs.getString(10));
-                    product.setSku(rs.getString(11));
-                    product.setSupplier(rs.getString(12));
-                    product.setUnit(rs.getString(13));
-                    product.setUnitPrice(rs.getDouble(14));
-                    product.setTotal(rs.getDouble(15));
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     
                     item.setProduct(product);
                     items.add(item);
@@ -309,17 +453,28 @@ public class EmbeddedDatabase {
         return items;
     }
     
-    public ArrayList<PurchaseInvoice> getAllPurchaseInvoices() throws SQLException {
+    public boolean purchaseInvoiceExists(String id) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM purchase_invoices WHERE id='" + id + "'");
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+    
+    public ArrayList<PurchaseInvoice> getPurchaseInvoices() throws SQLException {
         ArrayList<PurchaseInvoice> invoices = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet rs = statement.executeQuery("SELECT * FROM purchase_invoices");
                 while (rs.next()) {
+                    int index = 1;
                     PurchaseInvoice invoice = new PurchaseInvoice();
-                    invoice.setId(rs.getString(1));
-                    invoice.setDate(rs.getDate(2).toLocalDate());
-                    invoice.setSupplier(rs.getString(3));
-                    invoice.setTotal(rs.getDouble(4));
+                    invoice.setId(rs.getString(index++));
+                    invoice.setDate(rs.getDate(index++).toLocalDate());
+                    invoice.setSupplier(rs.getString(index++));
+                    invoice.setTotal(rs.getDouble(index++));
                     invoices.add(invoice);
                 }
             }
@@ -327,43 +482,82 @@ public class EmbeddedDatabase {
         return invoices;
     }
     
-    public ArrayList<PurchaseProduct> getPurchaseProducts(String purchaseInvoiceId) throws SQLException {
-        ArrayList<PurchaseProduct> stocks = new ArrayList<>();
+    public ArrayList<PurchaseInvoiceItem> getPurchaseInvoiceItems(String purchaseInvoiceId) throws SQLException {
+        ArrayList<PurchaseInvoiceItem> stocks = new ArrayList<>();
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
-                String sql = String.format("SELECT * FROM purchase_products "
-                        + "INNER JOIN products ON products.id = purchase_products.product_id "
-                        + "INNER JOIN stocks ON stocks.product_id = products.id");
+                String sql = String.format("SELECT * FROM purchase_invoice_items "
+                        + "INNER JOIN products ON products.id = purchase_invoice_items.product_id "
+                        + "INNER JOIN stocks ON stocks.product_id = purchase_invoice_items.product_id");
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
-                    PurchaseProduct pp = new PurchaseProduct();
+                    PurchaseInvoiceItem pp = new PurchaseInvoiceItem();
                     pp.setId(rs.getInt(1));
-                    pp.setProductId(rs.getInt(2));
-                    pp.setInvoiceId(rs.getString(3));
+                    pp.setInvoiceId(rs.getString(2));
+                    pp.setProductId(rs.getInt(3));
+                    pp.setUnitPrice(rs.getDouble(4));
+                    pp.setQuantity(rs.getInt(5));
+                    pp.setTotal(rs.getDouble(6));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(4));
-                    product.setDate(rs.getDate(5).toLocalDate());
-                    product.setName(rs.getString(6));
-                    product.setSku(rs.getString(7));
-                    product.setSupplier(rs.getString(8));
-                    product.setUnit(rs.getString(9));
-                    product.setUnitPrice(rs.getDouble(10));
-                    product.setTotal(rs.getDouble(11));
+                    product.setId(rs.getInt(7));
+                    product.setName(rs.getString(8));
+                    product.setSku(rs.getString(9));
+                    product.setSupplier(rs.getString(10));
+                    product.setUnit(rs.getString(11));
+                    product.setUnitPrice(rs.getDouble(12));
+                    product.setRetailPrice(rs.getDouble(13));
+                    
+                    // TODO fix
+                    // same, product has 1 extra column
                     
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(12));
-                    stock.setProductId(rs.getInt(13));
-                    stock.setQuantity(rs.getInt(14));
-                    stock.setQuantityOut(rs.getInt(15));
-                    stock.setProduct(product);
-                    
+                    stock.setId(rs.getInt(15));
+                    stock.setProductId(rs.getInt(16));
+                    stock.setQuantity(rs.getInt(17));
+                    stock.setQuantityOut(rs.getInt(18));
+                    stock.setInStock(rs.getInt(19));
+                    product.setStock(stock);
+
                     pp.setProduct(product);
-                    pp.setStock(stock);
                     stocks.add(pp);
                 }
             }
         }
         return stocks;
     }
+    
+    public ArrayList<Supplier> getSuppliers() throws SQLException {
+        ArrayList<Supplier> suppliers = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM suppliers");
+                while (rs.next()) {
+                    Supplier s = new Supplier();
+                    s.setId(rs.getInt(1));
+                    s.setName(rs.getString(2));
+                    suppliers.add(s);
+                }
+            }
+        }
+        return suppliers;
+    }
+    
+    public ArrayList<Customer> getCustomers() throws SQLException {
+        ArrayList<Customer> customers = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM suppliers");
+                while (rs.next()) {
+                    Customer c = new Customer();
+                    c.setId(rs.getInt(1));
+                    c.setName(rs.getString(2));
+                    c.setAddress(rs.getString(3));
+                    customers.add(c);
+                }
+            }
+        }
+        return customers;
+    }
+    
 }

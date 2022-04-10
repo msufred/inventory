@@ -9,7 +9,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -17,7 +16,6 @@ import javafx.stage.Stage;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
-import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 
 /**
@@ -26,23 +24,23 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class EditProductWindow extends AbstractWindowController {
     
-    @FXML private DatePicker datePicker;
     @FXML private TextField tfName;
     @FXML private TextField tfSku;
     @FXML private TextField tfSupplier;
     @FXML private TextField tfPrice;
+    @FXML private TextField tfRetailPrice;
     @FXML private TextField tfQuantity;
     @FXML private ComboBox<String> cbUnits;
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
     @FXML private ProgressBar progressBar;
     
-    private final InventoryPanel inventoryPanel;
+    private final PurchasesPanel inventoryPanel;
     private final CompositeDisposable disposables;
     
-    private Stock mStock;
+    private Product mProduct;
     
-    public EditProductWindow(InventoryPanel inventoryPanel, Stage mainStage) {
+    public EditProductWindow(PurchasesPanel inventoryPanel, Stage mainStage) {
         super("Add Product", AddProductWindow.class.getResource("edit_product.fxml"), mainStage);
         this.inventoryPanel = inventoryPanel;
         disposables = new CompositeDisposable();
@@ -57,6 +55,7 @@ public class EditProductWindow extends AbstractWindowController {
     @Override
     public void onLoad() {
         Utils.setAsNumericalTextField(tfPrice);
+        Utils.setAsNumericalTextField(tfRetailPrice);
         Utils.setAsIntegerTextField(tfQuantity);
         cbUnits.setItems(FXCollections.observableArrayList(
                 "Piece", "Box", "Pack", "Tray", "Sack", "Kilogram", "Gram",  "Litre"
@@ -64,9 +63,9 @@ public class EditProductWindow extends AbstractWindowController {
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (mStock == null || datePicker.getValue() == null || tfName.getText().isEmpty() ||
+                    if (mProduct == null || tfName.getText().isEmpty() ||
                             cbUnits.getValue() == null || tfPrice.getText().isEmpty() ||
-                            tfQuantity.getText().isEmpty()) {
+                            tfRetailPrice.getText().isEmpty() || tfQuantity.getText().isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields: Product Name, "
                                 + "Unit, Unit Price (PHP), Stock Quantity");
                     } else {
@@ -79,18 +78,17 @@ public class EditProductWindow extends AbstractWindowController {
         );
     }
 
-    public void show(Stock stock) {
+    public void show(Product product) {
         super.show();
-        if (stock != null) {
-            Product p = stock.getProduct();
-            datePicker.setValue(p.getDate());
-            tfName.setText(p.getName());
-            tfSku.setText(p.getSku());
-            tfSupplier.setText(p.getSupplier());
-            cbUnits.setValue(p.getUnit());
-            tfPrice.setText(String.format("%.2f", p.getUnitPrice()));
-            tfQuantity.setText(stock.getQuantity() + "");
-            mStock = stock;
+        if (product != null) {
+            tfName.setText(product.getName());
+            tfSku.setText(product.getSku());
+            tfSupplier.setText(product.getSupplier());
+            cbUnits.setValue(product.getUnit());
+            tfPrice.setText(String.format("%.2f", product.getUnitPrice()));
+            tfRetailPrice.setText(String.format("%.2f", product.getRetailPrice()));
+            tfQuantity.setText(product.getStock().getQuantity() + "");
+            mProduct = product;
         } else {
             showInfoDialog("No Product Selected", "Please select a product and try again.");
         }
@@ -99,18 +97,17 @@ public class EditProductWindow extends AbstractWindowController {
     private void saveAndClose() {
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            Product product = mStock.getProduct();
-            product.setDate(datePicker.getValue());
-            product.setName(tfName.getText());
-            product.setSku(tfSku.getText());
-            product.setSupplier(tfSupplier.getText());
-            product.setUnit(cbUnits.getValue());
-            product.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
-            return EmbeddedDatabase.getInstance().executeQuery(product.updateSQL());
+            mProduct.setName(tfName.getText());
+            mProduct.setSku(tfSku.getText());
+            mProduct.setSupplier(tfSupplier.getText());
+            mProduct.setUnit(cbUnits.getValue());
+            mProduct.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
+            mProduct.setRetailPrice(Double.parseDouble(tfRetailPrice.getText().trim()));
+            return EmbeddedDatabase.getInstance().executeQuery(mProduct.updateSQL());
         }).flatMap(success -> Single.fromCallable(() -> {
             if (success) {
                 int qty = Integer.parseInt(tfQuantity.getText().trim());
-                return EmbeddedDatabase.getInstance().updateEntry("stocks", "quantity", qty, "id", mStock.getId());
+                return EmbeddedDatabase.getInstance().updateEntry("stocks", "quantity", qty, "id", mProduct.getStock().getId());
             }
             return success;
         })).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
@@ -132,7 +129,6 @@ public class EditProductWindow extends AbstractWindowController {
 
     @Override
     public void onClose() {
-        datePicker.setValue(null);
         tfName.clear();
         tfSku.clear();
         tfSupplier.clear();
@@ -140,6 +136,7 @@ public class EditProductWindow extends AbstractWindowController {
         tfQuantity.setText("0");
         cbUnits.setValue(null);
         showProgress(false);
+        mProduct = null;
     }
 
     @Override

@@ -4,6 +4,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
@@ -32,7 +33,7 @@
             <VBox HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="form-label" text="Supplier Name" />
-                  <TextField fx:id="tfSupplier" promptText="Product Name" styleClass="form-text-field" />
+                  <ComboBox fx:id="cbSuppliers" editable="true" prefWidth="300.0" promptText="Select or Enter Supplier" styleClass="form-combo-box" />
                </children>
             </VBox>
             <VBox>
@@ -45,7 +46,7 @@
       </HBox>
       <HBox alignment="CENTER_LEFT" spacing="4.0">
          <children>
-            <Button fx:id="btnAdd" defaultButton="true" mnemonicParsing="false" styleClass="primary" text="Add Product" />
+            <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Product" />
             <Region HBox.hgrow="ALWAYS" />
             <Label styleClass="form-label" text="Total" />
             <Label fx:id="lblTotal" text="P 0.00">
@@ -66,6 +67,7 @@
             <TableColumn fx:id="colSku" prefWidth="75.0" text="SKU" />
           <TableColumn fx:id="colUnit" prefWidth="75.0" styleClass="table-cell-center-align" text="Unit" />
             <TableColumn fx:id="colPrice" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
+            <TableColumn fx:id="colRetailPrice" prefWidth="75.0" styleClass="table-cell-right-align" text="Retail Price" />
             <TableColumn fx:id="colQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Quantity" />
             <TableColumn fx:id="colTotal" prefWidth="77.0" styleClass="table-cell-right-align" text="Total" />
         </columns>

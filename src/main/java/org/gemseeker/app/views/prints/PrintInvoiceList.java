@@ -9,8 +9,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
-import org.gemseeker.app.data.Invoice;
-import org.gemseeker.app.data.InvoiceItem;
+import org.gemseeker.app.data.DeliveryInvoice;
+import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
@@ -24,15 +24,15 @@ public class PrintInvoiceList extends AbstractPanelController {
     @FXML private Label lblDate;
     @FXML private Label lblPage;
     
-    @FXML private TableView<Invoice> itemsTable;
-    @FXML private TableColumn<Invoice, LocalDate> colDate;
-    @FXML private TableColumn<Invoice, String> colNo;
-    @FXML private TableColumn<Invoice, String> colCustomer; 
-    @FXML private TableColumn<Invoice, String> colAddress; 
-    @FXML private TableColumn<Invoice, String> colStatus; 
-    @FXML private TableColumn<Invoice, Double> colTotal;
+    @FXML private TableView<DeliveryInvoice> itemsTable;
+    @FXML private TableColumn<DeliveryInvoice, LocalDate> colDate;
+    @FXML private TableColumn<DeliveryInvoice, String> colNo;
+    @FXML private TableColumn<DeliveryInvoice, String> colCustomer; 
+    @FXML private TableColumn<DeliveryInvoice, String> colAddress; 
+    @FXML private TableColumn<DeliveryInvoice, String> colStatus; 
+    @FXML private TableColumn<DeliveryInvoice, Double> colTotal;
     
-    private ArrayList<Invoice> mItems;
+    private ArrayList<DeliveryInvoice> mItems;
     private int mPage;
     private int mTotalPage;
     
@@ -52,7 +52,7 @@ public class PrintInvoiceList extends AbstractPanelController {
         colTotal.setCellFactory(col -> new PriceTableCell<>());
     }
     
-    public void set(ArrayList<Invoice> items, int page, int totalPage) {
+    public void set(ArrayList<DeliveryInvoice> items, int page, int totalPage) {
         mItems = items;
         mPage = page;
         mTotalPage = totalPage;

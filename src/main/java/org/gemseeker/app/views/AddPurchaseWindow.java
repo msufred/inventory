@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -24,13 +25,15 @@ import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
-import org.gemseeker.app.data.PurchaseProduct;
+import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.data.Stock;
+import org.gemseeker.app.data.Supplier;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSkuTableCell;
-import org.gemseeker.app.views.tablecells.ProductTotalTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
@@ -41,29 +44,30 @@ public class AddPurchaseWindow extends AbstractWindowController {
     
     @FXML private DatePicker datePicker;
     @FXML private TextField tfNo;
-    @FXML private TextField tfSupplier;
+    @FXML private ComboBox<Supplier> cbSuppliers;
     @FXML private Button btnAdd;
     @FXML private Label lblTotal;
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
     @FXML private ProgressBar progressBar;
-    @FXML private TableView<Stock> itemsTable;
-    @FXML private TableColumn<Stock, Product> colName;
-    @FXML private TableColumn<Stock, Product> colSku;
-    @FXML private TableColumn<Stock, Product> colUnit;
-    @FXML private TableColumn<Stock, Product> colPrice;
-    @FXML private TableColumn<Stock, Integer> colQuantity;
-    @FXML private TableColumn<Stock, Product> colTotal;
+    @FXML private TableView<PurchaseInvoiceItem> itemsTable;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colName;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colSku;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colUnit;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colPrice;
+    @FXML private TableColumn<PurchaseInvoiceItem, Product> colRetailPrice;
+    @FXML private TableColumn<PurchaseInvoiceItem, Integer> colQuantity;
+    @FXML private TableColumn<PurchaseInvoiceItem, Double> colTotal;
     
-    private final InventoryPanel inventoryPanel;
+    private final PurchasesPanel inventoryPanel;
     private final CompositeDisposable disposables;
     
-    private final ObservableList<Stock> mItems = FXCollections.observableArrayList();
+    private final ObservableList<PurchaseInvoiceItem> mItems = FXCollections.observableArrayList();
     private final SimpleDoubleProperty mTotal = new SimpleDoubleProperty(0);
     
     private final AddProductWindow addProductWindow;
     
-    public AddPurchaseWindow(InventoryPanel inventoryPanel, Stage mainStage) {
+    public AddPurchaseWindow(PurchasesPanel inventoryPanel, Stage mainStage) {
         super("Add Purchase", AddPurchaseWindow.class.getResource("add_purchase.fxml"), mainStage);
         this.inventoryPanel = inventoryPanel;
         disposables = new CompositeDisposable();
@@ -78,6 +82,9 @@ public class AddPurchaseWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
+        Utils.setSafeTextField(tfNo);
+        Utils.setSafeTextField(cbSuppliers.getEditor());
+        
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -85,10 +92,12 @@ public class AddPurchaseWindow extends AbstractWindowController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colPrice.setCellFactory(col -> new ProductPriceTableCell<>());
+        colPrice.setCellFactory(col -> new ProductUnitPriceTableCell<>());
+        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colTotal.setCellFactory(col -> new ProductTotalTableCell<>());
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(mItems);
         
@@ -98,10 +107,10 @@ public class AddPurchaseWindow extends AbstractWindowController {
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
                     if (tfNo.getText().isEmpty() || datePicker.getValue() == null ||
-                            tfSupplier.getText().isEmpty() || mItems.isEmpty()) {
+                            cbSuppliers.getEditor().getText().isEmpty() || mItems.isEmpty()) {
                         showInfoDialog("Invalid Input", "Please fill-in required fields.");
                     } else {
-                        saveAndClose();
+                        checkIdAndSave();
                     }
                 }),
                 JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
@@ -115,12 +124,12 @@ public class AddPurchaseWindow extends AbstractWindowController {
         );
     }
     
-    public void addProduct(Stock stock) {
-        mItems.add(stock);
+    public void addProduct(PurchaseInvoiceItem item) {
+        mItems.add(item);
         // recalculate
         double total = 0;
-        for (Stock s : mItems) {
-            total += s.getProduct().getTotal();
+        for (PurchaseInvoiceItem p : mItems) {
+            total += p.getTotal();
         }
         mTotal.set(total);
     }
@@ -131,37 +140,70 @@ public class AddPurchaseWindow extends AbstractWindowController {
         datePicker.setValue(LocalDate.now());
     }
     
-    private void saveAndClose() {
-        PurchaseInvoice invoice = new PurchaseInvoice();
-        invoice.setId(tfNo.getText());
-        invoice.setDate(datePicker.getValue());
-        invoice.setSupplier(tfSupplier.getText());
-        invoice.setTotal(mTotal.get());
-        
+    private void checkIdAndSave() {
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().addEntry(invoice);
-        }).flatMap(success -> Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().purchaseInvoiceExists(tfNo.getText().trim());
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(exists -> {
+            showProgress(false);
+            if (exists) showInfoDialog("Invoice Exists", "Purchase Invoice ID already in used. Try again.");
+            else saveAndClose();
+        }, err -> {
+            showProgress(false);
+            showErrorDialog("Database Error", "Error while doing database query.", err);
+        }));
+    }
+    
+    private void saveAndClose() {
+        showProgress(true);
+        disposables.add(Single.fromCallable(() -> {
+            EmbeddedDatabase database = EmbeddedDatabase.getInstance();
+            
+            PurchaseInvoice invoice = new PurchaseInvoice();
+            invoice.setId(tfNo.getText());
+            invoice.setDate(datePicker.getValue());
+            invoice.setSupplier(cbSuppliers.getEditor().getText());
+            invoice.setTotal(mTotal.get());
+            
+            boolean success = database.addEntry(invoice);
+            
+            // save purchase items
             if (success) {
-                EmbeddedDatabase db = EmbeddedDatabase.getInstance();
-                for (Stock s : mItems) {
-                    Product p = s.getProduct();
-                    p.setDate(invoice.getDate());
-                    p.setSupplier(invoice.getSupplier());
-                    int id = db.addEntryReturnId(p);
-                    if (id != -1) {
-                        PurchaseProduct pp = new PurchaseProduct();
-                        pp.setProductId(id);
-                        pp.setInvoiceId(invoice.getId());
-                        db.addEntry(pp);
-                        
-                        s.setProductId(id);
-                        db.addEntry(s);
+                for (PurchaseInvoiceItem p: mItems) {
+                    p.setInvoiceId(invoice.getId());
+                    
+                    if (p.getProductId() == -1) {
+                        // save product return id
+                        Product product = p.getProduct();
+                        product.setSupplier(invoice.getSupplier());
+                        int productId = database.addEntryReturnId(product);
+                        if (productId != -1) {
+                            p.setProductId(productId);
+                            // save stock entry
+                            Stock stock = new Stock();
+                            stock.setProductId(productId);
+                            stock.setQuantity(p.getQuantity());
+                            stock.setQuantityOut(0);
+                            stock.setInStock(p.getQuantity());
+                            database.addEntry(stock);
+                        }
+                    } else {
+                        // update product stock
+                        Stock stock = p.getProduct().getStock();
+                        if (stock != null) {
+                            int newQty = stock.getQuantity() + p.getQuantity();
+                            int inStock = stock.getInStock() + p.getQuantity();
+                            database.updateEntry("stocks", "quantity", newQty, "id", stock.getId());
+                            database.updateEntry("stocks", "in_stock", inStock, "id", stock.getId());
+                        }
                     }
+                    
+                    // save purchase invoice item
+                    database.addEntryReturnId(p);
                 }
             }
             return success;
-        })).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
             showProgress(false);
             if (!success) {
                 showInfoDialog("Failed to save purchase entry.", "");
@@ -182,7 +224,7 @@ public class AddPurchaseWindow extends AbstractWindowController {
     public void onClose() {
         datePicker.setValue(null);
         tfNo.clear();
-        tfSupplier.clear();
+        cbSuppliers.setValue(null);
         mItems.clear();
         mTotal.set(0);
         showProgress(false);

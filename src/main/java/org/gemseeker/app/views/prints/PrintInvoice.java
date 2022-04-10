@@ -9,13 +9,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
-import org.gemseeker.app.data.InvoiceItem;
+import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -34,15 +34,15 @@ public class PrintInvoice extends AbstractPanelController {
     @FXML private Label lblStatus;
     @FXML private Label lblPage;
     
-    @FXML private TableView<InvoiceItem> itemsTable;
-    @FXML private TableColumn<InvoiceItem, Product> colName;
-    @FXML private TableColumn<InvoiceItem, Product> colSupplier;
-    @FXML private TableColumn<InvoiceItem, Product> colUnit; 
-    @FXML private TableColumn<InvoiceItem, Product> colUnitPrice; 
-    @FXML private TableColumn<InvoiceItem, Double> colDiscount; 
-    @FXML private TableColumn<InvoiceItem, Double> colDiscountedPrice; 
-    @FXML private TableColumn<InvoiceItem, Integer> colQuantity; 
-    @FXML private TableColumn<InvoiceItem, Double> colTotal; 
+    @FXML private TableView<DeliveryInvoiceItem> itemsTable;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colName;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colSupplier;
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colUnit; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Product> colUnitPrice; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colDiscount; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colDiscountedPrice; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Integer> colQuantity; 
+    @FXML private TableColumn<DeliveryInvoiceItem, Double> colTotal; 
     
     private LocalDate mInvoiceDate;
     private String mInvoiceNo;
@@ -50,7 +50,7 @@ public class PrintInvoice extends AbstractPanelController {
     private String mAddress;
     private String mStatus;
     private double mTotal;
-    private ArrayList<InvoiceItem> mItems;
+    private ArrayList<DeliveryInvoiceItem> mItems;
     private int mPage;
     private int mTotalPage;
     
@@ -67,7 +67,7 @@ public class PrintInvoice extends AbstractPanelController {
         colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
         colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
         colUnitPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colUnitPrice.setCellFactory(col -> new ProductPriceTableCell<>());
+        colUnitPrice.setCellFactory(col -> new ProductUnitPriceTableCell<>());
         colDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
         colDiscount.setCellFactory(col -> new DiscountTableCell<>());
         colDiscountedPrice.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
@@ -78,7 +78,7 @@ public class PrintInvoice extends AbstractPanelController {
     }
     
     public void set(String invoiceNo, LocalDate invoiceDate, String customer, String address,
-            double total, String status, ArrayList<InvoiceItem> items, int page, int totalPage) {
+            double total, String status, ArrayList<DeliveryInvoiceItem> items, int page, int totalPage) {
         getContent();
         mInvoiceNo = invoiceNo;
         mInvoiceDate = invoiceDate;
