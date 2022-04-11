@@ -1,55 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="400.0" prefWidth="1000.0" spacing="8.0" stylesheets="@css/styles.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="1000.0" spacing="8.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Label styleClass="form-title" text="Orders" />
+      <Label fx:id="lblProduct" styleClass="form-title" text="Product Orders" />
       <SplitPane dividerPositions="0.3" VBox.vgrow="ALWAYS">
          <items>
             <TableView fx:id="ordersTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="colDate" prefWidth="75.0" text="Date" />
-                <TableColumn fx:id="colName" prefWidth="75.0" text="Name" />
+                <TableColumn fx:id="colDate" prefWidth="100.0" text="Date" />
+                <TableColumn fx:id="colShipper" prefWidth="100.0" text="Shipper Name" />
               </columns>
             </TableView>
-            <TableView fx:id="orderItemsTable" prefHeight="200.0" prefWidth="200.0">
-               <columns>
-                  <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
-                  <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
-                  <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                  <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
-                  <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
+            <VBox>
+               <children>
+                  <HBox styleClass="details-group">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <children>
+                        <Label styleClass="text-bold" text="Order Details" />
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                     </padding>
+                  </HBox>
+                  <TableView fx:id="orderItemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
+                        <TableColumn fx:id="colName" prefWidth="100.0" text="Product" />
+                        <TableColumn fx:id="colSupplier" prefWidth="100.0" text="Supplier" />
+                        <TableColumn fx:id="colUnit" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
+                        <TableColumn fx:id="colRetailPrice" prefWidth="100.0" styleClass="table-cell-right-align" text="Retail Price" />
+                        <TableColumn fx:id="colQuantity" prefWidth="100.0" styleClass="table-cell-center-align" text="Quantity" />
+                        <TableColumn fx:id="colTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
                      </columns>
-                  </TableColumn>
-                  <TableColumn fx:id="colOrderItemTotal32" prefWidth="100.0" text="Discounted Price">
-                     <columns>
-                        <TableColumn fx:id="colItemPriceAfter" prefWidth="100.0" styleClass="table-cell-right-align" text="(per Unit)" />
-                     </columns>
-                  </TableColumn>
-                  <TableColumn fx:id="colItemQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
-                  <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
-                  <TableColumn prefWidth="100.0" text="Delivered">
-                     <columns>
-                        <TableColumn fx:id="colItemQuantityOut" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
-                        <TableColumn fx:id="colItemTotalOut" prefWidth="70.0" styleClass="table-cell-right-align" text="Total" />
-                     </columns>
-                  </TableColumn>
-               </columns>
-            </TableView>
+                  </TableView>
+                  <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="details-group">
+                     <children>
+                        <Label styleClass="text-big" text="Total" />
+                        <Label fx:id="lblTotal" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-bold" />
+                              <String fx:value="text-big" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
          </items>
       </SplitPane>
-      <ProgressBar fx:id="progressBar" prefWidth="200.0" visible="false" />
+      <ProgressBar fx:id="progressBar" prefWidth="500.0" visible="false" />
    </children>
    <padding>
       <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
    </padding>
+   <stylesheets>
+      <URL value="@css/bootstrap3.css" />
+      <URL value="@css/styles.css" />
+   </stylesheets>
 </VBox>

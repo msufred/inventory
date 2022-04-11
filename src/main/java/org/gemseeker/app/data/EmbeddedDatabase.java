@@ -21,6 +21,8 @@ public class EmbeddedDatabase {
     private Connection connection;
     private Properties properties;
     
+    private boolean mReset = false;
+    
     private EmbeddedDatabase() throws ClassNotFoundException, SQLException {
         initProperties();
         openDatabase();
@@ -30,6 +32,14 @@ public class EmbeddedDatabase {
 
     public static EmbeddedDatabase getInstance() throws ClassNotFoundException, SQLException {
         if (instance == null) instance = new EmbeddedDatabase();
+        if (instance.mReset) {
+            if (instance.connection == null) {
+                instance.initProperties();
+                instance.openDatabase();
+            }
+            instance.createTables();
+            instance.updateDatabase();
+        }
         return instance;
     }
     
@@ -63,14 +73,24 @@ public class EmbeddedDatabase {
         if (connection != null) {
             ArrayList<String> sqls = new ArrayList<>();
             
-            // 1.0.0-beta-02
-            sqls.add("ALTER TABLE products ADD COLUMN IF NOT EXISTS total DOUBLE DEFAULT 0");
+            // TODO add sql strings to sqls list
             
             for (String sql : sqls) {
                 try (Statement statement = connection.createStatement()) {
                     statement.execute(sql);
                 }
             }
+        }
+    }
+    
+    public void reset() throws SQLException {
+        if (connection != null) {
+            for (String sql : DatabaseUtils.dropTables()) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute(sql);
+                }
+            }
+            mReset = true;
         }
     }
     
@@ -117,24 +137,22 @@ public class EmbeddedDatabase {
                 ResultSet rs = statement.executeQuery("SELECT * FROM products INNER JOIN stocks ON "
                         + "stocks.product_id = products.id");
                 while (rs.next()) {
+                    int index = 1;
                     Product product = new Product();
-                    product.setId(rs.getInt(1));
-                    product.setName(rs.getString(2));
-                    product.setSku(rs.getString(3));
-                    product.setSupplier(rs.getString(4));
-                    product.setUnit(rs.getString(5));
-                    product.setUnitPrice(rs.getDouble(6));
-                    product.setRetailPrice(rs.getDouble(7));
-                    
-                    // TODO fix
-                    // for some reason, Product has 1 extra column
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(9));
-                    stock.setProductId(rs.getInt(10));
-                    stock.setQuantity(rs.getInt(11));
-                    stock.setQuantityOut(rs.getInt(12));
-                    stock.setInStock(rs.getInt(13));
+                    stock.setId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setQuantity(rs.getInt(index++));
+                    stock.setQuantityOut(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
                     product.setStock(stock);
                     
                     products.add(product);
@@ -149,12 +167,13 @@ public class EmbeddedDatabase {
             try (Statement statement = connection.createStatement()) {
                 ResultSet rs = statement.executeQuery(String.format("SELECT * FROM stocks WHERE product_id = '%d' LIMIT 1", productId));
                 if (rs.next()) {
+                    int index = 1;
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(1));
-                    stock.setProductId(rs.getInt(2));
-                    stock.setQuantity(rs.getInt(3));
-                    stock.setQuantityOut(rs.getInt(4));
-                    stock.setInStock(rs.getInt(5));
+                    stock.setId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setQuantity(rs.getInt(index++));
+                    stock.setQuantityOut(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
                     return stock;
                 }
             }
@@ -200,23 +219,23 @@ public class EmbeddedDatabase {
                 ResultSet rs = statement.executeQuery("SELECT * FROM shipper_stocks INNER JOIN products ON "
                         + "products.id = shipper_stocks.product_id");
                 while (rs.next()) {
+                    int index = 1;
                     ShipperStock stock = new ShipperStock();
-                    stock.setId(rs.getInt(1));
-                    stock.setShipperId(rs.getInt(2));
-                    stock.setProductId(rs.getInt(3));
-                    stock.setQuantity(rs.getInt(4));
-                    stock.setTotal(rs.getDouble(5));
-                    stock.setQuantityOut(rs.getInt(6));
-                    stock.setTotalOut(rs.getDouble(7));
+                    stock.setId(rs.getInt(index++));
+                    stock.setShipperId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
+                    stock.setDelivered(rs.getInt(index++));
+                    stock.setSales(rs.getDouble(index++));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(8));
-                    product.setName(rs.getString(9));
-                    product.setSku(rs.getString(10));
-                    product.setSupplier(rs.getString(11));
-                    product.setUnit(rs.getString(12));
-                    product.setUnitPrice(rs.getDouble(13));
-                    product.setRetailPrice(rs.getDouble(14));
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     stock.setProduct(product);
                     
                     stocks.add(stock);
@@ -233,23 +252,23 @@ public class EmbeddedDatabase {
                 ResultSet rs = statement.executeQuery("SELECT * FROM shipper_stocks INNER JOIN products ON "
                         + "products.id = shipper_stocks.product_id WHERE shipper_stocks.shipper_id = '" + shipperId + "'");
                 while (rs.next()) {
+                    int index = 1;
                     ShipperStock stock = new ShipperStock();
-                    stock.setId(rs.getInt(1));
-                    stock.setShipperId(rs.getInt(2));
-                    stock.setProductId(rs.getInt(3));
-                    stock.setQuantity(rs.getInt(4));
-                    stock.setTotal(rs.getDouble(5));
-                    stock.setQuantityOut(rs.getInt(6));
-                    stock.setTotalOut(rs.getDouble(7));
+                    stock.setId(rs.getInt(index++));
+                    stock.setShipperId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
+                    stock.setDelivered(rs.getInt(index++));
+                    stock.setSales(rs.getDouble(index++));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(8));
-                    product.setName(rs.getString(9));
-                    product.setSku(rs.getString(10));
-                    product.setSupplier(rs.getString(11));
-                    product.setUnit(rs.getString(12));
-                    product.setUnitPrice(rs.getDouble(13));
-                    product.setRetailPrice(rs.getDouble(14));
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     stock.setProduct(product);
                     
                     stocks.add(stock);
@@ -266,14 +285,14 @@ public class EmbeddedDatabase {
                         + "product_id = '%d'", shipperId, productId);
                 ResultSet rs = statement.executeQuery(sql);
                 if (rs.next()) {
+                    int index = 1;
                     ShipperStock stock = new ShipperStock();
-                    stock.setId(rs.getInt(1));
-                    stock.setShipperId(rs.getInt(2));
-                    stock.setProductId(rs.getInt(3));
-                    stock.setQuantity(rs.getInt(4));
-                    stock.setTotal(rs.getDouble(5));
-                    stock.setQuantityOut(rs.getInt(6));
-                    stock.setTotalOut(rs.getDouble(7));
+                    stock.setId(rs.getInt(index++));
+                    stock.setShipperId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
+                    stock.setDelivered(rs.getInt(index++));
+                    stock.setSales(rs.getDouble(index++));
                     return stock;
                 }
             }
@@ -288,16 +307,17 @@ public class EmbeddedDatabase {
                 ResultSet rs = statement.executeQuery("SELECT * FROM orders INNER JOIN shippers ON "
                         + "shippers.id = orders.shipper_id");
                 while (rs.next()) {
+                    int index = 1;
                     Order order = new Order();
-                    order.setId(rs.getInt(1));
-                    order.setDate(rs.getDate(2).toLocalDate());
-                    order.setShipperId(rs.getInt(3));
-                    order.setTotal(rs.getDouble(4));
-                    order.setSales(rs.getDouble(5));
+                    order.setId(rs.getInt(index++));
+                    order.setDate(rs.getDate(index++).toLocalDate());
+                    order.setShipperId(rs.getInt(index++));
+                    order.setTotal(rs.getDouble(index++));
+                    order.setSales(rs.getDouble(index++));
                     
                     Shipper shipper = new Shipper();
-                    shipper.setId(rs.getInt(6));
-                    shipper.setName(rs.getString(7));
+                    shipper.setId(rs.getInt(index++));
+                    shipper.setName(rs.getString(index++));
                     order.setShipper(shipper);
                     
                     orders.add(order);
@@ -327,13 +347,7 @@ public class EmbeddedDatabase {
                     shipper.setId(rs.getInt(index++));
                     shipper.setName(rs.getString(index++));
                     order.setShipper(shipper);
-                    
-                    for (int i = 1; i < 7; i++) {
-                        System.out.print(rs.getObject(i).toString());
-                        System.out.print(" ");
-                    }
-                    System.out.println("");
-                    
+
                     orders.add(order);
                 }
             }
@@ -351,30 +365,30 @@ public class EmbeddedDatabase {
                         + "WHERE order_items.order_id = '" + orderId + "'";
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
+                    int index = 1;
                     OrderItem item = new OrderItem();
-                    item.setId(rs.getInt(1));
-                    item.setOrderId(rs.getInt(2));
-                    item.setProductId(rs.getInt(3));
-                    item.setQuantity(rs.getInt(4));
-                    item.setListPrice(rs.getDouble(5));
+                    item.setId(rs.getInt(index++));
+                    item.setOrderId(rs.getInt(index++));
+                    item.setProductId(rs.getInt(index++));
+                    item.setQuantity(rs.getInt(index++));
+                    item.setListPrice(rs.getDouble(index++));
                     
                     ShipperStock stock = new ShipperStock();
-                    stock.setId(rs.getInt(6));
-                    stock.setShipperId(rs.getInt(7));
-                    stock.setProductId(rs.getInt(8));
-                    stock.setQuantity(rs.getInt(9));
-                    stock.setTotal(rs.getDouble(10));
-                    stock.setQuantityOut(rs.getInt(11));
-                    stock.setTotalOut(rs.getDouble(12));
+                    stock.setId(rs.getInt(index++));
+                    stock.setShipperId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
+                    stock.setDelivered(rs.getInt(index++));
+                    stock.setSales(rs.getDouble(index++));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(13));
-                    product.setName(rs.getString(14));
-                    product.setSku(rs.getString(15));
-                    product.setSupplier(rs.getString(16));
-                    product.setUnit(rs.getString(17));
-                    product.setUnitPrice(rs.getDouble(18));
-                    product.setRetailPrice(rs.getDouble(19));
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     
                     stock.setProduct(product);
                     item.setProduct(product);
@@ -488,35 +502,37 @@ public class EmbeddedDatabase {
             try (Statement statement = connection.createStatement()) {
                 String sql = String.format("SELECT * FROM purchase_invoice_items "
                         + "INNER JOIN products ON products.id = purchase_invoice_items.product_id "
-                        + "INNER JOIN stocks ON stocks.product_id = purchase_invoice_items.product_id");
+                        + "INNER JOIN stocks ON stocks.product_id = purchase_invoice_items.product_id "
+                        + "WHERE invoice_id='" + purchaseInvoiceId + "'");
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
+                    int index = 1;
                     PurchaseInvoiceItem pp = new PurchaseInvoiceItem();
-                    pp.setId(rs.getInt(1));
-                    pp.setInvoiceId(rs.getString(2));
-                    pp.setProductId(rs.getInt(3));
-                    pp.setUnitPrice(rs.getDouble(4));
-                    pp.setQuantity(rs.getInt(5));
-                    pp.setTotal(rs.getDouble(6));
+                    pp.setId(rs.getInt(index++));
+                    pp.setInvoiceId(rs.getString(index++));
+                    pp.setProductId(rs.getInt(index++));
+                    pp.setUnitPrice(rs.getDouble(index++));
+                    pp.setQuantity(rs.getInt(index++));
+                    pp.setTotal(rs.getDouble(index++));
                     
                     Product product = new Product();
-                    product.setId(rs.getInt(7));
-                    product.setName(rs.getString(8));
-                    product.setSku(rs.getString(9));
-                    product.setSupplier(rs.getString(10));
-                    product.setUnit(rs.getString(11));
-                    product.setUnitPrice(rs.getDouble(12));
-                    product.setRetailPrice(rs.getDouble(13));
+                    product.setId(rs.getInt(index++));
+                    product.setName(rs.getString(index++));
+                    product.setSku(rs.getString(index++));
+                    product.setSupplier(rs.getString(index++));
+                    product.setUnit(rs.getString(index++));
+                    product.setUnitPrice(rs.getDouble(index++));
+                    product.setRetailPrice(rs.getDouble(index++));
                     
                     // TODO fix
                     // same, product has 1 extra column
                     
                     Stock stock = new Stock();
-                    stock.setId(rs.getInt(15));
-                    stock.setProductId(rs.getInt(16));
-                    stock.setQuantity(rs.getInt(17));
-                    stock.setQuantityOut(rs.getInt(18));
-                    stock.setInStock(rs.getInt(19));
+                    stock.setId(rs.getInt(index++));
+                    stock.setProductId(rs.getInt(index++));
+                    stock.setQuantity(rs.getInt(index++));
+                    stock.setQuantityOut(rs.getInt(index++));
+                    stock.setInStock(rs.getInt(index++));
                     product.setStock(stock);
 
                     pp.setProduct(product);
@@ -543,6 +559,21 @@ public class EmbeddedDatabase {
         return suppliers;
     }
     
+    public Supplier getSupplier(String name) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM suppliers WHERE name='" + name + "'");
+                if (rs.next()) {
+                    Supplier s = new Supplier();
+                    s.setId(rs.getInt(1));
+                    s.setName(rs.getString(2));
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+    
     public ArrayList<Customer> getCustomers() throws SQLException {
         ArrayList<Customer> customers = new ArrayList<>();
         if (connection != null) {
@@ -558,6 +589,22 @@ public class EmbeddedDatabase {
             }
         }
         return customers;
+    }
+    
+    public Customer getCustomer(String name) throws SQLException {
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM customers WHERE name='" + name + "'");
+                if (rs.next()) {
+                    Customer c = new Customer();
+                    c.setId(rs.getInt(1));
+                    c.setName(rs.getString(2));
+                    c.setAddress(rs.getString(3));
+                    return c;
+                }
+            }
+        }
+        return null;
     }
     
 }

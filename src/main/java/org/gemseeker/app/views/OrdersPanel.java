@@ -20,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
@@ -42,7 +43,6 @@ import org.gemseeker.app.data.Order;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.Shipper;
-import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
 import org.gemseeker.app.views.icons.PrintIcon;
@@ -78,11 +78,7 @@ public class OrdersPanel extends AbstractPanelController {
     @FXML private TableColumn<OrderItem, Product> colItemUnitPrice;
     @FXML private TableColumn<OrderItem, Integer> colItemQuantity;
     @FXML private TableColumn<OrderItem, Double> colItemTotal;
-    // NOT RELATED TO ORDERS TABLE
-    // represents the current stocks in shipper's inventory
-    @FXML private TableColumn<OrderItem, ShipperStock> colItemInStock;
-    @FXML private TableColumn<OrderItem, ShipperStock> colItemQuantityOut;
-    @FXML private TableColumn<OrderItem, ShipperStock> colItemTotalOut;
+    @FXML private Label lblTotal;
 
     @FXML private SplitPane splitPane;
     private SplitController splitController;
@@ -142,47 +138,14 @@ public class OrdersPanel extends AbstractPanelController {
         colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
         colItemTotal.setCellFactory(col -> new PriceTableCell<>());
         
-        colItemInStock.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
-        colItemInStock.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
-            @Override
-            protected void updateItem(ShipperStock item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    setText(item.getQuantity() - item.getQuantityOut() + "");
-                } else setText("");
-            }
-        });
-        colItemQuantityOut.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
-        colItemQuantityOut.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
-            @Override
-            protected void updateItem(ShipperStock item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    setText(item.getQuantityOut()+ "");
-                } else setText("");
-            }
-        });
-        colItemTotalOut.setCellValueFactory(new PropertyValueFactory<>("shipperStock"));
-        colItemTotalOut.setCellFactory(col -> new TableCell<OrderItem, ShipperStock>() {
-            @Override
-            protected void updateItem(ShipperStock item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    double sales = item.getProduct().getUnitPrice() * item.getQuantityOut();
-                    setText(Utils.getMoneyFormat(sales));
-                } else setText("");
-            }
-        });
-        
         orderItemsTable.setItems(orderItems);
         
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
-        MenuItem mShowInventory = new MenuItem("Show Inventory");
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mShowDetails, mShowInventory, mPrint, mExport, mDelete);
+        cm.getItems().addAll(mShowDetails, mPrint, mExport, mDelete);
         ordersTable.setContextMenu(cm);
         
         // setup icons
@@ -198,12 +161,6 @@ public class OrdersPanel extends AbstractPanelController {
                 JavaFxObservable.actionEventsOf(mShowDetails).subscribe(evt -> {
                     if (!splitController.isTargetVisible() && mShowDetails.isSelected()) splitController.showTarget();
                     else splitController.hideTarget();
-                }),
-                JavaFxObservable.actionEventsOf(mShowInventory).subscribe(evt -> {
-                    Order order = ordersTable.getSelectionModel().getSelectedItem();
-                    if (order != null) {
-                        // TODO show shippers inventory
-                    }
                 }),
                 JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
                     Order order = ordersTable.getSelectionModel().getSelectedItem();
@@ -270,6 +227,7 @@ public class OrdersPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             mainWindow.showProgress(false);
             orderItems.setAll(items);
+            lblTotal.setText("P " + Utils.getMoneyFormat(order.getTotal()));
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);

@@ -2,6 +2,11 @@
     -fx-background-color: white;
 }
 
+.print-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
 .print-date {
     -fx-text-fill: black;
     -fx-font-size: 16px;

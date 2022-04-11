@@ -10,22 +10,25 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Order;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
+import org.gemseeker.app.data.Shipper;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 import org.gemseeker.app.views.tablecells.DateTableCell;
-import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
-import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
@@ -35,20 +38,18 @@ import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
  */
 public class ShowOrdersWindow extends AbstractWindowController {
     
+    @FXML private Label lblProduct;
     @FXML private TableView<Order> ordersTable;
     @FXML private TableColumn<Order, LocalDate> colDate;
-    @FXML private TableColumn<Order, String> colName;
+    @FXML private TableColumn<Order, Shipper> colShipper;
     @FXML private TableView<OrderItem> orderItemsTable;
-    @FXML private TableColumn<OrderItem, Product> colItemName;
-    @FXML private TableColumn<OrderItem, Product> colItemSupplier;
-    @FXML private TableColumn<OrderItem, Product> colItemUnit; 
-    @FXML private TableColumn<OrderItem, Product> colItemPriceBefore; 
-    @FXML private TableColumn<OrderItem, Double> colItemDiscount; 
-    @FXML private TableColumn<OrderItem, Double> colItemPriceAfter; 
-    @FXML private TableColumn<OrderItem, Integer> colItemQuantity; 
-    @FXML private TableColumn<OrderItem, Double> colItemTotal; 
-    @FXML private TableColumn<OrderItem, Integer> colItemQuantityOut; 
-    @FXML private TableColumn<OrderItem, Double> colItemTotalOut; 
+    @FXML private TableColumn<OrderItem, Product> colName;
+    @FXML private TableColumn<OrderItem, Product> colSupplier;
+    @FXML private TableColumn<OrderItem, Product> colUnit; 
+    @FXML private TableColumn<OrderItem, Product> colRetailPrice; 
+    @FXML private TableColumn<OrderItem, Integer> colQuantity; 
+    @FXML private TableColumn<OrderItem, Double> colTotal;
+    @FXML private Label lblTotal;
     
     @FXML private ProgressBar progressBar;
     
@@ -69,31 +70,35 @@ public class ShowOrdersWindow extends AbstractWindowController {
 
     @Override
     public void onLoad() {
-         // Order Table Columns
+        // Order Table Columns
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colDate.setCellFactory(col -> new DateTableCell<>());
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colShipper.setCellValueFactory(new PropertyValueFactory<>("shipper"));
+        colShipper.setCellFactory(col -> new TableCell<Order, Shipper>() {
+            @Override
+            protected void updateItem(Shipper item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item.getName());
+                } else setText("");
+            }
+        });
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         // OrderItems Table Columns
-        colItemName.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemName.setCellFactory(col -> new ProductNameTableCell<>());
-        colItemSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemSupplier.setCellFactory(col -> new ProductSupplierTableCell<>());
-        colItemUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemUnit.setCellFactory(col -> new ProductUnitTableCell<>());
-        colItemPriceBefore.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colItemPriceBefore.setCellFactory(col -> new ProductUnitPriceTableCell<>());
-        colItemDiscount.setCellValueFactory(new PropertyValueFactory<>("discount"));
-        colItemDiscount.setCellFactory(col -> new DiscountTableCell<>());
-        colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
-        colItemPriceAfter.setCellFactory(col -> new PriceTableCell<>());
-        colItemQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
-        colItemTotal.setCellFactory(col -> new PriceTableCell<>());
-        colItemQuantityOut.setCellValueFactory(new PropertyValueFactory<>("quantityOut"));
-        colItemTotalOut.setCellValueFactory(new PropertyValueFactory<>("totalOut"));
-        colItemTotalOut.setCellFactory(col -> new PriceTableCell<>());
-        
+        colName.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colName.setCellFactory(col -> new ProductNameTableCell<>());
+        colSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colSupplier.setCellFactory(col -> new ProductSupplierTableCell<>());
+        colUnit.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colUnit.setCellFactory(col -> new ProductUnitTableCell<>());
+        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
+        colTotal.setCellFactory(col -> new PriceTableCell<>());
+
         orderItemsTable.setItems(mItems);
         
         disposables.addAll(
@@ -105,11 +110,12 @@ public class ShowOrdersWindow extends AbstractWindowController {
         );
     }
     
-    public void show(int productId) {
+    public void show(Product product) {
         super.show();
+        lblProduct.setText(product.getName() + "-" + product.getSupplier());
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getOrders(productId);
+            return EmbeddedDatabase.getInstance().getOrders(product.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
             showProgress(false);
             filteredList = new FilteredList<>(FXCollections.observableArrayList(orders));
@@ -127,6 +133,7 @@ public class ShowOrdersWindow extends AbstractWindowController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             showProgress(false);
             mItems.setAll(items);
+            lblTotal.setText("P " + Utils.getMoneyFormat(order.getTotal()));
         }, err -> {
             showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);

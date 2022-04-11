@@ -23,15 +23,37 @@ public class DatabaseUtils {
         };
     }
     
+    public static String[] dropTables() {
+        return new String[]{
+            // 1.0.0-beta-02
+            "DROP TABLE IF EXISTS customers",
+            "DROP TABLE IF EXISTS suppliers",
+            "DROP TABLE IF EXISTS purchase_invoice_items",
+            "DROP TABLE IF EXISTS purchase_invoices",
+            "DROP TABLE IF EXISTS delivery_invoice_items",
+            "DROP TABLE IF EXISTS delivery_invoices",
+            "DROP TABLE IF EXISTS order_items",
+            "DROP TABLE IF EXISTS orders",
+            "DROP TABLE IF EXISTS shipper_stocks",
+            "DROP TABLE IF EXISTS shippers",
+            "DROP TABLE IF EXISTS stocks",
+            "DROP TABLE IF EXISTS products",
+            
+            // 1.0.0-beta-01
+            "DROP TABLE IF EXISTS invoice_items",
+            "DROP TABLE IF EXISTS invoices",
+        };
+    }
+    
     public static String createProductsTable() {
         return "CREATE TABLE IF NOT EXISTS products ("
-                + "id INT NOT NULL AUTO_INCREMENT, "
-                + "name VARCHAR(255) NOT NULL, "
-                + "sku VARCHAR(255), "
-                + "supplier VARCHAR(255), "
-                + "unit VARCHAR(100) NOT NULL, "
-                + "unit_price DOUBLE DEFAULT 0, "
-                + "retail_price DOUBLE DEFAULT 0, "
+                + "id INT NOT NULL AUTO_INCREMENT, "    // 1    id
+                + "name VARCHAR(255) NOT NULL, "        // 2    name
+                + "sku VARCHAR(255), "                  // 3    sku
+                + "supplier VARCHAR(255), "             // 4    supplier
+                + "unit VARCHAR(100) NOT NULL, "        // 5    unit
+                + "unit_price DOUBLE DEFAULT 0, "       // 6    unit_price
+                + "retail_price DOUBLE DEFAULT 0, "     // 7    retail_price
                 + "PRIMARY KEY (id)"
                 + ")";
     }
@@ -62,10 +84,9 @@ public class DatabaseUtils {
                 + "id INT NOT NULL AUTO_INCREMENT, "
                 + "shipper_id INT NOT NULL, "
                 + "product_id INT NOT NULL, "
-                + "quantity INT DEFAULT 0, "
-                + "total DOUBLE DEFAULT 0, "
-                + "quantity_out INT DEFAULT 0, "
-                + "total_out DOUBLE DEFAULT 0, "
+                + "in_stock INT DEFAULT 0, "
+                + "delivered INT DEFAULT 0, "
+                + "sales DOUBLE DEFAULT 0, "
                 + "PRIMARY KEY (id), "
                 + "CONSTRAINT fk_shipper_1 FOREIGN KEY (shipper_id) REFERENCES shippers (id) "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "

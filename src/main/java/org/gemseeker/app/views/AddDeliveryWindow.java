@@ -206,12 +206,14 @@ public class AddDeliveryWindow extends AbstractWindowController {
                                 .findAny()
                                 .orElse(null);
                         if (stock != null) {
-                            // update Quantity Out
-                            int qtyOut = stock.getQuantityOut() + item.getQuantity();
-                            database.updateEntry("shipper_stocks", "quantity_out", qtyOut, "id", stock.getId());
-                            // update Total Out
-                            double totalOut = stock.getTotalOut() + item.getListPrice();
-                            database.updateEntry("shipper_stocks", "total_out", totalOut, "id", stock.getId());
+                            int inStock = stock.getInStock() - item.getQuantity();
+                            int delivered = stock.getDelivered() + item.getQuantity();
+                            double sales = stock.getSales() + item.getListPrice();
+                            
+                            stock.setInStock(inStock);
+                            stock.setDelivered(delivered);
+                            stock.setSales(sales);
+                            database.executeQuery(stock.updateSQL());
                         }
                     }
                 }

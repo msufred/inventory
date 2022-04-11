@@ -74,7 +74,7 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
                     if (stock.getNewVal() != null) {
                         ShipperStock item = stock.getNewVal();
                         lblPrice.setText(String.format("%.2f", item.getProduct().getRetailPrice()));
-                        lblStock.setText((item.getQuantity() - item.getQuantityOut()) + "");
+                        lblStock.setText(item.getInStock() + "");
                         recalculate();
                     }
                 }),

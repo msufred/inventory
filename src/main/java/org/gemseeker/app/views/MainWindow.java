@@ -1,18 +1,23 @@
 package org.gemseeker.app.views;
 
+import io.reactivex.Completable;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
-import javafx.event.EventType;
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
+import io.reactivex.schedulers.Schedulers;
+import java.util.Optional;
 import javafx.fxml.FXML;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.gemseeker.app.data.EmbeddedDatabase;
 
 /**
  *
@@ -20,20 +25,23 @@ import javafx.stage.Stage;
  */
 public class MainWindow extends AbstractWindowController {
     
-    @FXML private ToggleGroup toggleGroup;
     @FXML private ToggleButton toggleInventory;
     @FXML private ToggleButton togglePurchases;
     @FXML private ToggleButton toggleOrders;
+    @FXML private ToggleButton toggleShippers;
     @FXML private ToggleButton toggleDeliveries;
     @FXML private StackPane contentView;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
     
+    @FXML private MenuItem mReset; // TEMPORARY RESET FUNCTION - will drop the database and re-create database at the same time
+    
     private final CompositeDisposable disposables;
     
-//    private final InventoryPanel inventoryPanel;
+    private final InventoryPanel inventoryPanel;
     private final PurchasesPanel purchasesPanel;
     private final OrdersPanel ordersPanel;
+    private final ShippersStocksPanel shipperStocksPanel;
     private final DeliveriesPanel deliveriesPanel;
     private AbstractPanelController mPanelController;
     
@@ -41,9 +49,10 @@ public class MainWindow extends AbstractWindowController {
         super("Inventory", MainWindow.class.getResource("main.fxml"), stage, null);
         disposables = new CompositeDisposable();
         
-//        inventoryPanel = new InventoryPanel(this);
+        inventoryPanel = new InventoryPanel(this);
         purchasesPanel = new PurchasesPanel(this);
         ordersPanel = new OrdersPanel(this);
+        shipperStocksPanel = new ShippersStocksPanel(this);
         deliveriesPanel = new DeliveriesPanel(this);
     }
 
@@ -58,11 +67,12 @@ public class MainWindow extends AbstractWindowController {
         addToggleEventFilter(toggleInventory);
         addToggleEventFilter(togglePurchases);
         addToggleEventFilter(toggleOrders);
+        addToggleEventFilter(toggleShippers);
         addToggleEventFilter(toggleDeliveries);
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(toggleInventory).subscribe(evt -> {
-//                    changeContent(inventoryPanel);
+                    changeContent(inventoryPanel);
                 }),
                 JavaFxObservable.actionEventsOf(togglePurchases).subscribe(evt -> {
                     changeContent(purchasesPanel);
@@ -70,8 +80,27 @@ public class MainWindow extends AbstractWindowController {
                 JavaFxObservable.actionEventsOf(toggleOrders).subscribe(evt -> {
                     changeContent(ordersPanel);
                 }),
+                JavaFxObservable.actionEventsOf(toggleShippers).subscribe(evt -> {
+                    changeContent(shipperStocksPanel);
+                }),
                 JavaFxObservable.actionEventsOf(toggleDeliveries).subscribe(evt -> {
                     changeContent(deliveriesPanel);
+                }),
+                JavaFxObservable.actionEventsOf(mReset).subscribe(evt -> {
+                    Optional<ButtonType> result = showConfirmDialog("Reset Database?", "This will erase all the data of the database. Continue?");
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        showProgress(true, "Resetting database...");
+                        disposables.add(Completable.fromAction(() -> {
+                            EmbeddedDatabase.getInstance().reset();
+                            EmbeddedDatabase.getInstance();
+                        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(() -> {
+                            showProgress(false);
+                            mPanelController.onResume();
+                        }, err -> {
+                            showProgress(false);
+                            showErrorDialog("Database Error", "Error while resetting database.", err);
+                        }));
+                    }
                 })
         );
     }
@@ -111,7 +140,7 @@ public class MainWindow extends AbstractWindowController {
     @Override
     public void show() {
         super.show();
-//        changeContent(inventoryPanel);
+        changeContent(inventoryPanel);
     }
     
     @Override
@@ -122,8 +151,10 @@ public class MainWindow extends AbstractWindowController {
     @Override
     public void onDispose() {
         disposables.dispose();
-//        inventoryPanel.onDispose();
+        inventoryPanel.onDispose();
+        purchasesPanel.onDispose();
         ordersPanel.onDispose();
+        shipperStocksPanel.onDispose();
         deliveriesPanel.onDispose();
     }
 

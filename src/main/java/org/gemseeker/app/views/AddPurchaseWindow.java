@@ -137,7 +137,12 @@ public class AddPurchaseWindow extends AbstractWindowController {
     @Override
     public void show() {
         super.show();
-        datePicker.setValue(LocalDate.now());
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getSuppliers();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(suppliers -> {
+            cbSuppliers.setItems(FXCollections.observableArrayList(suppliers));
+            datePicker.setValue(LocalDate.now());
+        }));
     }
     
     private void checkIdAndSave() {
@@ -159,10 +164,19 @@ public class AddPurchaseWindow extends AbstractWindowController {
         disposables.add(Single.fromCallable(() -> {
             EmbeddedDatabase database = EmbeddedDatabase.getInstance();
             
+            // save Supplier if necessary
+            String supplierName = cbSuppliers.getEditor().getText();
+            Supplier supplier = database.getSupplier(supplierName);
+            if (supplier == null) {
+                supplier = new Supplier();
+                supplier.setName(supplierName);
+                supplier.setId(database.addEntryReturnId(supplier));
+            }
+            
             PurchaseInvoice invoice = new PurchaseInvoice();
             invoice.setId(tfNo.getText());
             invoice.setDate(datePicker.getValue());
-            invoice.setSupplier(cbSuppliers.getEditor().getText());
+            invoice.setSupplier(supplier.getName());
             invoice.setTotal(mTotal.get());
             
             boolean success = database.addEntry(invoice);
@@ -175,7 +189,7 @@ public class AddPurchaseWindow extends AbstractWindowController {
                     if (p.getProductId() == -1) {
                         // save product return id
                         Product product = p.getProduct();
-                        product.setSupplier(invoice.getSupplier());
+                        product.setSupplier(supplier.getName());
                         int productId = database.addEntryReturnId(product);
                         if (productId != -1) {
                             p.setProductId(productId);

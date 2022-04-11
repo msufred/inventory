@@ -126,7 +126,9 @@ public abstract class AbstractWindowController {
     public Optional<ButtonType> showConfirmDialog(String title, String content, ButtonType... buttonTypes) {
         confirmDialog.setTitle(title);
         confirmDialog.setContentText(content);
-        confirmDialog.getButtonTypes().setAll(buttonTypes);
+        if (buttonTypes.length > 0) {
+            confirmDialog.getButtonTypes().setAll(buttonTypes);
+        }
         return confirmDialog.showAndWait();
     }
 }

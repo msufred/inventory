@@ -11,10 +11,9 @@ public class ShipperStock implements IEntry {
     private int id;
     private int shipperId;
     private int productId;
-    private int quantity;
-    private double total;
-    private int quantityOut = 0;
-    private double totalOut = 0;
+    private int inStock = 0;
+    private int delivered = 0;
+    private double sales = 0;
     
     private Shipper shipper;
     private Product product;
@@ -43,36 +42,28 @@ public class ShipperStock implements IEntry {
         this.productId = productId;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public int getInStock() {
+        return inStock;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setInStock(int inStock) {
+        this.inStock = inStock;
     }
 
-    public double getTotal() {
-        return total;
+    public int getDelivered() {
+        return delivered;
     }
 
-    public void setTotal(double total) {
-        this.total = total;
+    public void setDelivered(int delivered) {
+        this.delivered = delivered;
     }
 
-    public int getQuantityOut() {
-        return quantityOut;
+    public double getSales() {
+        return sales;
     }
 
-    public void setQuantityOut(int quantityOut) {
-        this.quantityOut = quantityOut;
-    }
-
-    public double getTotalOut() {
-        return totalOut;
-    }
-
-    public void setTotalOut(double totalOut) {
-        this.totalOut = totalOut;
+    public void setSales(double sales) {
+        this.sales = sales;
     }
 
     public Shipper getShipper() {
@@ -94,18 +85,18 @@ public class ShipperStock implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO shipper_stocks (shipper_id, product_id, "
-                + "quantity, total, quantity_out, total_out) "
-                + "VALUES ('%d', '%d', '%d', '%f', '%d', '%f')",
-                shipperId, productId, quantity, total, quantityOut, totalOut);
+                + "in_stock, delivered, sales) "
+                + "VALUES ('%d', '%d', '%d', '%d', '%f')",
+                shipperId, productId, inStock, delivered, sales);
     }
     
     public String updateSQL() {
-        return String.format("UPDATE shipper_stocks SET quantity='%d', total='%f', quantity_out='%d', "
-                + "total_out='%f' WHERE id='%d'", quantity, total, quantityOut, totalOut, id);
+        return String.format("UPDATE shipper_stocks SET in_stock='%d', delivered='%d', "
+                + "sales='%f' WHERE id='%d'", inStock, delivered, sales, id);
     }
 
     @Override
     public String toString() {
-        return product.getName() + "(" + product.getSupplier() + ")";
+        return product.getName() + " (" + product.getSupplier() + ")";
     }
 }

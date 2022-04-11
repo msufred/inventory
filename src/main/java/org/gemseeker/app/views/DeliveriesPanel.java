@@ -19,6 +19,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -148,6 +149,7 @@ public class DeliveriesPanel extends AbstractPanelController {
         
         itemsTable.setItems(invoiceItems);
         
+        CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
@@ -157,14 +159,22 @@ public class DeliveriesPanel extends AbstractPanelController {
         MenuItem mReceivable = new MenuItem("Receivable");
         menuUpdate.getItems().addAll(mCash, mCheque, mReceivable);
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mPrint, mExport, mDelete, menuUpdate);
+        cm.getItems().addAll(mShowDetails, mPrint, mExport, mDelete, menuUpdate);
         invoicesTable.setContextMenu(cm);
         
         // setup icons
         btnPrintList.setGraphic(new PrintIcon(14));
         
-        disposables.addAll(JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
+        disposables.addAll(
+                JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addInvoiceWindow.show();
+                }), 
+                JavaFxObservable.actionEventsOf(mShowDetails).subscribe(evt -> {
+                    if (!splitController.isTargetVisible() && mShowDetails.isSelected()) {
+                        splitController.showTarget();
+                    } else {
+                        splitController.hideTarget();
+                    }
                 }), 
                 JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
                     DeliveryInvoice invoice = invoicesTable.getSelectionModel().getSelectedItem();
@@ -212,14 +222,10 @@ public class DeliveriesPanel extends AbstractPanelController {
                     if (item.getNewVal() != null) {
                         mPrint.setDisable(false);
                         mExport.setDisable(false);
-                        if (!splitController.isTargetVisible()) {
-                            splitController.showTarget();
-                        }
                         getInvoiceItems(item.getNewVal());
                     } else {
                         mPrint.setDisable(true);
                         mExport.setDisable(true);
-                        splitController.hideTarget();
                     }
                 }),
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
@@ -237,7 +243,7 @@ public class DeliveriesPanel extends AbstractPanelController {
     @Override
     public void onPause() {
         itemsTable.getSelectionModel().clearSelection();
-        splitController.hideTarget();
+        invoiceItems.clear();
     }
 
     @Override
@@ -549,7 +555,7 @@ public class DeliveriesPanel extends AbstractPanelController {
     private void updateInvoiceStatus(DeliveryInvoice invoice, String status) {
         mainWindow.showProgress(true, "Updating invoice status...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().updateEntry("invoices", "payment_type", status, "id", invoice.getId());
+            return EmbeddedDatabase.getInstance().updateEntry("delivery_invoices", "payment_type", status, "id", invoice.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
             mainWindow.showProgress(false);
             if (!success) {

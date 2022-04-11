@@ -35,7 +35,6 @@ public class PrintWindow extends AbstractWindowController {
     @FXML private ComboBox<Paper> cbPapers;
     @FXML private TextField tfCopies;
     @FXML private Button btnPrint;
-    @FXML private Button btnCancel;
     @FXML private Slider zoomSlider;
     @FXML private VBox pages;
     @FXML private ProgressBar progressBar;
@@ -66,9 +65,6 @@ public class PrintWindow extends AbstractWindowController {
                         printPages();
                     }
                 }),
-                JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
-                    close();
-                }),
                 JavaFxObservable.changesOf(cbPapers.valueProperty()).subscribe(paper -> {
                     if (paper.getNewVal() != null) {
                         resizePages();
@@ -94,7 +90,6 @@ public class PrintWindow extends AbstractWindowController {
 
     private void addAll(ArrayList<? extends AbstractPanelController> panels) {
         for (AbstractPanelController panel : panels) {
-            System.out.println("Adding panel");
             pages.getChildren().add(panel.getContent());
         }
         mPanels = panels;
@@ -145,8 +140,9 @@ public class PrintWindow extends AbstractWindowController {
     
     private void showProgress(boolean show) {
         progressBar.setVisible(show);
+        cbPrinters.setDisable(show);
+        cbPapers.setDisable(show);
         btnPrint.setDisable(show);
-        btnCancel.setDisable(show);
     }
     
     @Override

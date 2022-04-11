@@ -168,16 +168,13 @@ public class AddOrderWindow extends AbstractWindowController {
                         shipperStock = new ShipperStock();
                         shipperStock.setShipperId(shipper.getId());
                         shipperStock.setProductId(item.getProductId());
-                        shipperStock.setQuantity(item.getQuantity());
-                        shipperStock.setTotal(item.getListPrice());
-                        shipperStock.setQuantityOut(0);
-                        shipperStock.setTotalOut(0);
+                        shipperStock.setInStock(item.getQuantity());
+                        shipperStock.setDelivered(0);
+                        shipperStock.setSales(0);
                         success = database.addEntry(shipperStock);
                     } else {
-                        int newQty = shipperStock.getQuantity() + item.getQuantity();
-                        shipperStock.setQuantity(newQty);
-                        double newTotal = shipperStock.getTotal() + item.getListPrice();
-                        shipperStock.setTotal(newTotal);
+                        int newInStock = shipperStock.getInStock() + item.getQuantity();
+                        shipperStock.setInStock(newInStock);
                         success = database.executeQuery(shipperStock.updateSQL());
                     }
                     
@@ -220,11 +217,10 @@ public class AddOrderWindow extends AbstractWindowController {
     
     @Override
     public void onClose() {
-        cbShippers.setValue(null);
-        datePicker.setValue(null);
-        itemsTable.setItems(null);
-        orderItems.clear();
-        mTotal.set(0);
+        cbShippers.setValue(null);      // reset Shipper ComboBox
+        datePicker.setValue(null);      // reset DatePicker
+        orderItems.clear();             // clear itemsTable items
+        mTotal.set(0);                  // clear total
     }
 
     @Override

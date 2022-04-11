@@ -7,11 +7,9 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
@@ -38,6 +36,11 @@
                      </VBox.margin>
                   </Label>
                   <TextField fx:id="tfCopies" maxWidth="200.0" prefWidth="200.0" text="1" />
+                  <Button fx:id="btnPrint" defaultButton="true" mnemonicParsing="false" prefWidth="200.0" styleClass="primary" text="Print">
+                     <VBox.margin>
+                        <Insets top="48.0" />
+                     </VBox.margin>
+                  </Button>
                </children>
                <HBox.margin>
                   <Insets />
@@ -46,10 +49,9 @@
                   <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                </padding>
             </VBox>
-            <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+            <VBox spacing="8.0" styleClass="details-group" HBox.hgrow="ALWAYS">
                <children>
-                  <Label text="Print Preview" />
+                  <Label styleClass="text-bold" text="Print Preview" />
                   <ScrollPane fitToWidth="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                      <content>
                         <VBox fx:id="pages" prefWidth="100.0" spacing="16.0">
@@ -58,10 +60,10 @@
                            </padding></VBox>
                      </content>
                   </ScrollPane>
-                  <HBox alignment="CENTER_LEFT">
+                  <HBox alignment="CENTER_LEFT" spacing="5.0">
                      <children>
                         <Label text="Zoom" />
-                        <Label text="(50%)" />
+                        <Label text="0%" />
                         <Slider fx:id="zoomSlider" max="1.0" prefWidth="500.0" value="1.0" />
                         <Label text="100%" />
                      </children>
@@ -72,6 +74,7 @@
                         <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                      </padding>
                   </HBox>
+                  <ProgressBar fx:id="progressBar" prefWidth="500.0" visible="false" />
                </children>
                <padding>
                   <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
@@ -79,18 +82,10 @@
             </VBox>
          </children>
       </HBox>
-      <Separator prefWidth="200.0" />
-      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0">
-         <children>
-            <ProgressBar fx:id="progressBar" prefWidth="500.0" visible="false" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnPrint" defaultButton="true" mnemonicParsing="false" styleClass="primary" text="Print" />
-            <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" text="Close" />
-         </children>
-      </HBox>
    </children>
    <stylesheets>
       <URL value="@../css/bootstrap3.css" />
       <URL value="@../css/prints.css" />
+      <URL value="@../css/styles.css" />
    </stylesheets>
 </VBox>

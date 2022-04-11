@@ -10,6 +10,11 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1754.0" prefWidth="1240.0" style="-fx-background-color: #ffffff;" stylesheets="@../css/prints2.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+      <HBox alignment="CENTER_LEFT" styleClass="print-title">
+         <children>
+            <Label fx:id="lblNo" text="PURCHASE INVOICES" />
+         </children>
+      </HBox>
       <HBox alignment="TOP_CENTER">
          <children>
             <Label fx:id="lblDate" styleClass="print-date" text="01/01/2022" />

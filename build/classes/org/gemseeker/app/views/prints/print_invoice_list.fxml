@@ -10,6 +10,11 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1754.0" prefWidth="1240.0" style="-fx-background-color: #ffffff;" stylesheets="@../css/prints2.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+      <HBox alignment="CENTER_LEFT" styleClass="print-title">
+         <children>
+            <Label fx:id="lblNo" text="DELIVERY INVOICES" />
+         </children>
+      </HBox>
       <HBox alignment="TOP_CENTER">
          <children>
             <Label fx:id="lblDate" styleClass="print-date" text="01/01/2022" />
@@ -21,14 +26,17 @@
         <columns>
           <TableColumn fx:id="colDate" editable="false" prefWidth="120.0" styleClass="table-cell-center-align" text="Invoice Date" />
           <TableColumn fx:id="colNo" editable="false" prefWidth="120.0" styleClass="table-cell-center-align" text="Invoice No" />
-            <TableColumn fx:id="colCustomer" editable="false" prefWidth="250.0" text="Customer" />
-            <TableColumn fx:id="colAddress" editable="false" prefWidth="280.0" text="Address" />
+            <TableColumn fx:id="colCustomer" editable="false" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Customer" />
+            <TableColumn fx:id="colAddress" editable="false" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Address" />
             <TableColumn fx:id="colStatus" editable="false" prefWidth="150.0" styleClass="table-cell-center-align" text="Status" />
             <TableColumn fx:id="colTotal" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Amount" />
         </columns>
          <VBox.margin>
             <Insets top="32.0" />
          </VBox.margin>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
       </TableView>
    </children>
    <padding>

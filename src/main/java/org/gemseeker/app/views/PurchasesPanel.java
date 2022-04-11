@@ -16,12 +16,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
@@ -66,6 +68,8 @@ public class PurchasesPanel extends AbstractPanelController {
     @FXML private TableColumn<PurchaseInvoiceItem, Product> colUnitPrice;
     @FXML private TableColumn<PurchaseInvoiceItem, Integer> colQuantity;
     @FXML private TableColumn<PurchaseInvoiceItem, Double> colTotal;
+    @FXML private Label lblTotal;
+    
     // NOT RELATED TO PURCHASE INVOICE ITEMS
     // This columns represents the current stock and ordered quantity of the product
     @FXML private TableColumn<PurchaseInvoiceItem, Product> colOrdered;
@@ -151,18 +155,17 @@ public class PurchasesPanel extends AbstractPanelController {
         itemsTable.setItems(productItems);
         
         // purchase invoice context menu
-        MenuItem mPrint = new MenuItem("Print");
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
+        MenuItem mPrint = new MenuItem("Print");
         MenuItem mDeleteInvoice = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mPrint, mShowDetails, mDeleteInvoice);
+        cm.getItems().addAll(mShowDetails, mPrint, mDeleteInvoice);
         purchaseTable.setContextMenu(cm);
         
-        MenuItem mEdit = new MenuItem("Edit");
-        MenuItem mDelete = new MenuItem("Delete");
         MenuItem mOrders = new MenuItem("Show Orders");
+        MenuItem mEdit = new MenuItem("Edit Details");
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(mEdit, mDelete, mOrders);
+        contextMenu.getItems().addAll(mOrders, mEdit);
         itemsTable.setContextMenu(contextMenu);
         
         disposables.addAll(JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
@@ -199,20 +202,10 @@ public class PurchasesPanel extends AbstractPanelController {
                     PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
                     if (p != null) editProductWindow.show(p.getProduct());
                 }),
-                JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
-                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
-                    if (p != null) {
-                        Optional<ButtonType> result = showConfirmDialog("Delete Product?", "Deleting this entry will also "
-                                + "delete any related data. Continue?");
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                            deleteProduct(p.getProduct());
-                        }
-                    }
-                }),
                 JavaFxObservable.actionEventsOf(mOrders).subscribe(evt -> {
                     PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
                     if (p != null) {
-                        showOrdersWindow.show(p.getProductId());
+                        showOrdersWindow.show(p.getProduct());
                     }
                 }),
                 JavaFxObservable.changesOf(purchaseTable.getSelectionModel().selectedItemProperty()).subscribe(inv -> {
@@ -253,19 +246,6 @@ public class PurchasesPanel extends AbstractPanelController {
         }
     }
     
-    private void deleteProduct(Product product) {
-        mainWindow.showProgress(true, "Deleting product...");
-        disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().deleteEntry("products", "id", product.getId());
-        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(success -> {
-            mainWindow.showProgress(false);
-            onResume();
-        }, err -> {
-            mainWindow.showProgress(false);
-            showErrorDialog("Database Error", "Error occurred while deleting product entry.", err);
-        }));
-    }
-    
     private void deleteInvoice(PurchaseInvoice invoice) {
         mainWindow.showProgress(true, "Deleting invoice...");
         disposables.add(Single.fromCallable(() -> {
@@ -286,6 +266,7 @@ public class PurchasesPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
             mainWindow.showProgress(false);
             productItems.setAll(products);
+            lblTotal.setText("P " + Utils.getMoneyFormat(invoice.getTotal()));
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching purchased products", err);

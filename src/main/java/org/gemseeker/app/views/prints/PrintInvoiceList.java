@@ -10,7 +10,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.DeliveryInvoice;
-import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DateTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;

@@ -14,6 +14,11 @@
             <Label fx:id="lblDate" styleClass="print-date" text="01/01/2022" />
          </children>
       </HBox>
+      <HBox alignment="CENTER_LEFT" styleClass="print-title">
+         <children>
+            <Label fx:id="lblNo" text="PURCHASE INVOICE" />
+         </children>
+      </HBox>
       <HBox>
          <children>
             <Label prefWidth="200.0" styleClass="print-label-bold" text="Invoice No:" />
@@ -46,10 +51,10 @@
       </HBox>
       <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
         <columns>
-          <TableColumn fx:id="colItem" editable="false" prefWidth="200.0" text="Item" />
+          <TableColumn fx:id="colItem" editable="false" maxWidth="300.0" minWidth="300.0" prefWidth="300.0" text="Product" />
             <TableColumn fx:id="colUnit" editable="false" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
             <TableColumn fx:id="colPrice" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Unit Price" />
-            <TableColumn fx:id="colQuantity" editable="false" prefWidth="100.0" styleClass="table-cell-center-align" text="Quantity" />
+            <TableColumn fx:id="colQuantity" editable="false" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" styleClass="table-cell-center-align" text="Quantity" />
             <TableColumn fx:id="colTotal" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
         </columns>
          <VBox.margin>

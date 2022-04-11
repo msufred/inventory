@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefHeight="500.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
@@ -29,9 +30,9 @@
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </padding>
       </HBox>
-      <HBox prefWidth="200.0">
+      <HBox prefWidth="200.0" spacing="8.0">
          <children>
-            <HBox id="summary-3" alignment="CENTER" prefWidth="200.0" spacing="8.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="text-big" text="Cash" />
                   <Label fx:id="lblCash" text="P 0.00">
@@ -45,7 +46,7 @@
                   <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                </padding>
             </HBox>
-            <HBox id="summary-2" alignment="CENTER" prefWidth="200.0" spacing="8.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="text-big" text="Cheque" />
                   <Label fx:id="lblCheque" text="P 0.00">
@@ -59,7 +60,7 @@
                   <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                </padding>
             </HBox>
-            <HBox id="summary-1" alignment="CENTER" prefWidth="200.0" spacing="8.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="text-big" text="Receivables" />
                   <Label fx:id="lblReceivables" text="P 0.00">
@@ -74,6 +75,9 @@
                </padding>
             </HBox>
          </children>
+         <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" />
+         </padding>
       </HBox>
       <SplitPane fx:id="splitPane" dividerPositions="0.5" VBox.vgrow="ALWAYS">
          <items>
@@ -93,25 +97,20 @@
             </VBox>
             <VBox>
                <children>
-                  <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0">
+                  <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0" styleClass="details-group">
                      <children>
-                        <Label styleClass="text-big" text="Total" />
-                        <Label fx:id="lblTotal" text="P 0.00">
-                           <styleClass>
-                              <String fx:value="text-big" />
-                              <String fx:value="text-bold" />
-                           </styleClass>
-                        </Label>
+                        <Label styleClass="text-bold" text="Delivery Invoice Details" />
+                        <Region HBox.hgrow="ALWAYS" />
                      </children>
                      <padding>
-                        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                      </padding>
                   </HBox>
                   <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                      <columns>
                         <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
-                        <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
+                        <TableColumn fx:id="colItemUnit" prefWidth="75.0" styleClass="table-cell-center-align" text="Unit" />
                         <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
                            <columns>
@@ -120,13 +119,28 @@
                         </TableColumn>
                         <TableColumn fx:id="colOrderItemTotal32" prefWidth="75.0" text="Discounted Price">
                            <columns>
-                              <TableColumn fx:id="colItemPriceAfter" prefWidth="100.0" styleClass="table-cell-right-align" text="(per Unit)" />
+                              <TableColumn fx:id="colItemPriceAfter" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
                            </columns>
                         </TableColumn>
-                        <TableColumn fx:id="colItemQuantity" prefWidth="40.0" styleClass="table-cell-center-align" text="Qty" />
+                        <TableColumn fx:id="colItemQuantity" prefWidth="75.0" styleClass="table-cell-center-align" text="Qty" />
                         <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
                      </columns>
                   </TableView>
+                  <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="8.0" styleClass="details-group">
+                     <children>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label styleClass="text-big" text="Total" />
+                        <Label fx:id="lblTotal" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-bold" />
+                              <String fx:value="text-big" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                     </padding>
+                  </HBox>
                </children>
             </VBox>
          </items>

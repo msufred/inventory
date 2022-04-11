@@ -14,6 +14,11 @@
             <Label fx:id="lblDate" styleClass="print-date" text="01/01/2022" />
          </children>
       </HBox>
+      <HBox alignment="CENTER_LEFT" styleClass="print-title">
+         <children>
+            <Label fx:id="lblNo" text="ORDER DETAILS" />
+         </children>
+      </HBox>
       <HBox>
          <children>
             <Label prefWidth="200.0" styleClass="print-label-bold" text="Order Date:" />
@@ -26,7 +31,7 @@
       <HBox>
          <children>
             <Label prefWidth="200.0" styleClass="print-label-bold" text="Shipper Name:" />
-            <Label fx:id="lblName" styleClass="print-label" text="Order Name" />
+            <Label fx:id="lblName" styleClass="print-label" text="Shipper Name" />
          </children>
       </HBox>
       <HBox>
@@ -37,11 +42,11 @@
       </HBox>
       <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
         <columns>
-          <TableColumn fx:id="colName" editable="false" prefWidth="150.0" text="Item" />
-          <TableColumn fx:id="colSupplier" editable="false" prefWidth="150.0" text="Supplier" />
+          <TableColumn fx:id="colName" editable="false" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Item" />
+          <TableColumn fx:id="colSupplier" editable="false" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" text="Supplier" />
             <TableColumn fx:id="colUnit" editable="false" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
             <TableColumn fx:id="colUnitPrice" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Unit Price" />
-            <TableColumn fx:id="colQuantity" editable="false" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
+            <TableColumn fx:id="colQuantity" editable="false" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" styleClass="table-cell-center-align" text="Qty" />
             <TableColumn fx:id="colTotal" editable="false" prefWidth="100.0" styleClass="table-cell-right-align" text="Total" />
         </columns>
          <VBox.margin>

@@ -26,51 +26,48 @@
          <items>
             <TableView fx:id="ordersTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn fx:id="colDate" prefWidth="100.0" styleClass="table-cell-center-align" text="Date" />
-                <TableColumn fx:id="colShipperName" prefWidth="200.0" styleClass="table-cell-center-align" text="Shipper Name" />
-                  <TableColumn fx:id="colTotal" prefWidth="100.0" styleClass="table-cell-right-align" text="Total Amount" />
+                <TableColumn fx:id="colDate" prefWidth="120.0" styleClass="table-cell-center-align" text="Date" />
+                <TableColumn fx:id="colShipperName" prefWidth="120.0" styleClass="table-cell-center-align" text="Shipper Name" />
+                  <TableColumn fx:id="colTotal" prefWidth="120.0" styleClass="table-cell-right-align" text="Total Amount" />
               </columns>
             </TableView>
             <VBox>
                <children>
-                  <Label styleClass="text-bold" text="Order Details">
+                  <HBox styleClass="details-group">
                      <VBox.margin>
-                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                        <Insets />
                      </VBox.margin>
-                  </Label>
+                     <children>
+                        <Label styleClass="text-bold" text="Order Details" />
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                     </padding>
+                  </HBox>
                   <TableView fx:id="orderItemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                     <columns>
-                      <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
-                        <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
-                        <TableColumn fx:id="colItemUnit" prefWidth="40.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colItemUnitPrice" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
-                      <TableColumn fx:id="colItemQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
-                        <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
-                        <TableColumn maxWidth="20.0" minWidth="20.0" prefWidth="20.0" />
-                        <TableColumn prefWidth="100.0" text="Shipper Inventory">
-                           <columns>
-                              <TableColumn fx:id="colItemInStock" prefWidth="70.0" text="In Stock">
-                                 <styleClass>
-                                    <String fx:value="table-cell-center-align" />
-                                    <String fx:value="table-cell-text-green" />
-                                 </styleClass>
-                              </TableColumn>
-                              <TableColumn fx:id="colItemQuantityOut" prefWidth="70.0" text="Out">
-                                 <styleClass>
-                                    <String fx:value="table-cell-center-align" />
-                                    <String fx:value="table-cell-text-green" />
-                                 </styleClass>
-                              </TableColumn>
-                              <TableColumn fx:id="colItemTotalOut" prefWidth="70.0" text="Sales">
-                                 <styleClass>
-                                    <String fx:value="table-cell-right-align" />
-                                    <String fx:value="table-cell-text-green" />
-                                 </styleClass>
-                              </TableColumn>
-                           </columns>
-                        </TableColumn>
+                      <TableColumn fx:id="colItemName" prefWidth="120.0" text="Product" />
+                        <TableColumn fx:id="colItemSupplier" prefWidth="120.0" text="Supplier" />
+                        <TableColumn fx:id="colItemUnit" prefWidth="120.0" styleClass="table-cell-center-align" text="Unit" />
+                        <TableColumn fx:id="colItemUnitPrice" prefWidth="120.0" styleClass="table-cell-right-align" text="Retail Price" />
+                      <TableColumn fx:id="colItemQuantity" prefWidth="120.0" styleClass="table-cell-center-align" text="Quantity" />
+                        <TableColumn fx:id="colItemTotal" prefWidth="120.0" styleClass="table-cell-right-align" text="Total" />
                     </columns>
                   </TableView>
+                  <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="details-group">
+                     <children>
+                        <Label styleClass="text-big" text="Total" />
+                        <Label fx:id="lblTotal" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-bold" />
+                              <String fx:value="text-big" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                     </padding>
+                  </HBox>
                </children>
             </VBox>
          </items>
