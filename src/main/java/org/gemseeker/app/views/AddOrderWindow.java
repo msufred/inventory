@@ -29,11 +29,9 @@ import org.gemseeker.app.data.Shipper;
 import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
-import org.gemseeker.app.views.tablecells.DiscountTableCell;
 import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
-import org.gemseeker.app.views.tablecells.ProductUnitPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
