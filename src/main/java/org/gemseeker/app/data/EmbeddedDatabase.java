@@ -1,12 +1,13 @@
 package org.gemseeker.app.data;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Properties;
 import org.gemseeker.app.Utils;
@@ -398,6 +399,31 @@ public class EmbeddedDatabase {
         return orderItems;
     }
     
+    public ArrayList<OrderItem> getOrderItems(LocalDate date) throws SQLException {
+        ArrayList<OrderItem> orderItems = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                LocalDate first = date.with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
+                String sql = String.format("SELECT * FROM order_items "
+                        + "WHERE date <= '%s' AND date >= '%s'", last, first);
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    int index = 1;
+                    OrderItem item = new OrderItem();
+                    item.setId(rs.getInt(index++));
+                    item.setDate(rs.getDate(index++).toLocalDate());
+                    item.setOrderId(rs.getInt(index++));
+                    item.setProductId(rs.getInt(index++));
+                    item.setQuantity(rs.getInt(index++));
+                    item.setTotal(rs.getDouble(index++));
+                    orderItems.add(item);
+                }
+            }
+        }
+        return orderItems;
+    }
+    
     public boolean deliveryInvoiceExists(String id) throws SQLException {
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
@@ -459,6 +485,34 @@ public class EmbeddedDatabase {
                     product.setRetailPrice(rs.getDouble(index++));
                     
                     item.setProduct(product);
+                    items.add(item);
+                }
+            }
+        }
+        return items;
+    }
+    
+    public ArrayList<DeliveryInvoiceItem> getDeliveryInvoiceItems(LocalDate date) throws SQLException {
+        ArrayList<DeliveryInvoiceItem> items = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                LocalDate first = date.with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
+                String sql = String.format("SELECT * FROM delivery_invoice_items "
+                        + "WHERE date <= '%s' AND date >= '%s'", last, first);
+
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    int index = 1;
+                    DeliveryInvoiceItem item = new DeliveryInvoiceItem();
+                    item.setId(rs.getInt(index++));
+                    item.setDate(rs.getDate(index++).toLocalDate());
+                    item.setInvoiceId(rs.getString(index++));
+                    item.setProductId(rs.getInt(index++));
+                    item.setQuantity(rs.getInt(index++));
+                    item.setDiscount(rs.getDouble(index++));
+                    item.setDiscountedPrice(rs.getDouble(index++));
+                    item.setTotal(rs.getDouble(index++));
                     items.add(item);
                 }
             }
@@ -533,6 +587,32 @@ public class EmbeddedDatabase {
                     product.setStock(stock);
 
                     pp.setProduct(product);
+                    stocks.add(pp);
+                }
+            }
+        }
+        return stocks;
+    }
+    
+    public ArrayList<PurchaseInvoiceItem> getPurchaseInvoiceItems(LocalDate date) throws SQLException {
+        ArrayList<PurchaseInvoiceItem> stocks = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                LocalDate first = date.with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
+                String sql = String.format("SELECT * FROM purchase_invoice_items "
+                        + "WHERE date <= '%s' AND date >= '%s'", last, first);
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    int index = 1;
+                    PurchaseInvoiceItem pp = new PurchaseInvoiceItem();
+                    pp.setId(rs.getInt(index++));
+                    pp.setDate(rs.getDate(index++).toLocalDate());
+                    pp.setInvoiceId(rs.getString(index++));
+                    pp.setProductId(rs.getInt(index++));
+                    pp.setUnitPrice(rs.getDouble(index++));
+                    pp.setQuantity(rs.getInt(index++));
+                    pp.setTotal(rs.getDouble(index++));
                     stocks.add(pp);
                 }
             }

@@ -185,7 +185,7 @@ public class AddPurchaseWindow extends AbstractWindowController {
             if (success) {
                 for (PurchaseInvoiceItem p: mItems) {
                     p.setInvoiceId(invoice.getId());
-                    
+                    p.setDate(invoice.getDate());
                     if (p.getProductId() == -1) {
                         // save product return id
                         Product product = p.getProduct();

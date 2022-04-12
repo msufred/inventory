@@ -119,6 +119,14 @@
 .table-cell-text-green {
     -fx-text-fill: #006837;
 }
+.table-cell-green {
+    -fx-background-color: derive(-col-green, 50%), transparent;
+    -fx-background-insets: 1, 0;
+}
+.table-row-cell:selected .table-cell-green {
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+}
 
 #supplier-name {
     -fx-font-size: 24;

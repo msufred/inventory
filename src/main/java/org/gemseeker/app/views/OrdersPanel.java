@@ -135,7 +135,7 @@ public class OrdersPanel extends AbstractPanelController {
         colItemUnitPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
         colItemUnitPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colItemQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
+        colItemTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colItemTotal.setCellFactory(col -> new PriceTableCell<>());
         
         orderItemsTable.setItems(orderItems);
