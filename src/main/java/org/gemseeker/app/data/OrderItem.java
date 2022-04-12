@@ -1,5 +1,6 @@
 package org.gemseeker.app.data;
 
+import java.time.LocalDate;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -9,10 +10,11 @@ import org.gemseeker.app.data.frameworks.IEntry;
 public class OrderItem implements IEntry {
 
     private int id;
+    private LocalDate date;
     private int orderId;
     private int productId;
     private int quantity;
-    private double listPrice;   // quantity * unitPrice
+    private double total;   // quantity * unitPrice
 
     private Product product;
     private ShipperStock shipperStock;
@@ -24,6 +26,15 @@ public class OrderItem implements IEntry {
     public void setId(int id) {
         this.id = id;
     }
+    
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+    
 
     public int getOrderId() {
         return orderId;
@@ -49,14 +60,13 @@ public class OrderItem implements IEntry {
         this.quantity = quantity;
     }
 
-    public double getListPrice() {
-        return listPrice;
+    public double getTotal() {
+        return total;
     }
 
-    public void setListPrice(double listPrice) {
-        this.listPrice = listPrice;
+    public void setTotal(double total) {
+        this.total = total;
     }
-    
     public Product getProduct() {
         return product;
     }
@@ -76,9 +86,9 @@ public class OrderItem implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO order_items ("
-                + "order_id, product_id, quantity, list_price) VALUES ("
-                + "'%d', '%d', '%d', '%f')",
-                orderId, productId, quantity, listPrice);
+                + "date, order_id, product_id, quantity, total) VALUES ("
+                + "'%s', '%d', '%d', '%d', '%f')",
+                date, orderId, productId, quantity, total);
     }
     
     @Override

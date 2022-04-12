@@ -104,7 +104,7 @@ public class AddOrderItemWindow extends AbstractWindowController {
         orderItem.setProductId(product.getId());
         int qty = Integer.parseInt(tfQuantity.getText().trim());
         orderItem.setQuantity(qty);
-        orderItem.setListPrice(product.getRetailPrice() * qty);
+        orderItem.setTotal(product.getRetailPrice() * qty);
         orderItem.setProduct(product);
         
         addOrderWindow.addOrderItem(orderItem);

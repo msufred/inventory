@@ -138,7 +138,7 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
         double less = retail * discount;
         double discountedPrice = retail - less;
         item.setDiscountedPrice(discountedPrice);
-        item.setListPrice(qty * discountedPrice);
+        item.setTotal(qty * discountedPrice);
         item.setProduct(stock.getProduct());
         addInvoiceWindow.addInvoiceItem(item);
         close();

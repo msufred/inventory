@@ -34,7 +34,7 @@ public class MainWindow extends AbstractWindowController {
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
     
-    @FXML private MenuItem mReset; // TEMPORARY RESET FUNCTION - will drop the database and re-create database at the same time
+     @FXML private MenuItem mReset; // TEMPORARY RESET FUNCTION - will drop the database and re-create database at the same time
     
     private final CompositeDisposable disposables;
     
@@ -85,7 +85,8 @@ public class MainWindow extends AbstractWindowController {
                 }),
                 JavaFxObservable.actionEventsOf(toggleDeliveries).subscribe(evt -> {
                     changeContent(deliveriesPanel);
-                }),
+                })
+                ,
                 JavaFxObservable.actionEventsOf(mReset).subscribe(evt -> {
                     Optional<ButtonType> result = showConfirmDialog("Reset Database?", "This will erase all the data of the database. Continue?");
                     if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -140,7 +141,7 @@ public class MainWindow extends AbstractWindowController {
     @Override
     public void show() {
         super.show();
-        changeContent(inventoryPanel);
+        changeContent(purchasesPanel);
     }
     
     @Override

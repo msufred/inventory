@@ -1,6 +1,7 @@
 package org.gemseeker.app.data;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,11 +72,7 @@ public class EmbeddedDatabase {
     
     private void updateDatabase() throws SQLException {
         if (connection != null) {
-            ArrayList<String> sqls = new ArrayList<>();
-            
-            // TODO add sql strings to sqls list
-            
-            for (String sql : sqls) {
+            for (String sql : DatabaseUtils.alterTables()) {
                 try (Statement statement = connection.createStatement()) {
                     statement.execute(sql);
                 }
@@ -368,10 +365,11 @@ public class EmbeddedDatabase {
                     int index = 1;
                     OrderItem item = new OrderItem();
                     item.setId(rs.getInt(index++));
+                    item.setDate(rs.getDate(index++).toLocalDate());
                     item.setOrderId(rs.getInt(index++));
                     item.setProductId(rs.getInt(index++));
                     item.setQuantity(rs.getInt(index++));
-                    item.setListPrice(rs.getDouble(index++));
+                    item.setTotal(rs.getDouble(index++));
                     
                     ShipperStock stock = new ShipperStock();
                     stock.setId(rs.getInt(index++));
@@ -443,13 +441,14 @@ public class EmbeddedDatabase {
                     int index = 1;
                     DeliveryInvoiceItem item = new DeliveryInvoiceItem();
                     item.setId(rs.getInt(index++));
+                    item.setDate(rs.getDate(index++).toLocalDate());
                     item.setInvoiceId(rs.getString(index++));
                     item.setProductId(rs.getInt(index++));
                     item.setQuantity(rs.getInt(index++));
                     item.setDiscount(rs.getDouble(index++));
                     item.setDiscountedPrice(rs.getDouble(index++));
-                    item.setListPrice(rs.getDouble(index++));
-                    
+                    item.setTotal(rs.getDouble(index++));
+
                     Product product = new Product();
                     product.setId(rs.getInt(index++));
                     product.setName(rs.getString(index++));
@@ -509,12 +508,13 @@ public class EmbeddedDatabase {
                     int index = 1;
                     PurchaseInvoiceItem pp = new PurchaseInvoiceItem();
                     pp.setId(rs.getInt(index++));
+                    pp.setDate(rs.getDate(index++).toLocalDate());
                     pp.setInvoiceId(rs.getString(index++));
                     pp.setProductId(rs.getInt(index++));
                     pp.setUnitPrice(rs.getDouble(index++));
                     pp.setQuantity(rs.getInt(index++));
                     pp.setTotal(rs.getDouble(index++));
-                    
+
                     Product product = new Product();
                     product.setId(rs.getInt(index++));
                     product.setName(rs.getString(index++));
@@ -523,10 +523,7 @@ public class EmbeddedDatabase {
                     product.setUnit(rs.getString(index++));
                     product.setUnitPrice(rs.getDouble(index++));
                     product.setRetailPrice(rs.getDouble(index++));
-                    
-                    // TODO fix
-                    // same, product has 1 extra column
-                    
+
                     Stock stock = new Stock();
                     stock.setId(rs.getInt(index++));
                     stock.setProductId(rs.getInt(index++));
@@ -607,4 +604,24 @@ public class EmbeddedDatabase {
         return null;
     }
     
+    public ArrayList<Expense> getExpenses() throws SQLException {
+        ArrayList<Expense> expenses = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery("SELECT * FROM expenses");
+                while (rs.next()) {
+                    int index = 1;
+                    Expense e = new Expense();
+                    e.setId(rs.getInt(index++));
+                    e.setDate(rs.getDate(index++).toLocalDate());
+                    e.setCategory(rs.getString(index++));
+                    e.setRemarks(rs.getString(index++));
+                    e.setRef(rs.getString(index++));
+                    e.setAmount(rs.getDouble(index++));
+                    expenses.add(e);
+                }
+            }
+        }
+        return expenses;
+    }
 }

@@ -3,8 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ToggleButton?>
@@ -16,49 +15,37 @@
 
 <VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <MenuBar>
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Add Purchase Invoice" />
-                  <MenuItem mnemonicParsing="false" text="Add Shipment Order" />
-                  <MenuItem mnemonicParsing="false" text="Add Delivery Invoice" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Edit" />
-                  <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-                  <MenuItem fx:id="mReset" mnemonicParsing="false" text="Reset" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
+      <HBox alignment="CENTER_RIGHT" prefHeight="32.0" prefWidth="200.0">
+         <children>
+            <MenuButton mnemonicParsing="false" text="1.0.0-beta">
+              <items>
+                <MenuItem fx:id="mReset" mnemonicParsing="false" text="Reset" />
+              </items>
+            </MenuButton>
+         </children>
+         <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </padding></HBox>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
             <VBox alignment="TOP_CENTER" prefWidth="120.0" spacing="16.0" styleClass="sidebar">
                <children>
-                  <ToggleButton fx:id="toggleInventory" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" selected="true" styleClass="sidebar-toggle" text="Product Inventory" textAlignment="CENTER" wrapText="true">
+                  <ToggleButton fx:id="togglePurchases" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" selected="true" styleClass="sidebar-toggle" text="Purchase Invoices" textAlignment="CENTER" wrapText="true">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
                      <toggleGroup>
                         <ToggleGroup fx:id="toggleGroup" />
                      </toggleGroup>
-                     <VBox.margin>
-                        <Insets top="62.0" />
-                     </VBox.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="togglePurchases" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Purchase Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true">
+                  <ToggleButton fx:id="toggleInventory" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Product Inventory" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipment Orders" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
-                  <ToggleButton fx:id="toggleShippers" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipper Stocks" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
-                  <ToggleButton fx:id="toggleDeliveries" contentDisplay="CENTER" minHeight="80.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Delivery Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipment Orders" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleShippers" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipper Stocks" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleDeliveries" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Delivery Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
                   <Region VBox.vgrow="ALWAYS" />
                   <Label style="-fx-text-fill: #dddddd;" text="1.0.0-Beta" />
                </children>

@@ -285,7 +285,7 @@ public class DeliveriesPanel extends AbstractPanelController {
             invoiceItems.setAll(items);
             double total = 0;
             for (DeliveryInvoiceItem item : items) {
-                total += item.getListPrice();
+                total += item.getTotal();
             }
             mTotal.set(total);
         }, err -> {
@@ -506,7 +506,7 @@ public class DeliveriesPanel extends AbstractPanelController {
                                 break;
                             case 7:
                                 cell.setCellType(CellType.NUMERIC);
-                                cell.setCellValue(item.getListPrice());
+                                cell.setCellValue(item.getTotal());
                                 cell.setCellStyle(borderCell);
                                 break;
                         }

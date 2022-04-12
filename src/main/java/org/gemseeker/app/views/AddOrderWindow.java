@@ -157,6 +157,7 @@ public class AddOrderWindow extends AbstractWindowController {
             // Save order items
             for (OrderItem item : orderItems) {
                 item.setOrderId(orderId);
+                item.setDate(order.getDate());
                 boolean added = database.addEntry(item);
                 if(added) {
                     // Check if product already exists in Shipper's inventory
@@ -204,7 +205,7 @@ public class AddOrderWindow extends AbstractWindowController {
     }
     
     public void addOrderItem(OrderItem orderItem) {
-        double newTotal = mTotal.get() + orderItem.getListPrice();
+        double newTotal = mTotal.get() + orderItem.getTotal();
         mTotal.set(newTotal);
         orderItems.add(orderItem);
     }

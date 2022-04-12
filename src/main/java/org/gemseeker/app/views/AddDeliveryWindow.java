@@ -154,7 +154,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
     
     public void addInvoiceItem(DeliveryInvoiceItem item) {
         if (item != null) {
-            double newTotal = mTotal.get() + item.getListPrice();
+            double newTotal = mTotal.get() + item.getTotal();
             mTotal.set(newTotal);
             items.add(item);
         }
@@ -197,6 +197,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
                 for (DeliveryInvoiceItem item : items) {
                     // Add Invoice entry
                     item.setInvoiceId(invoice.getId());
+                    item.setDate(invoice.getDate());
                     boolean added = database.addEntry(item);
                     
                     // Update OrderItem of Order
@@ -208,7 +209,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
                         if (stock != null) {
                             int inStock = stock.getInStock() - item.getQuantity();
                             int delivered = stock.getDelivered() + item.getQuantity();
-                            double sales = stock.getSales() + item.getListPrice();
+                            double sales = stock.getSales() + item.getTotal();
                             
                             stock.setInStock(inStock);
                             stock.setDelivered(delivered);

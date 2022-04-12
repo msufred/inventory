@@ -1,5 +1,6 @@
 package org.gemseeker.app.data;
 
+import java.time.LocalDate;
 import org.gemseeker.app.data.frameworks.IEntry;
 
 /**
@@ -9,12 +10,13 @@ import org.gemseeker.app.data.frameworks.IEntry;
 public class PurchaseInvoiceItem implements IEntry {
     
     private int id;
+    private LocalDate date;
     private String invoiceId; // purchase invoice
     private int productId = -1;
     private double unitPrice;
     private int quantity;
     private double total;
-    
+
     private Product product;
 
     public int getId() {
@@ -23,6 +25,14 @@ public class PurchaseInvoiceItem implements IEntry {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public int getProductId() {
@@ -64,7 +74,7 @@ public class PurchaseInvoiceItem implements IEntry {
     public void setTotal(double total) {
         this.total = total;
     }
-
+    
     public Product getProduct() {
         return product;
     }
@@ -76,9 +86,9 @@ public class PurchaseInvoiceItem implements IEntry {
     @Override
     public String insertSQL() {
         return String.format("INSERT INTO purchase_invoice_items "
-                + "(invoice_id, product_id, unit_price, quantity, total) "
-                + "VALUES ('%s', '%d', '%f', '%d', '%f')",
-                invoiceId, productId, unitPrice, quantity, total);
+                + "(date, invoice_id, product_id, unit_price, quantity, total) "
+                + "VALUES ('%s', '%s', '%d', '%f', '%d', '%f')",
+                date, invoiceId, productId, unitPrice, quantity, total);
     }
 
 }

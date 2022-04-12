@@ -374,7 +374,7 @@ public class OrdersPanel extends AbstractPanelController {
                                 break;
                             case 5:
                                 cell.setCellType(CellType.NUMERIC);
-                                cell.setCellValue(item.getListPrice());
+                                cell.setCellValue(item.getTotal());
                                 cell.setCellStyle(borderCell);
                                 break;
                         }

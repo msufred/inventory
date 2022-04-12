@@ -20,6 +20,7 @@ public class DatabaseUtils {
             createPurchaseInvoiceItemsTable(),  // Purchase Invoice Products
             createSuppliersTable(),             // Suppliers
             createCustomersTable(),             // Customers
+            createExpensesTable()
         };
     }
     
@@ -38,10 +39,13 @@ public class DatabaseUtils {
             "DROP TABLE IF EXISTS shippers",
             "DROP TABLE IF EXISTS stocks",
             "DROP TABLE IF EXISTS products",
+            "DROP TABLE IF EXISTS expenses"
+        };
+    }
+    
+    public static String[] alterTables() {
+        return new String[] {
             
-            // 1.0.0-beta-01
-            "DROP TABLE IF EXISTS invoice_items",
-            "DROP TABLE IF EXISTS invoices",
         };
     }
     
@@ -111,10 +115,11 @@ public class DatabaseUtils {
     public static String createOrderItemsTable() {
         return "CREATE TABLE IF NOT EXISTS order_items ("
                 + "id INT NOT NULL AUTO_INCREMENT, "
+                + "date DATE NOT NULL, "
                 + "order_id INT NOT NULL, "
                 + "product_id INT NOT NULL, "
                 + "quantity INT DEFAULT 0, "
-                + "list_price DOUBLE DEFAULT 0, "           // discounted price * quantity (projected total
+                + "total DOUBLE DEFAULT 0, "           // discounted price * quantity (projected total
                 + "PRIMARY KEY (id), "
                 + "CONSTRAINT fk_order_1 FOREIGN KEY (order_id) REFERENCES orders (id) "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
@@ -141,12 +146,13 @@ public class DatabaseUtils {
     public static String createDeliveryInvoiceItemsTable() {
         return "CREATE TABLE IF NOT EXISTS delivery_invoice_items ("
                 + "id INT NOT NULL AUTO_INCREMENT, "
+                + "date DATE NOT NULL, "
                 + "invoice_id VARCHAR(50) NOT NULL, "   // delivery invoice id
                 + "product_id INT NOT NULL, "
                 + "quantity INT DEFAULT 0, "
                 + "discount DOUBLE DEFAULT 0, "
                 + "discounted_price DOUBLE DEFAULT 0, "
-                + "list_price DOUBLE DEFAULT 0, "
+                + "total DOUBLE DEFAULT 0, "
                 + "PRIMARY KEY (id), "
                 + "CONSTRAINT fk_invoice_1 FOREIGN KEY (invoice_id) REFERENCES delivery_invoices (id) "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
@@ -168,6 +174,7 @@ public class DatabaseUtils {
     public static String createPurchaseInvoiceItemsTable() {
         return "CREATE TABLE IF NOT EXISTS purchase_invoice_items ("
                 + "id INT NOT NULL AUTO_INCREMENT, "
+                + "date DATE NOT NULL, "
                 + "invoice_id VARCHAR(100) NOT NULL, "
                 + "product_id INT NOT NULL, "
                 + "unit_price DOUBLE DEFAULT 0, "
@@ -194,6 +201,18 @@ public class DatabaseUtils {
                 + "id INT NOT NULL AUTO_INCREMENT, "
                 + "name VARCHAR(255) NOT NULL, "
                 + "address VARCHAR(255), "
+                + "PRIMARY KEY (id)"
+                + ")";
+    }
+    
+    public static String createExpensesTable() {
+        return "CREATE TABLE IF NOT EXISTS expenses ("
+                + "id INT NOT NULL AUTO_INCREMENT, "
+                + "date DATE NOT NULL, "
+                + "category VARCHAR(255), "
+                + "remarks VARCHAR(255), "
+                + "ref VARCHAR(100), "
+                + "amount DOUBLE DEFAULT 0, "
                 + "PRIMARY KEY (id)"
                 + ")";
     }
