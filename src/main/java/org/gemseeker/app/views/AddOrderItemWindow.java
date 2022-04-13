@@ -5,11 +5,13 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -27,7 +29,7 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddOrderItemWindow extends AbstractWindowController {
     
-    @FXML private ComboBox<Product> cbProducts;
+    @FXML private ListView<Product> productsList;
     @FXML private Label lblSupplier;
     @FXML private Label lblStock;
     @FXML private Label lblPrice; // retail price
@@ -39,6 +41,8 @@ public class AddOrderItemWindow extends AbstractWindowController {
     
     private final AddOrderWindow addOrderWindow;
     private final CompositeDisposable disposables;
+    
+    private final SimpleObjectProperty<Product> selected = new SimpleObjectProperty<>();
     
     public AddOrderItemWindow(AddOrderWindow addOrderWindow) {
         super("Add Order Item", AddOrderItemWindow.class.getResource("add_order_item.fxml"), addOrderWindow.getWindow());
@@ -57,15 +61,18 @@ public class AddOrderItemWindow extends AbstractWindowController {
         Utils.setAsIntegerTextField(tfQuantity);
         
         disposables.addAll(
-                JavaFxObservable.changesOf(cbProducts.valueProperty()).subscribe(product -> {
+                JavaFxObservable.changesOf(productsList.getSelectionModel().selectedItemProperty()).subscribe(product -> {
+                    selected.set(product.getNewVal());
+                    btnSave.setDisable(selected.get() == null && tfQuantity.getText().isEmpty());
                     recalculate();
                 }),
                 JavaFxObservable.changesOf(tfQuantity.textProperty()).subscribe(text -> {
+                    btnSave.setDisable(selected.get() == null && text.getNewVal().isEmpty());
                     recalculate();
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
-                    if (cbProducts.getValue() == null || tfQuantity.getText().isEmpty()) {
-                        showInfoDialog("Invalid Input", "Please fill-in required fields.");
+                    if (selected.get() == null || tfQuantity.getText().isEmpty()) {
+                        showInfoDialog("Invalid Input", "Please select Product & fill-in required fields.");
                     } else {
                         saveAndClose();
                     }
@@ -77,7 +84,7 @@ public class AddOrderItemWindow extends AbstractWindowController {
     }
     
     private void recalculate() {
-        Product p = cbProducts.getValue();
+        Product p = productsList.getSelectionModel().getSelectedItem();
         if (p != null) {
             Stock s = p.getStock();
             
@@ -99,7 +106,7 @@ public class AddOrderItemWindow extends AbstractWindowController {
     }
     
     private void saveAndClose() {
-        Product product = cbProducts.getValue();
+        Product product = selected.get();
         OrderItem orderItem = new OrderItem();
         orderItem.setProductId(product.getId());
         int qty = Integer.parseInt(tfQuantity.getText().trim());
@@ -117,9 +124,9 @@ public class AddOrderItemWindow extends AbstractWindowController {
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
             return EmbeddedDatabase.getInstance().getProducts();
-        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(stocks -> {
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
             showProgress(false);
-            cbProducts.setItems(FXCollections.observableArrayList(stocks));
+            productsList.setItems(FXCollections.observableArrayList(products));
         }, err -> {
             showProgress(false);
             showErrorDialog("Database Error", "Failed to fetch products.", err);
@@ -132,7 +139,7 @@ public class AddOrderItemWindow extends AbstractWindowController {
     
     @Override
     public void onClose() {
-        cbProducts.getItems().clear();
+        selected.set(null);
         lblSupplier.setText("No Product Selected");
         lblStock.setText("0");
         lblPrice.setText("0");

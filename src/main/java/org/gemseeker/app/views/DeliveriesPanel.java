@@ -144,7 +144,7 @@ public class DeliveriesPanel extends AbstractPanelController {
         colItemPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
         colItemPriceAfter.setCellFactory(col -> new PriceTableCell<>());
         colItemQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colItemTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
+        colItemTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colItemTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(invoiceItems);

@@ -33,7 +33,7 @@
 
 .sidebar-toggle {
     -fx-background-color: derive(-col-dark, 10%);
-    -fx-background-radius: 5px;
+    -fx-background-radius: 0;
     -fx-border-width: 0;
     -fx-text-fill: white;
     -fx-effect: none;
@@ -109,6 +109,9 @@
     -fx-background-color: -col-grey;
 }
 
+/*
+Table Cell Styles
+*/
 .table-cell-right-align {
     -fx-alignment: CENTER-RIGHT;
 }
@@ -120,12 +123,18 @@
     -fx-text-fill: #006837;
 }
 .table-cell-green {
-    -fx-background-color: derive(-col-green, 50%), transparent;
+    -fx-background-color: derive(-col-green, 60%), transparent;
     -fx-background-insets: 1, 0;
 }
 .table-row-cell:selected .table-cell-green {
-    -fx-text-fill: black;
-    /*-fx-font-weight: bold;*/
+    -fx-background-color: transparent;
+}
+.table-cell-orange {
+    -fx-background-color: derive(-col-orange, 60%), transparent;
+    -fx-background-insets: 1, 0;
+}
+.table-row-cell:selected .table-cell-orange {
+    -fx-background-color: transparent;
 }
 
 #supplier-name {

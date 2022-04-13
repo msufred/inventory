@@ -92,6 +92,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
         Utils.setSafeTextField(tfAddress);
         
         cbPaymentTypes.setItems(FXCollections.observableArrayList("Cash", "Cheque", "Receivable"));
+        cbPaymentTypes.setValue("Cash"); // default
         
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
@@ -104,7 +105,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
         colPriceAfter.setCellValueFactory(new PropertyValueFactory<>("discountedPrice"));
         colPriceAfter.setCellFactory(col -> new PriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(items);

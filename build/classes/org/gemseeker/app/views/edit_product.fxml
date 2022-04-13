@@ -24,8 +24,6 @@
       <TextField fx:id="tfName" promptText="Product Name" styleClass="form-text-field" />
       <Label styleClass="form-label" text="SKU" />
       <TextField fx:id="tfSku" promptText="Product/Barcode No." styleClass="form-text-field" />
-      <Label styleClass="form-label" text="Supplier Name" />
-      <TextField fx:id="tfSupplier" promptText="Name of Supplier" styleClass="form-text-field" />
       <ProgressBar fx:id="progressBar" prefWidth="400.0" visible="false">
          <VBox.margin>
             <Insets top="16.0" />

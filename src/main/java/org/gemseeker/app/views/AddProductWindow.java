@@ -128,10 +128,9 @@ public class AddProductWindow extends AbstractWindowController {
     }
     
     private void disableInputs(boolean disable) {
+        // Disable fields except the Unit Price, Retail Price and SKU
         tfName.setDisable(disable);
-        tfSku.setDisable(disable);
         cbUnits.setDisable(disable);
-        tfRetailPrice.setDisable(disable);
         cbProducts.setDisable(!disable);
     }
     
@@ -155,24 +154,26 @@ public class AddProductWindow extends AbstractWindowController {
     }
 
     private void saveAndClose() {
-        PurchaseInvoiceItem item = new PurchaseInvoiceItem();
-        item.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
-        item.setQuantity(Integer.parseInt(tfQuantity.getText().trim()));
-        item.setTotal(mTotal.get());
+        PurchaseInvoiceItem item = new PurchaseInvoiceItem();                           // create PurchaseInvoiceItem object
+        item.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));                // set Unit Price
+        item.setQuantity(Integer.parseInt(tfQuantity.getText().trim()));                // set Quantity
+        item.setTotal(mTotal.get());                                                    // set Total
+        
         Product product;
-        if (checkExisting.isSelected() && cbProducts.getValue() != null) {
-            product = cbProducts.getValue();
-            item.setProductId(product.getId());
+        if (checkExisting.isSelected() && cbProducts.getValue() != null) {              // if checkbox is selected
+            product = cbProducts.getValue();                                            // get selected Product
+            item.setProductId(product.getId());                                         // set PurchaseInvoiceItem productId
         } else {
-            product = new Product();
-            product.setName(tfName.getText());
-            product.setSku(tfSku.getText());
-            product.setUnit(cbUnits.getValue());
-            product.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));
-            product.setRetailPrice(Double.parseDouble(tfRetailPrice.getText().trim()));
+            product = new Product();                                                    // else, create new Product object
+            product.setName(tfName.getText());                                          // set Product name
         }
-        item.setProduct(product);
-        addPurchaseWindow.addProduct(item);
+        product.setSku(tfSku.getText());                                                // set Product SKU
+        product.setUnit(cbUnits.getValue());                                            // set Product Unit
+        product.setUnitPrice(Double.parseDouble(tfPrice.getText().trim()));             // set Product Unit Price
+        product.setRetailPrice(Double.parseDouble(tfRetailPrice.getText().trim()));     // set Product Retail Price
+        
+        item.setProduct(product);                                                       // set PurchaseInvoiceItem Product
+        addPurchaseWindow.addProduct(item);                                             // add PurchaseInvoiceItem to AddPurchaseWindow list
         close();
     }
     

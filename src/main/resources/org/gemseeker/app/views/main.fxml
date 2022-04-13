@@ -28,9 +28,17 @@
          </padding></HBox>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
-            <VBox alignment="TOP_CENTER" prefWidth="120.0" spacing="16.0" styleClass="sidebar">
+            <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="2.0" styleClass="sidebar">
                <children>
-                  <ToggleButton fx:id="togglePurchases" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" selected="true" styleClass="sidebar-toggle" text="Purchase Invoices" textAlignment="CENTER" wrapText="true">
+                  <ToggleButton fx:id="toggleDashboard" contentDisplay="CENTER" disable="true" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Dashboard" textAlignment="CENTER" wrapText="true">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="toggleGroup1" />
+                     </toggleGroup>
+                     <VBox.margin>
+                        <Insets top="32.0" />
+                     </VBox.margin>
+                  </ToggleButton>
+                  <ToggleButton fx:id="togglePurchases" contentDisplay="CENTER" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" selected="true" styleClass="sidebar-toggle" text="Purchase Invoices" textAlignment="CENTER" wrapText="true">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
@@ -38,20 +46,18 @@
                         <ToggleGroup fx:id="toggleGroup" />
                      </toggleGroup>
                   </ToggleButton>
-                  <ToggleButton fx:id="toggleInventory" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Product Inventory" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true">
+                  <ToggleButton fx:id="toggleInventory" contentDisplay="CENTER" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Product Inventory" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipment Orders" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
-                  <ToggleButton fx:id="toggleShippers" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Shipper Stocks" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
-                  <ToggleButton fx:id="toggleDeliveries" contentDisplay="CENTER" minHeight="60.0" mnemonicParsing="false" prefWidth="100.0" styleClass="sidebar-toggle" text="Delivery Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleOrders" contentDisplay="CENTER" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Shipment Orders" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleShippers" contentDisplay="CENTER" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Shipper Inventory" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleDeliveries" contentDisplay="CENTER" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Delivery Invoices" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
+                  <ToggleButton fx:id="toggleExpenses" contentDisplay="CENTER" disable="true" minHeight="40.0" mnemonicParsing="false" prefWidth="200.0" styleClass="sidebar-toggle" text="Expenses" textAlignment="CENTER" toggleGroup="$toggleGroup" wrapText="true" />
                   <Region VBox.vgrow="ALWAYS" />
                   <Label style="-fx-text-fill: #dddddd;" text="1.0.0-Beta" />
                </children>
-               <padding>
-                  <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-               </padding>
             </VBox>
             <VBox HBox.hgrow="ALWAYS">
                <children>

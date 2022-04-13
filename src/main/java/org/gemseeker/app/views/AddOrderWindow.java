@@ -85,7 +85,7 @@ public class AddOrderWindow extends AbstractWindowController {
         colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
         colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("listPrice"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(orderItems);

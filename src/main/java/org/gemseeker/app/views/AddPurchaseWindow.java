@@ -173,6 +173,7 @@ public class AddPurchaseWindow extends AbstractWindowController {
                 supplier.setId(database.addEntryReturnId(supplier));
             }
             
+            // save PurchaseInvoice
             PurchaseInvoice invoice = new PurchaseInvoice();
             invoice.setId(tfNo.getText());
             invoice.setDate(datePicker.getValue());
@@ -186,11 +187,15 @@ public class AddPurchaseWindow extends AbstractWindowController {
                 for (PurchaseInvoiceItem p: mItems) {
                     p.setInvoiceId(invoice.getId());
                     p.setDate(invoice.getDate());
+                    
+                    // if Product is not in the database yet, add
                     if (p.getProductId() == -1) {
                         // save product return id
                         Product product = p.getProduct();
                         product.setSupplier(supplier.getName());
                         int productId = database.addEntryReturnId(product);
+                        
+                        // save 
                         if (productId != -1) {
                             p.setProductId(productId);
                             // save stock entry
@@ -201,14 +206,21 @@ public class AddPurchaseWindow extends AbstractWindowController {
                             stock.setInStock(p.getQuantity());
                             database.addEntry(stock);
                         }
-                    } else {
-                        // update product stock
-                        Stock stock = p.getProduct().getStock();
-                        if (stock != null) {
-                            int newQty = stock.getQuantity() + p.getQuantity();
-                            int inStock = stock.getInStock() + p.getQuantity();
-                            database.updateEntry("stocks", "quantity", newQty, "id", stock.getId());
-                            database.updateEntry("stocks", "in_stock", inStock, "id", stock.getId());
+                    } 
+                    
+                    // if Product is already saved in the database, update
+                    else {
+                        boolean updated = database.executeQuery(p.getProduct().updateSQL());
+                        if (updated) {
+                            // update product stock
+                            Stock stock = p.getProduct().getStock();
+                            if (stock != null) {
+                                int newQty = stock.getQuantity() + p.getQuantity();
+                                stock.setQuantity(newQty);
+                                int inStock = stock.getInStock() + p.getQuantity();
+                                stock.setInStock(inStock);
+                                database.executeQuery(stock.updateSQL());
+                            }
                         }
                     }
                     

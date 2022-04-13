@@ -7,10 +7,12 @@ import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -18,7 +20,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
-import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
@@ -26,8 +27,10 @@ import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.data.Stock;
 import org.gemseeker.app.data.views.ProductMonthlyView;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
-import org.gemseeker.app.views.tablecells.InventoryPurchasedTableCell;
-import org.gemseeker.app.views.tablecells.PriceTableCell;
+import org.gemseeker.app.views.tablecells.DoubleGreenTableCell;
+import org.gemseeker.app.views.tablecells.DoubleOrangeTableCell;
+import org.gemseeker.app.views.tablecells.IntegerGreenTableCell;
+import org.gemseeker.app.views.tablecells.IntegerOrangeTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSkuTableCell;
@@ -44,15 +47,6 @@ public class InventoryPanel extends AbstractPanelController {
     
     @FXML private Button btnRefresh;
     @FXML private Button btnPrint;
-//    @FXML private TableView<Product> itemsTable;
-//    @FXML private TableColumn<Product, String> colName;
-//    @FXML private TableColumn<Product, String> colSku;
-//    @FXML private TableColumn<Product, String> colSupplier;
-//    @FXML private TableColumn<Product, String> colUnit;
-//    @FXML private TableColumn<Product, Double> colUnitPrice;
-//    @FXML private TableColumn<Product, Double> colRetailPrice;
-//    @FXML private TableColumn<Product, Stock> colOrdered;
-//    @FXML private TableColumn<Product, Stock> colInStock;
     @FXML private ComboBox<String> cbMonths;
     @FXML private ComboBox<Integer> cbYears;
     @FXML private TableView<ProductMonthlyView> itemsTable;
@@ -89,37 +83,6 @@ public class InventoryPanel extends AbstractPanelController {
 
     @Override
     public void onLoad() {
-//        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-//        colSku.setCellValueFactory(new PropertyValueFactory<>("sku"));
-//        colSupplier.setCellValueFactory(new PropertyValueFactory<>("supplier"));
-//        colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
-//        colUnitPrice.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
-//        colUnitPrice.setCellFactory(col -> new PriceTableCell<>());
-//        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("retailPrice"));
-//        colRetailPrice.setCellFactory(col -> new PriceTableCell<>());
-//        colOrdered.setCellValueFactory(new PropertyValueFactory<>("stock"));
-//        colOrdered.setCellFactory(col -> new TableCell<Product, Stock>() {
-//            @Override
-//            protected void updateItem(Stock item, boolean empty) {
-//                super.updateItem(item, empty);
-//                if (!empty && item != null) setText(item.getQuantityOut() + "");
-//                else setText("");
-//            }
-//            
-//        });
-//        colInStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-//        colInStock.setCellFactory(col -> new TableCell<Product, Stock>() {
-//            @Override
-//            protected void updateItem(Stock item, boolean empty) {
-//                super.updateItem(item, empty);
-//                if (!empty && item != null) {
-//                    if (item.getInStock() == 0) setText("Out of Stock");
-//                    else setText(item.getInStock()+ "");
-//                }
-//                else setText("");
-//            }
-//            
-//        });
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -135,12 +98,13 @@ public class InventoryPanel extends AbstractPanelController {
         colInStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
         colInStock.setCellFactory(col -> new StockInStockTableCell<>());
         colPurchased.setCellValueFactory(new PropertyValueFactory<>("purchased"));
-        colPurchased.setCellFactory(col -> new InventoryPurchasedTableCell<>());
+        colPurchased.setCellFactory(col -> new IntegerGreenTableCell<>());
         colPurchasedTotal.setCellValueFactory(new PropertyValueFactory<>("purchasedTotal"));
-        colPurchasedTotal.setCellFactory(col -> new PriceTableCell<>());
+        colPurchasedTotal.setCellFactory(col -> new DoubleGreenTableCell<>());
         colOrdered.setCellValueFactory(new PropertyValueFactory<>("ordered"));
+        colOrdered.setCellFactory(col -> new IntegerOrangeTableCell<>());
         colOrderedTotal.setCellValueFactory(new PropertyValueFactory<>("orderedTotal"));
-        colOrderedTotal.setCellFactory(col -> new PriceTableCell<>());
+        colOrderedTotal.setCellFactory(col -> new DoubleOrangeTableCell<>());
 
         cbMonths.setItems(FXCollections.observableArrayList(
                 "January", "February", "March", "April", "May", "June", "July",
@@ -155,7 +119,7 @@ public class InventoryPanel extends AbstractPanelController {
         LocalDate now = LocalDate.now();
         cbMonths.setValue(Utils.monthStringValue(now.getMonthValue()));
         cbYears.setValue(now.getYear());
-        colMonth.setText("MONTH OF " + Utils.monthStringValue(now.getMonthValue()).toUpperCase());
+        updateMonthColumn();
         
         MenuItem mShowOrders = new MenuItem("Show Orders");
         MenuItem mEdit = new MenuItem("Edit Details");
@@ -172,34 +136,33 @@ public class InventoryPanel extends AbstractPanelController {
                     
                 }),
                 JavaFxObservable.actionEventsOf(mShowOrders).subscribe(evt -> {
-//                    Product p = itemsTable.getSelectionModel().getSelectedItem();
-//                    if (p != null) {
-//                        showOrdersWindow.show(p);
-//                    }
+                    ProductMonthlyView p = itemsTable.getSelectionModel().getSelectedItem();
+                    if (p != null) {
+                        showOrdersWindow.show(p.getProduct());
+                    }
                 }),
                 JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
-//                    Product p = itemsTable.getSelectionModel().getSelectedItem();
-//                    if (p != null) {
-//                        editProductWindow.show(p);
-//                    }
+                    ProductMonthlyView p = itemsTable.getSelectionModel().getSelectedItem();
+                    if (p != null) {
+                        editProductWindow.show(p.getProduct());
+                    }
                 }),
                 JavaFxObservable.actionEventsOf(mDelete).subscribe(evt -> {
-//                    Product p = itemsTable.getSelectionModel().getSelectedItem();
-//                    if (p != null) {
-//                        Optional<ButtonType> result = showConfirmDialog("Delete Product?", "This will delete this product permanently. Deleting "
-//                                + "this entry might affect related data. Continue?");
-//                        if (result.isPresent() && result.get() == ButtonType.OK) {
-//                            deleteProduct(p);
-//                        }
-//                    }
+                    ProductMonthlyView p = itemsTable.getSelectionModel().getSelectedItem();
+                    if (p != null) {
+                        Optional<ButtonType> result = showConfirmDialog("Delete Product?", "This will delete this product permanently. Deleting "
+                                + "this entry might affect related data. Continue?");
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                            deleteProduct(p.getProduct());
+                        }
+                    }
                 }),
                 JavaFxObservable.changesOf(cbMonths.valueProperty()).subscribe(month -> {
-                    if (month.getNewVal() != null) {
-                        colMonth.setText("MONTH OF " + month.getNewVal().toUpperCase());
-                    }
+                    updateMonthColumn();
                     filterByDate();
                 }),
                 JavaFxObservable.changesOf(cbYears.valueProperty()).subscribe(month -> {
+                    updateMonthColumn();
                     filterByDate();
                 })
         );
@@ -224,6 +187,12 @@ public class InventoryPanel extends AbstractPanelController {
 //            showErrorDialog("Database Error", "Error while fetching products.", err);
 //        }));
         filterByDate();
+    }
+    
+    private void updateMonthColumn() {
+        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
+            colMonth.setText(String.format("%s %d", cbMonths.getValue(), cbYears.getValue()).toUpperCase());
+        }
     }
     
     private void filterByDate() {

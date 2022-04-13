@@ -61,5 +61,10 @@ public class Stock implements IEntry {
                 + "VALUES ('%d', '%d', '%d', '%d')",
                 productId, quantity, quantityOut, inStock);
     }
+    
+    public String updateSQL() {
+        return String.format("UPDATE stocks SET quantity='%d', quantity_out='%d', in_stock='%d'",
+                quantity, quantityOut, inStock);
+    }
 
 }
