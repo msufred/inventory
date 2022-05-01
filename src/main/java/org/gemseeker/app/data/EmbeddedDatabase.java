@@ -480,6 +480,32 @@ public class EmbeddedDatabase {
         return invoices;
     }
     
+    public ArrayList<DeliveryInvoice> getDeliveryInvoices(LocalDate date) throws SQLException {
+        ArrayList<DeliveryInvoice> invoices = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                LocalDate first = date.with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
+                String sql = String.format("SELECT * FROM delivery_invoices "
+                        + "WHERE date <= '%s' AND date >= '%s'", last, first);
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    int index = 1;
+                    DeliveryInvoice invoice = new DeliveryInvoice();
+                    invoice.setId(rs.getString(index++));
+                    invoice.setShipperId(index++);
+                    invoice.setDate(rs.getDate(index++).toLocalDate());
+                    invoice.setCustomer(rs.getString(index++));
+                    invoice.setAddress(rs.getString(index++));
+                    invoice.setTotal(rs.getDouble(index++));
+                    invoice.setPaymentType(rs.getString(index++));
+                    invoices.add(invoice);
+                }
+            }
+        }
+        return invoices;
+    }
+    
     public ArrayList<DeliveryInvoice> getDeliveryInvoices(int shipperId, LocalDate date) throws SQLException {
         ArrayList<DeliveryInvoice> invoices = new ArrayList<>();
         if (connection != null) {
@@ -488,7 +514,7 @@ public class EmbeddedDatabase {
                 LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
                 String sql = String.format("SELECT * FROM delivery_invoices "
                         + "WHERE shipper_id='%d' AND date <= '%s' AND date >= '%s'", shipperId, last, first);
-                ResultSet rs = statement.executeQuery("SELECT * FROM delivery_invoices");
+                ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
                     int index = 1;
                     DeliveryInvoice invoice = new DeliveryInvoice();
@@ -585,6 +611,29 @@ public class EmbeddedDatabase {
         if (connection != null) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet rs = statement.executeQuery("SELECT * FROM purchase_invoices");
+                while (rs.next()) {
+                    int index = 1;
+                    PurchaseInvoice invoice = new PurchaseInvoice();
+                    invoice.setId(rs.getString(index++));
+                    invoice.setDate(rs.getDate(index++).toLocalDate());
+                    invoice.setSupplier(rs.getString(index++));
+                    invoice.setTotal(rs.getDouble(index++));
+                    invoices.add(invoice);
+                }
+            }
+        }
+        return invoices;
+    }
+    
+    public ArrayList<PurchaseInvoice> getPurchaseInvoices(LocalDate date) throws SQLException {
+        ArrayList<PurchaseInvoice> invoices = new ArrayList<>();
+        if (connection != null) {
+            try (Statement statement = connection.createStatement()) {
+                LocalDate first = date.with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate last = date.with(TemporalAdjusters.lastDayOfMonth());
+                String sql = String.format("SELECT * FROM purchase_invoices "
+                        + "WHERE date <= '%s' AND date >= '%s'", last, first);
+                ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
                     int index = 1;
                     PurchaseInvoice invoice = new PurchaseInvoice();

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -15,65 +16,83 @@
 
 <VBox prefHeight="500.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="8.0">
+         <children>
+            <Label fx:id="lblMonthYear" minWidth="260.0" styleClass="form-title" text="September 2022" />
+            <HBox alignment="CENTER" prefWidth="200.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="lblPeso" prefHeight="56.0" prefWidth="32.0" style="-fx-background-color: -col-green;" />
+                  <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="text-big" text="Cash" />
+                        <Label fx:id="lblCash" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-big" />
+                              <String fx:value="text-bold" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </HBox>
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="lblPeso2" prefHeight="56.0" prefWidth="32.0" style="-fx-background-color: -col-orange;" />
+                  <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="text-big" text="Cheque" />
+                        <Label fx:id="lblCheque" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-big" />
+                              <String fx:value="text-bold" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="lblPeso3" prefHeight="56.0" prefWidth="32.0" style="-fx-background-color: -col-grey;" />
+                  <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label styleClass="text-big" text="Receivables" />
+                        <Label fx:id="lblReceivables" text="P 0.00">
+                           <styleClass>
+                              <String fx:value="text-big" />
+                              <String fx:value="text-bold" />
+                           </styleClass>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </children>
+         <VBox.margin>
+            <Insets left="8.0" right="8.0" top="8.0" />
+         </VBox.margin>
+      </HBox>
+      <Separator prefWidth="200.0" />
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
             <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Invoice" />
             <Button fx:id="btnPrintList" mnemonicParsing="false" text="Print List" />
+            <Label styleClass="form-label" text="Filter">
+               <HBox.margin>
+                  <Insets left="16.0" />
+               </HBox.margin>
+            </Label>
+            <ComboBox fx:id="cbMonths" prefWidth="150.0" promptText="Select Month" styleClass="form-combo-box" />
+            <ComboBox fx:id="cbYears" prefWidth="150.0" promptText="Select Year" styleClass="form-combo-box" />
             <Label styleClass="form-label" text="Payment Type/Status">
                <HBox.margin>
                   <Insets left="16.0" />
                </HBox.margin>
             </Label>
             <ComboBox fx:id="cbStatus" prefWidth="150.0" promptText="Select Status" styleClass="form-combo-box" />
-         </children>
-         <padding>
-            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-         </padding>
-      </HBox>
-      <HBox prefWidth="200.0" spacing="8.0">
-         <children>
-            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
-               <children>
-                  <Label styleClass="text-big" text="Cash" />
-                  <Label fx:id="lblCash" text="P 0.00">
-                     <styleClass>
-                        <String fx:value="text-big" />
-                        <String fx:value="text-bold" />
-                     </styleClass>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-               </padding>
-            </HBox>
-            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
-               <children>
-                  <Label styleClass="text-big" text="Cheque" />
-                  <Label fx:id="lblCheque" text="P 0.00">
-                     <styleClass>
-                        <String fx:value="text-big" />
-                        <String fx:value="text-bold" />
-                     </styleClass>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-               </padding>
-            </HBox>
-            <HBox alignment="CENTER" prefWidth="200.0" spacing="8.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
-               <children>
-                  <Label styleClass="text-big" text="Receivables" />
-                  <Label fx:id="lblReceivables" text="P 0.00">
-                     <styleClass>
-                        <String fx:value="text-big" />
-                        <String fx:value="text-bold" />
-                     </styleClass>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-               </padding>
-            </HBox>
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" />
@@ -111,7 +130,7 @@
                         <TableColumn fx:id="colItemName" prefWidth="75.0" text="Item" />
                         <TableColumn fx:id="colItemSupplier" prefWidth="75.0" text="Supplier" />
                         <TableColumn fx:id="colItemUnit" prefWidth="75.0" styleClass="table-cell-center-align" text="Unit" />
-                        <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Unit Price" />
+                        <TableColumn fx:id="colItemPriceBefore" prefWidth="75.0" styleClass="table-cell-right-align" text="Retail Price" />
                         <TableColumn fx:id="colOrderItemTotal31" prefWidth="75.0" text="Discount">
                            <columns>
                               <TableColumn fx:id="colItemDiscount" prefWidth="75.0" styleClass="table-cell-center-align" text="(per Unit)" />
@@ -122,7 +141,7 @@
                               <TableColumn fx:id="colItemPriceAfter" prefWidth="75.0" styleClass="table-cell-right-align" text="(per Unit)" />
                            </columns>
                         </TableColumn>
-                        <TableColumn fx:id="colItemQuantity" prefWidth="75.0" styleClass="table-cell-center-align" text="Qty" />
+                        <TableColumn fx:id="colItemQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
                         <TableColumn fx:id="colItemTotal" prefWidth="75.0" styleClass="table-cell-right-align" text="Total" />
                      </columns>
                   </TableView>

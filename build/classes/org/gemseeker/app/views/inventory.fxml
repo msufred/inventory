@@ -14,8 +14,8 @@
    <children>
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
-            <Button fx:id="btnRefresh" mnemonicParsing="false" text="Refresh" />
-            <Button fx:id="btnPrint" mnemonicParsing="false" text="Print List" />
+            <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="primary" text="Refresh" />
+            <Button fx:id="btnPrint" mnemonicParsing="false" styleClass="primary" text="Print List" />
             <Label styleClass="form-label" text="Filter">
                <HBox.margin>
                   <Insets left="32.0" />
@@ -36,7 +36,6 @@
             <TableColumn fx:id="colUnit" prefWidth="120.0" styleClass="table-cell-center-align" text="Unit" />
             <TableColumn fx:id="colUnitPrice" prefWidth="120.0" styleClass="table-cell-right-align" text="Unit Price" />
             <TableColumn fx:id="colRetailPrice" prefWidth="120.0" styleClass="table-cell-right-align" text="Retail Price" />
-            <TableColumn maxWidth="10.0" prefWidth="10.0" />
             <TableColumn fx:id="colInStock" prefWidth="120.0" styleClass="table-cell-center-align" text="In Stock" />
             <TableColumn fx:id="colMonth" prefWidth="120.0" styleClass="table-cell-center-align" text="MONTH OF JANUARY">
                <columns>

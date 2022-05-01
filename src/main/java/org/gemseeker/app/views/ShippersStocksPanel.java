@@ -30,7 +30,7 @@ import org.gemseeker.app.data.views.ShipperStockMonthlyView;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DoubleGreenTableCell;
 import org.gemseeker.app.views.tablecells.IntegerGreenTableCell;
-import org.gemseeker.app.views.tablecells.PriceTableCell;
+import org.gemseeker.app.views.tablecells.IntegerOrangeTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
@@ -44,13 +44,6 @@ public class ShippersStocksPanel extends AbstractPanelController {
     @FXML private ListView<Shipper> shippersList;
     @FXML private ComboBox<String> cbMonths;
     @FXML private ComboBox<Integer> cbYears;
-//    @FXML private TableView<ShipperStock> stocksTable;
-//    @FXML private TableColumn<ShipperStock, Product> colName;
-//    @FXML private TableColumn<ShipperStock, Product> colSupplier;
-//    @FXML private TableColumn<ShipperStock, Product> colRetailPrice;
-//    @FXML private TableColumn<ShipperStock, Integer> colInStock;
-//    @FXML private TableColumn<ShipperStock, Integer> colDelivered;
-//    @FXML private TableColumn<ShipperStock, Double> colSales;
     @FXML private TableView<ShipperStockMonthlyView> stocksTable;
     @FXML private TableColumn<ShipperStockMonthlyView, Product> colName;
     @FXML private TableColumn<ShipperStockMonthlyView, Product> colSupplier;
@@ -76,17 +69,6 @@ public class ShippersStocksPanel extends AbstractPanelController {
 
     @Override
     public void onLoad() {
-//        colName.setCellValueFactory(new PropertyValueFactory<>("product"));
-//        colName.setCellFactory(col -> new ProductNameTableCell<>());
-//        colSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
-//        colSupplier.setCellFactory(col -> new ProductSupplierTableCell<>());
-//        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
-//        colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
-//        colInStock.setCellValueFactory(new PropertyValueFactory<>("inStock"));
-//        colDelivered.setCellValueFactory(new PropertyValueFactory<>("delivered"));
-//        colSales.setCellValueFactory(new PropertyValueFactory<>("sales"));
-//        colSales.setCellFactory(col -> new PriceTableCell<>());
-        
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -106,7 +88,7 @@ public class ShippersStocksPanel extends AbstractPanelController {
         colOrdered.setCellValueFactory(new PropertyValueFactory<>("ordered"));
         colOrdered.setCellFactory(col -> new IntegerGreenTableCell<>());
         colDelivered.setCellValueFactory(new PropertyValueFactory<>("delivered"));
-        colDelivered.setCellFactory(col -> new IntegerGreenTableCell<>());
+        colDelivered.setCellFactory(col -> new IntegerOrangeTableCell<>());
         colSales.setCellValueFactory(new PropertyValueFactory<>("sales"));
         colSales.setCellFactory(col -> new DoubleGreenTableCell<>());
         

@@ -60,7 +60,7 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
     
     @Override
     public void onLoad() {
-        Utils.setAsNumericalTextField(tfDiscount);
+        Utils.setAsIntegerTextField(tfDiscount);
         Utils.setAsIntegerTextField(tfQuantity);
         
         disposables.addAll(
@@ -115,7 +115,7 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
         if (item != null) {
             double discount = 0;
             if (!tfDiscount.getText().isEmpty()) {
-                discount = Double.parseDouble(tfDiscount.getText().trim());
+                discount = Double.parseDouble(tfDiscount.getText().trim()) / 100;
             }
             
             double retail = item.getProduct().getRetailPrice();
@@ -139,7 +139,10 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
         item.setProductId(stock.getProductId());
         int qty = Integer.parseInt(tfQuantity.getText().trim());
         item.setQuantity(qty);
-        double discount = Double.parseDouble(tfDiscount.getText().trim());
+        double discount = 0;
+        if (!tfDiscount.getText().isEmpty()) {
+            discount = Double.parseDouble(tfDiscount.getText().trim()) / 100;
+        }
         item.setDiscount(discount);
         double retail = stock.getProduct().getRetailPrice();
         double less = retail * discount;

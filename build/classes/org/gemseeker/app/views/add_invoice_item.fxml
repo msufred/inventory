@@ -58,7 +58,7 @@
                   </HBox>
                   <VBox>
                      <children>
-                        <Label styleClass="form-label" text="Discount" />
+                        <Label styleClass="form-label" text="Discount (%)" />
                         <TextField fx:id="tfDiscount" prefWidth="176.0" text="0" />
                      </children>
                   </VBox>

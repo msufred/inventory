@@ -46,6 +46,7 @@ import org.gemseeker.app.data.DeliveryInvoiceItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
+import org.gemseeker.app.views.icons.PesoIcon;
 import org.gemseeker.app.views.icons.PrintIcon;
 import org.gemseeker.app.views.prints.PrintInvoice;
 import org.gemseeker.app.views.prints.PrintInvoiceList;
@@ -67,7 +68,10 @@ public class DeliveriesPanel extends AbstractPanelController {
     @FXML private Button btnAdd;
     @FXML private Button btnPrintList;
     @FXML private Label lblTotal;
+    @FXML private ComboBox<String> cbMonths;
+    @FXML private ComboBox<Integer> cbYears;
     @FXML private ComboBox<String> cbStatus;
+    @FXML private Label lblMonthYear;
     @FXML private Label lblCash;
     @FXML private Label lblCheque;
     @FXML private Label lblReceivables;
@@ -119,8 +123,6 @@ public class DeliveriesPanel extends AbstractPanelController {
 
     @Override
     public void onLoad() {
-        cbStatus.setItems(FXCollections.observableArrayList("All", "Cash", "Cheque", "Receivable"));
-        
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
         colDate.setCellFactory(col -> new DateTableCell<>());
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -149,7 +151,25 @@ public class DeliveriesPanel extends AbstractPanelController {
         
         itemsTable.setItems(invoiceItems);
         
+        cbStatus.setItems(FXCollections.observableArrayList("All", "Cash", "Cheque", "Receivable"));
+        
+        cbMonths.setItems(FXCollections.observableArrayList(
+                "January", "February", "March", "April", "May", "June", "July",
+                "August", "September", "October", "November", "December"
+        ));
+        
+        cbYears.setItems(FXCollections.observableArrayList(
+                2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028
+        ));
+        
+        // Set current month and year
+        LocalDate now = LocalDate.now();
+        cbMonths.setValue(Utils.monthStringValue(now.getMonthValue()));
+        cbYears.setValue(now.getYear());
+        updateMonthYearLabel();
+        
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
+        mShowDetails.setSelected(true);
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
@@ -166,6 +186,20 @@ public class DeliveriesPanel extends AbstractPanelController {
         btnPrintList.setGraphic(new PrintIcon(14));
         
         disposables.addAll(
+                JavaFxObservable.changesOf(cbStatus.valueProperty()).subscribe(status -> {
+                    if (status.getNewVal() != null) {
+                        if (status.getNewVal().equals("All")) filteredList.setPredicate(p -> true);
+                        else filteredList.setPredicate(invoice -> invoice.getPaymentType().equals(status.getNewVal()));
+                    }
+                }),
+                JavaFxObservable.changesOf(cbMonths.valueProperty()).subscribe(month -> {
+                    updateMonthYearLabel();
+                    filterByDate();
+                }),
+                JavaFxObservable.changesOf(cbYears.valueProperty()).subscribe(year -> {
+                    updateMonthYearLabel();
+                    filterByDate();
+                }),
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addInvoiceWindow.show();
                 }), 
@@ -212,12 +246,6 @@ public class DeliveriesPanel extends AbstractPanelController {
                         updateInvoiceStatus(invoice, "Receivable");
                     }
                 }),
-                JavaFxObservable.changesOf(cbStatus.valueProperty()).subscribe(status -> {
-                    if (status.getNewVal() != null) {
-                        if (status.getNewVal().equals("All")) filteredList.setPredicate(p -> true);
-                        else filteredList.setPredicate(invoice -> invoice.getPaymentType().equals(status.getNewVal()));
-                    }
-                }),
                 JavaFxObservable.changesOf(invoicesTable.getSelectionModel().selectedItemProperty()).subscribe(item -> {
                     if (item.getNewVal() != null) {
                         mPrint.setDisable(false);
@@ -237,20 +265,34 @@ public class DeliveriesPanel extends AbstractPanelController {
         );
         
         splitController = new SplitController(splitPane, SplitController.Target.LAST);
-        splitController.hideTarget();
+//        splitController.hideTarget();
     }
 
     @Override
     public void onPause() {
         itemsTable.getSelectionModel().clearSelection();
         invoiceItems.clear();
+        lblTotal.setText("P 0.00");
     }
 
     @Override
     public void onResume() {
-        mainWindow.showProgress(true, "Fetching invoices...");
+        filterByDate();
+    }
+    
+    private void filterByDate() {
+        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
+            int month = Utils.monthIntegerValue(cbMonths.getValue());
+            int year = cbYears.getValue();
+            LocalDate date = LocalDate.of(year, month, 1);
+            getDeliveryInvoices(date);
+        }
+    }
+    
+    private void getDeliveryInvoices(LocalDate date) {
+        mainWindow.showProgress(true, "Fetching delviery invoices...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getDeliveryInvoices();
+            return EmbeddedDatabase.getInstance().getDeliveryInvoices(date);
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(invoices -> {
             mainWindow.showProgress(false);
             double totalCash = 0;
@@ -274,6 +316,14 @@ public class DeliveriesPanel extends AbstractPanelController {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching invoices.", err);
         }));
+    }
+    
+    private void updateMonthYearLabel() {
+        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
+            int month = Utils.monthIntegerValue(cbMonths.getValue());
+            int year = cbYears.getValue();
+            lblMonthYear.setText(Utils.monthStringValue(month) + " " + year);
+        }
     }
     
     private void getInvoiceItems(DeliveryInvoice invoice) {

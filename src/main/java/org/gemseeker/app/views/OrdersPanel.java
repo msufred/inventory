@@ -141,6 +141,7 @@ public class OrdersPanel extends AbstractPanelController {
         orderItemsTable.setItems(orderItems);
         
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
+        mShowDetails.setSelected(true);
         MenuItem mPrint = new MenuItem("Print");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
@@ -190,13 +191,14 @@ public class OrdersPanel extends AbstractPanelController {
         );
         
         splitController = new SplitController(splitPane, SplitController.Target.LAST);
-        splitController.hideTarget();
+//        splitController.hideTarget();
     }
     
     @Override
     public void onPause() {
         ordersTable.getSelectionModel().clearSelection();
         orderItems.clear();
+        lblTotal.setText("P 0.00");
     }
 
     @Override
