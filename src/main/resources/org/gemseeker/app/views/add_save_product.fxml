@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="400.0" spacing="4.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <stylesheets>
+      <URL value="@css/bootstrap3.css" />
+      <URL value="@css/styles.css" />
+   </stylesheets>
+   <children>
+      <Label styleClass="form-title" text="Add Product" />
+      <CheckBox fx:id="checkExisting" mnemonicParsing="false" styleClass="form-label" text="Add Existing Product" />
+      <ComboBox fx:id="cbProducts" disable="true" prefWidth="372.0" promptText="Select Existing Product" styleClass="form-combo-box" />
+      <Label styleClass="form-label" text="Product Name">
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </Label>
+      <TextField fx:id="tfName" promptText="Product Name" styleClass="form-text-field" />
+      <Label styleClass="form-label" text="SKU" />
+      <TextField fx:id="tfSku" promptText="Product/Barcode No." styleClass="form-text-field" />
+      <HBox spacing="8.0">
+         <children>
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="form-label" text="Unit" />
+                  <ComboBox fx:id="cbUnits" editable="true" prefWidth="200.0" promptText="Select or Enter Unit" styleClass="form-combo-box" />
+               </children>
+            </VBox>
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Unit Price (PHP)" />
+                  <TextField fx:id="tfPrice" prefWidth="200.0" styleClass="form-text-field" text="0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <VBox spacing="4.0">
+         <children>
+            <Label styleClass="form-label" text="Retail Price (PHP)" />
+            <TextField fx:id="tfRetailPrice" prefWidth="200.0" styleClass="form-text-field" text="0" />
+         </children>
+      </VBox>
+      <HBox spacing="8.0">
+         <children>
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="form-label" text="Quantity" />
+                  <TextField fx:id="tfQuantity" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
+               </children>
+            </VBox>
+            <VBox spacing="4.0">
+               <children>
+                  <Label styleClass="form-label" text="Total Amount" />
+                  <TextField fx:id="tfTotal" editable="false" promptText="Initial Stock Quantity" styleClass="form-text-field" text="0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <ProgressBar fx:id="progressBar" prefWidth="400.0" visible="false">
+         <VBox.margin>
+            <Insets top="16.0" />
+         </VBox.margin>
+      </ProgressBar>
+      <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="5.0">
+         <children>
+            <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" styleClass="primary" text="Add Product" />
+            <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Cancel" />
+         </children>
+         <VBox.margin>
+            <Insets top="8.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+   </padding>
+</VBox>
