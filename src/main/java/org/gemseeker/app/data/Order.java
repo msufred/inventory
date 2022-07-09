@@ -73,6 +73,11 @@ public class Order implements IEntry {
                 date, shipperId, total, sales);
     }
 
+    public String updateSQL() {
+        return String.format("UPDATE orders SET date='%s', shipper_id='%d', total='%f', sales='%f' WHERE id='%d'",
+                date, shipperId, total, sales, id);
+    }
+    
     @Override
     public String toString() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
