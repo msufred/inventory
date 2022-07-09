@@ -79,7 +79,7 @@ public class PrintOrder extends AbstractPanelController {
         lblDate.setText(LocalDate.now().format(Utils.dateTimeFormat));
         lblOrderDate.setText(mOrderDate.format(Utils.dateTimeFormat));
         lblName.setText(mOrderName);
-        lblAmount.setText("P " + Utils.getMoneyFormat(mTotal));
+        lblAmount.setText("P " + Utils.toMoneyFormat(mTotal));
         lblPage.setText("Page " + String.format("%d/%d", mPage, mTotalPage));
         itemsTable.setItems(FXCollections.observableArrayList(mItems));
     }

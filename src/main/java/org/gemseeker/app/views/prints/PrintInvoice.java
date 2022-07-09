@@ -98,7 +98,7 @@ public class PrintInvoice extends AbstractPanelController {
         lblInvoiceDate.setText(mInvoiceDate.format(Utils.dateTimeFormat));
         lblCustomer.setText(mCustomerName);
         lblAddress.setText(mAddress);
-        lblAmount.setText("P " + Utils.getMoneyFormat(mTotal));
+        lblAmount.setText("P " + Utils.toMoneyFormat(mTotal));
         lblStatus.setText(mStatus);
         lblPage.setText("Page " + String.format("%d/%d", mPage, mTotalPage));
         itemsTable.setItems(FXCollections.observableArrayList(mItems));
