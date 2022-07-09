@@ -19,50 +19,33 @@ public final class Utils {
     public static final String VERSION = "0.0.1-beta";
     public static final String DB_NAME = "inventorydb";
 
-    public static final String APP_FOLDER = ".inventory";
-    public static final String LOG_FOLDER = "logs";
-    public static final String DATA_FOLDER = "data";
-    public static final String IMAGES_FOLDER = "images";
+    public static final String APP_FOLDER = getUserHome() + fileSeparator() + ".inventory";
+    public static final String LOG_FOLDER = APP_FOLDER + fileSeparator() + "logs";
+    public static final String DATA_FOLDER = APP_FOLDER + fileSeparator() + "data";
+    public static final String IMAGES_FOLDER = APP_FOLDER + fileSeparator() + "images";
+    public static final String TEMP_FOLDER = APP_FOLDER + fileSeparator() + "temp";
+    
+    public static final String DATABASE_PATH = DATA_FOLDER + fileSeparator() + DB_NAME;
+    public static final String SETTINGS_FILE = APP_FOLDER + fileSeparator() + "settings.xml";
 
     public static final String TABLE_DATE_FORMAT_STR = "MMM dd, yyyy";
     
+    /**
+     * Date time format with a pattern MMMM dd, yyyy (ex. July 01, 2022)
+     */
     public static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-    public static final DateTimeFormatter dateTimeFormat2 = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-    public static final DateTimeFormatter fileDateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-
-    public static String getSeparator() {
-        return System.getProperty("file.separator");
-    }
-
-    public static String getUserHome() {
-        return System.getProperty("user.home");
-    }
-
-    public static String getAppFolder() {
-        return getUserHome() + getSeparator() + APP_FOLDER;
-    }
-
-    public static String getLogFolder() {
-        return getAppFolder() + getSeparator() + LOG_FOLDER;
-    }
-
-    public static String getImagesFolder() {
-        return getAppFolder() + getSeparator() + IMAGES_FOLDER;
-    }
-
-    public static String getTempFolder() {
-        return getAppFolder() + getSeparator() + "temp";
-    }
-
-    public static String getDataFolder() {
-        return getAppFolder() + getSeparator() + DATA_FOLDER;
-    }
-
-    public static String getDatabasePath() {
-        return getDataFolder() + getSeparator() + DB_NAME;
-    }
     
-    public static String getMoneyFormat(double value) {
+    /**
+     * Date time format with a patter MMM dd, yyyy (ex. Jul 01, 2022)
+     */
+    public static final DateTimeFormatter dateTimeFormat2 = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+    
+    /**
+     * Date time format with a pattern MM-dd-yyyy (ex. 07-01-2022)
+     */
+    public static final DateTimeFormatter fileDateFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+    
+    public static String toMoneyFormat(double value) {
         String str = String.format("%.2f", value);
         StringBuilder sb = new StringBuilder();
         int startIndex = str.indexOf('.');
@@ -79,7 +62,7 @@ public final class Utils {
         return sb.reverse().append(str.substring(startIndex)).toString();
     }
     
-    public static String getMoneyFormat(int value) {
+    public static String toMoneyFormat(int value) {
         String str = String.format("%d", value);
         StringBuilder sb = new StringBuilder();
         int decCount = 0;
@@ -108,10 +91,15 @@ public final class Utils {
         }
     }
 
-    public static void setAsNumericalTextField(TextField textField) {
-        if (textField != null) {
-            textField.addEventFilter(KeyEvent.KEY_TYPED, evt -> {
+    public static void setAsNumericalTextField(TextField...textFields) {
+        for (TextField tf : textFields) {
+            tf.addEventFilter(KeyEvent.KEY_TYPED, evt -> {
                 if (!"-0123456789.".contains(evt.getCharacter())) evt.consume();
+                String text = tf.getText();
+                String chr = evt.getCharacter();
+                if ((chr.equals("-") || chr.equals(".")) && (text.contains("-") || text.contains("."))) {
+                    evt.consume();
+                }
             });
         }
     }
@@ -168,5 +156,13 @@ public final class Utils {
             case 12: return "December";
             default: return "Invalid";
         }
+    }
+    
+    public static String fileSeparator() {
+        return System.getProperty("file.separator");
+    }
+
+    public static String getUserHome() {
+        return System.getProperty("user.home");
     }
 }
