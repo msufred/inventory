@@ -79,5 +79,11 @@ public class DeliveryInvoice implements IEntry {
                 + "VALUES ('%s', '%d', '%s', '%s', '%s', '%f', '%s')",
                 id, shipperId, date, customer, address, total, paymentType);
     }
+    
+    public String updateSQL() {
+        return String.format("UPDATE delivery_invoices SET date='%s', customer='%s', "
+                + "address='%s', total='%f', payment_type='%s' WHERE id='%s'",
+                date, customer, address, total, paymentType, id);
+    }
 
 }
