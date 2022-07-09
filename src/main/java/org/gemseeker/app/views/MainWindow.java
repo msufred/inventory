@@ -141,7 +141,7 @@ public class MainWindow extends AbstractWindowController {
     @Override
     public void show() {
         super.show();
-        changeContent(purchasesPanel);
+        changeContent(inventoryPanel);
     }
     
     @Override

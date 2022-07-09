@@ -113,7 +113,7 @@ public class AddDeliveryWindow extends AbstractWindowController {
         disposables.addAll(
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
-                        lblTotal.setText("P " + Utils.getMoneyFormat(value.getNewVal().doubleValue()));
+                        lblTotal.setText("P " + Utils.toMoneyFormat(value.getNewVal().doubleValue()));
                     }
                 }), 
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {

@@ -7,6 +7,7 @@ import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
 import java.time.LocalDate;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -46,6 +47,8 @@ public class AddPurchaseWindow extends AbstractWindowController {
     @FXML private TextField tfNo;
     @FXML private ComboBox<Supplier> cbSuppliers;
     @FXML private Button btnAdd;
+    @FXML private Button btnEdit;
+    @FXML private Button btnRemove;
     @FXML private Label lblTotal;
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
@@ -63,15 +66,19 @@ public class AddPurchaseWindow extends AbstractWindowController {
     private final CompositeDisposable disposables;
     
     private final ObservableList<PurchaseInvoiceItem> mItems = FXCollections.observableArrayList();
+    private final SimpleIntegerProperty selectedIndex = new SimpleIntegerProperty(-1);
     private final SimpleDoubleProperty mTotal = new SimpleDoubleProperty(0);
     
+    // TODO rename to AddPurchaseItemWindow
     private final AddProductWindow addProductWindow;
+    private final EditPurchaseItemWindow editPurchaseItemWindow;
     
     public AddPurchaseWindow(PurchasesPanel inventoryPanel, Stage mainStage) {
         super("Add Purchase", AddPurchaseWindow.class.getResource("add_purchase.fxml"), mainStage);
         this.inventoryPanel = inventoryPanel;
         disposables = new CompositeDisposable();
         addProductWindow = new AddProductWindow(this);
+        editPurchaseItemWindow = new EditPurchaseItemWindow(this);
     }
 
     @Override
@@ -100,10 +107,22 @@ public class AddPurchaseWindow extends AbstractWindowController {
         colTotal.setCellFactory(col -> new PriceTableCell<>());
         
         itemsTable.setItems(mItems);
+        // bind table's selected index to selectedIndex
+        selectedIndex.bind(itemsTable.getSelectionModel().selectedIndexProperty());
         
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addProductWindow.show();
+                }),
+                JavaFxObservable.actionEventsOf(btnEdit).subscribe(evt -> {
+                    if (selectedIndex.get() > -1) {
+                        PurchaseInvoiceItem item = mItems.get(selectedIndex.get());
+                        editPurchaseItemWindow.show(item);
+                    }
+                }),
+                JavaFxObservable.actionEventsOf(btnRemove).subscribe(evt -> {
+                    int index = itemsTable.getSelectionModel().getSelectedIndex();
+                    if (index > -1) mItems.remove(index);
                 }),
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
                     if (tfNo.getText().isEmpty() || datePicker.getValue() == null ||
@@ -118,8 +137,13 @@ public class AddPurchaseWindow extends AbstractWindowController {
                 }),
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
-                        lblTotal.setText("P " + Utils.getMoneyFormat(value.getNewVal().doubleValue()));
+                        lblTotal.setText("P " + Utils.toMoneyFormat(value.getNewVal().doubleValue()));
                     }
+                }),
+                JavaFxObservable.changesOf(selectedIndex).subscribe(index -> {
+                    System.out.println("Selected:" + index.getNewVal().intValue());
+                    btnEdit.setDisable(index.getNewVal().intValue() == -1);
+                    btnRemove.setDisable(index.getNewVal().intValue() == -1);
                 })
         );
     }
@@ -134,6 +158,15 @@ public class AddPurchaseWindow extends AbstractWindowController {
         mTotal.set(total);
     }
 
+    public void replaceProduct(int index, PurchaseInvoiceItem item) {
+        if (index > -1) mItems.remove(index);
+        mItems.add(index, item);
+    }
+    
+    public void replaceProduct(PurchaseInvoiceItem item) {
+        if (selectedIndex.get() > -1) replaceProduct(selectedIndex.get(), item);
+    }
+    
     @Override
     public void show() {
         super.show();

@@ -6,6 +6,7 @@ import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Optional;
 import javafx.collections.FXCollections;
@@ -13,11 +14,16 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
@@ -25,12 +31,14 @@ import org.gemseeker.app.data.OrderItem;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoiceItem;
 import org.gemseeker.app.data.Stock;
+import org.gemseeker.app.data.Supplier;
 import org.gemseeker.app.data.views.ProductMonthlyView;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.tablecells.DoubleGreenTableCell;
 import org.gemseeker.app.views.tablecells.DoubleOrangeTableCell;
 import org.gemseeker.app.views.tablecells.IntegerGreenTableCell;
 import org.gemseeker.app.views.tablecells.IntegerOrangeTableCell;
+import org.gemseeker.app.views.tablecells.PriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductNameTableCell;
 import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
 import org.gemseeker.app.views.tablecells.ProductSkuTableCell;
@@ -47,8 +55,13 @@ public class InventoryPanel extends AbstractPanelController {
     
     @FXML private Button btnRefresh;
     @FXML private Button btnPrint;
-    @FXML private ComboBox<String> cbMonths;
-    @FXML private ComboBox<Integer> cbYears;
+    @FXML private RadioButton toggleShowAll;
+    @FXML private RadioButton toggleFilterDate;
+    @FXML private ComboBox<Supplier> cbSuppliers;
+    @FXML private DatePicker dateFrom;
+    @FXML private DatePicker dateTo;
+    @FXML private Label lblSearch; // for icon only
+    @FXML private TextField searchField;
     @FXML private TableView<ProductMonthlyView> itemsTable;
     @FXML private TableColumn<ProductMonthlyView, Product> colName;
     @FXML private TableColumn<ProductMonthlyView, Product> colSku;
@@ -61,7 +74,6 @@ public class InventoryPanel extends AbstractPanelController {
     @FXML private TableColumn<ProductMonthlyView, Double> colPurchasedTotal;
     @FXML private TableColumn<ProductMonthlyView, Integer> colOrdered;
     @FXML private TableColumn<ProductMonthlyView, Double> colOrderedTotal;
-    @FXML private TableColumn<ProductMonthlyView, Product> colMonth;
     
 //    private FilteredList<Product> filteredList;
     private FilteredList<ProductMonthlyView> filteredList;
@@ -71,6 +83,10 @@ public class InventoryPanel extends AbstractPanelController {
     
     private final ShowOrdersWindow showOrdersWindow;
     private final EditProductWindow editProductWindow;
+    
+    // Date filter range
+    private LocalDate mDateFrom;
+    private LocalDate mDateTo;
     
     public InventoryPanel(MainWindow mainWindow) {
         super(InventoryPanel.class.getResource("inventory.fxml"));
@@ -83,6 +99,9 @@ public class InventoryPanel extends AbstractPanelController {
 
     @Override
     public void onLoad() {
+        // set icons
+        // TODO set Search Icon
+        
         colName.setCellValueFactory(new PropertyValueFactory<>("product"));
         colName.setCellFactory(col -> new ProductNameTableCell<>());
         colSku.setCellValueFactory(new PropertyValueFactory<>("product"));
@@ -100,27 +119,12 @@ public class InventoryPanel extends AbstractPanelController {
         colPurchased.setCellValueFactory(new PropertyValueFactory<>("purchased"));
         colPurchased.setCellFactory(col -> new IntegerGreenTableCell<>());
         colPurchasedTotal.setCellValueFactory(new PropertyValueFactory<>("purchasedTotal"));
-        colPurchasedTotal.setCellFactory(col -> new DoubleGreenTableCell<>());
+        colPurchasedTotal.setCellFactory(col -> new PriceTableCell<>());
         colOrdered.setCellValueFactory(new PropertyValueFactory<>("ordered"));
         colOrdered.setCellFactory(col -> new IntegerOrangeTableCell<>());
         colOrderedTotal.setCellValueFactory(new PropertyValueFactory<>("orderedTotal"));
-        colOrderedTotal.setCellFactory(col -> new DoubleOrangeTableCell<>());
+        colOrderedTotal.setCellFactory(col -> new PriceTableCell<>());
 
-        cbMonths.setItems(FXCollections.observableArrayList(
-                "January", "February", "March", "April", "May", "June", "July",
-                "August", "September", "October", "November", "December"
-        ));
-        
-        cbYears.setItems(FXCollections.observableArrayList(
-                2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028
-        ));
-        
-        // Set current month and year
-        LocalDate now = LocalDate.now();
-        cbMonths.setValue(Utils.monthStringValue(now.getMonthValue()));
-        cbYears.setValue(now.getYear());
-        updateMonthColumn();
-        
         MenuItem mShowOrders = new MenuItem("Show Orders");
         MenuItem mEdit = new MenuItem("Edit Details");
         MenuItem mDelete = new MenuItem("Delete Product");
@@ -134,6 +138,54 @@ public class InventoryPanel extends AbstractPanelController {
                 }),
                 JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {
                     
+                }),
+                JavaFxObservable.changesOf(toggleShowAll.selectedProperty()).subscribe(selectedValue -> {
+                    boolean isSelected = selectedValue.getNewVal();
+                    if (isSelected) getAllProducts();
+                }),
+                JavaFxObservable.changesOf(toggleFilterDate.selectedProperty()).subscribe(selectedValue -> {
+                    boolean isSelected = selectedValue.getNewVal();
+                    dateFrom.setDisable(!isSelected);
+                    dateTo.setDisable(!isSelected);
+                    if (isSelected) {
+                        getAllProducts(mDateFrom, mDateTo);
+                    }
+                }),
+                JavaFxObservable.changesOf(cbSuppliers.valueProperty()).subscribe(supplier -> {
+                    if (supplier.getNewVal() != null) {
+                        // TODO filter by supplier
+                    }
+                }),
+                JavaFxObservable.changesOf(dateFrom.valueProperty()).subscribe(dateValue -> {
+                    mDateFrom = dateValue.getNewVal();
+                    if (mDateFrom.isAfter(mDateTo)) {
+                        YearMonth ym = YearMonth.from(mDateFrom);
+                        mDateTo = ym.atEndOfMonth();
+                        dateTo.setValue(mDateTo);
+                    }
+                    //updateMonthLabel();
+                    getAllProducts(mDateFrom, mDateTo);
+                }),
+                JavaFxObservable.changesOf(dateTo.valueProperty()).subscribe(dateValue -> {
+                    mDateTo = dateValue.getNewVal();
+                    //updateMonthLabel();
+                    getAllProducts(mDateFrom, mDateTo);
+                }),
+                JavaFxObservable.changesOf(cbSuppliers.valueProperty()).subscribe(value -> {
+                    Supplier supplier = value.getNewVal();
+                    if(supplier != null && filteredList != null) {
+                        if (supplier.getName().equals("All")) filteredList.setPredicate(p -> true);
+                        else {
+                            filteredList.setPredicate(p -> p.getProduct().getSupplier().equals(supplier.getName()));
+                        }
+                    }
+                }),
+                JavaFxObservable.changesOf(searchField.textProperty()).subscribe(textValue -> {
+                    // If search text is not empty, filter inventory
+                    String text = textValue.getNewVal();
+                    if (text != null && !text.isEmpty()) {
+                        // Search by product or sku
+                    }
                 }),
                 JavaFxObservable.actionEventsOf(mShowOrders).subscribe(evt -> {
                     ProductMonthlyView p = itemsTable.getSelectionModel().getSelectedItem();
@@ -156,14 +208,6 @@ public class InventoryPanel extends AbstractPanelController {
                             deleteProduct(p.getProduct());
                         }
                     }
-                }),
-                JavaFxObservable.changesOf(cbMonths.valueProperty()).subscribe(month -> {
-                    updateMonthColumn();
-                    filterByDate();
-                }),
-                JavaFxObservable.changesOf(cbYears.valueProperty()).subscribe(month -> {
-                    updateMonthColumn();
-                    filterByDate();
                 })
         );
     }
@@ -175,42 +219,84 @@ public class InventoryPanel extends AbstractPanelController {
 
     @Override
     public void onResume() {
-//        mainWindow.showProgress(true, "Fetching all products...");
-//        disposables.add(Single.fromCallable(() -> {
-////            return EmbeddedDatabase.getInstance().getProducts();
-//        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(products -> {
-//            mainWindow.showProgress(false);
-//            filteredList = new FilteredList<>(FXCollections.observableArrayList(products));
-//            itemsTable.setItems(filteredList);
-//        }, err -> {
-//            mainWindow.showProgress(false);
-//            showErrorDialog("Database Error", "Error while fetching products.", err);
-//        }));
-        filterByDate();
+        LocalDate now = LocalDate.now();
+        YearMonth ym = YearMonth.from(now);
+        mDateFrom = ym.atDay(1);
+        mDateTo = ym.atEndOfMonth();
+        dateFrom.setValue(mDateFrom);
+        dateTo.setValue(mDateTo);
+        //updateMonthLabel();
+        
+        mainWindow.showProgress(true, "Fetching suppliers...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getSuppliers();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(suppliers -> {
+            mainWindow.showProgress(false);
+            Supplier all = new Supplier();
+            all.setName("All");
+            suppliers.add(0, all);
+            cbSuppliers.setItems(FXCollections.observableArrayList(suppliers));
+            getAllProducts();
+            cbSuppliers.setValue(all);
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error while retrieving suppliers.", err);
+        }));
     }
     
-    private void updateMonthColumn() {
-        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
-            colMonth.setText(String.format("%s %d", cbMonths.getValue(), cbYears.getValue()).toUpperCase());
-        }
+    private void getAllProducts() {
+        mainWindow.showProgress(true, "Fetching products...");
+        disposables.add(Single.fromCallable(() -> {
+            EmbeddedDatabase database = EmbeddedDatabase.getInstance();
+            ArrayList<Product> products = database.getProducts();
+            ArrayList<PurchaseInvoiceItem> purchaseItems = database.getAllPurchaseInvoiceItems();
+            ArrayList<OrderItem> orderedItems = database.getAllOrderItems();
+            ArrayList<ProductMonthlyView> views = new ArrayList<>();
+            for (Product p : products) {
+                ProductMonthlyView view = new ProductMonthlyView();
+                view.setProduct(p);
+                view.setStock(p.getStock());
+                int purchasedQty = 0;
+                double purchasedTotal = 0;
+                for (PurchaseInvoiceItem item : purchaseItems) {
+                    if (item.getProductId() == p.getId()) {
+                        purchasedQty += item.getQuantity();
+                        purchasedTotal += item.getTotal();
+                    }
+                }
+                view.setPurchased(purchasedQty);
+                view.setPurchasedTotal(purchasedTotal);
+                int orderedQty = 0;
+                double orderedTotal = 0;
+                for (OrderItem item : orderedItems) {
+                    if (item.getProductId() == p.getId()) {
+                        orderedQty += item.getQuantity();
+                        orderedTotal += item.getTotal();
+                    }
+                }
+                view.setOrdered(orderedQty);
+                view.setOrderedTotal(orderedTotal);
+                views.add(view);
+            }
+            return views;
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(views -> {
+            mainWindow.showProgress(false);
+            filteredList = new FilteredList<>(FXCollections.observableArrayList(views));
+            itemsTable.setItems(filteredList);
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error while fetching products.", err);
+        }));
     }
     
-    private void filterByDate() {
-        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
-            int month = Utils.monthIntegerValue(cbMonths.getValue());
-            int year = cbYears.getValue();
-            LocalDate date = LocalDate.of(year, month, 1);
-            getProducts(date);
-        }
-    }
     
-    private void getProducts(LocalDate date) {
+    private void getAllProducts(LocalDate dateFrom, LocalDate dateTo) {
         mainWindow.showProgress(true, "Fetching all products...");
         disposables.add(Single.fromCallable(() -> {
             EmbeddedDatabase database = EmbeddedDatabase.getInstance();
             ArrayList<Product> products = database.getProducts();
-            ArrayList<PurchaseInvoiceItem> purchaseItems = database.getPurchaseInvoiceItems(date);
-            ArrayList<OrderItem> orderedItems = database.getOrderItems(date);
+            ArrayList<PurchaseInvoiceItem> purchaseItems = database.getPurchaseInvoiceItems(dateFrom, dateTo);
+            ArrayList<OrderItem> orderedItems = database.getOrderItems(dateFrom, dateTo);
             ArrayList<ProductMonthlyView> views = new ArrayList<>();
             for (Product p : products) {
                 ProductMonthlyView view = new ProductMonthlyView();
@@ -261,11 +347,13 @@ public class InventoryPanel extends AbstractPanelController {
             showErrorDialog("Database Error", "Error occurred while deleting product entry.", err);
         }));
     }
-
+    
     @Override
     public void onDispose() {
         disposables.dispose();
         editProductWindow.onDispose();
+        mDateFrom = null;
+        mDateTo = null;
     }
     
 }

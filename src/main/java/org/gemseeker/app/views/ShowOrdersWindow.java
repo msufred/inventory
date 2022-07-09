@@ -133,7 +133,7 @@ public class ShowOrdersWindow extends AbstractWindowController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             showProgress(false);
             mItems.setAll(items);
-            lblTotal.setText("P " + Utils.getMoneyFormat(order.getTotal()));
+            lblTotal.setText("P " + Utils.toMoneyFormat(order.getTotal()));
         }, err -> {
             showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);

@@ -7,20 +7,26 @@ import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.DeliveryInvoiceItem;
+import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.Shipper;
 import org.gemseeker.app.data.ShipperStock;
 import org.gemseeker.app.views.frameworks.AbstractWindowController;
+import org.gemseeker.app.views.tablecells.ProductNameTableCell;
+import org.gemseeker.app.views.tablecells.ProductRetailPriceTableCell;
+import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 
 /**
  *
@@ -28,10 +34,14 @@ import org.gemseeker.app.views.frameworks.AbstractWindowController;
  */
 public class AddDeliveryItemWindow extends AbstractWindowController {
 
-//    @FXML private ComboBox<ShipperStock> cbProducts;
-    @FXML private ListView<ShipperStock> productsList;
-    @FXML private Label lblPrice;
-    @FXML private Label lblStock;
+    @FXML private TableView<ShipperStock> productsTable;
+    @FXML private TableColumn<ShipperStock, Product> colName;
+    @FXML private TableColumn<ShipperStock, Product> colSupplier;
+    @FXML private TableColumn<ShipperStock, Integer> colStock;
+    @FXML private TableColumn<ShipperStock, Product> colRetailPrice;
+    
+    private FilteredList<ShipperStock> filteredList;
+    
     @FXML private TextField tfDiscount;
     @FXML private TextField tfDiscountedPrice;
     @FXML private TextField tfQuantity;
@@ -63,6 +73,14 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
         Utils.setAsIntegerTextField(tfDiscount);
         Utils.setAsIntegerTextField(tfQuantity);
         
+        colName.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colName.setCellFactory(col -> new ProductNameTableCell<>());
+        colSupplier.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colSupplier.setCellFactory(col -> new ProductSupplierTableCell<>());
+        colStock.setCellValueFactory(new PropertyValueFactory<>("inStock"));
+        colRetailPrice.setCellValueFactory(new PropertyValueFactory<>("product"));
+        colRetailPrice.setCellFactory(col -> new ProductRetailPriceTableCell<>());
+        
         disposables.addAll(
                 JavaFxObservable.actionEventsOf(btnSave).subscribe(evt -> {
                     if (selected.get() != null && !tfQuantity.getText().isEmpty()) {
@@ -74,14 +92,10 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
                 JavaFxObservable.actionEventsOf(btnCancel).subscribe(evt -> {
                     close();
                 }),
-                JavaFxObservable.changesOf(productsList.getSelectionModel().selectedItemProperty()).subscribe(stock -> {
+                JavaFxObservable.changesOf(productsTable.getSelectionModel().selectedItemProperty()).subscribe(stock -> {
                     selected.set(stock.getNewVal());
                     ShipperStock item = selected.get();
-                    if (item != null) {
-                        lblPrice.setText(String.format("%.2f", item.getProduct().getRetailPrice()));
-                        lblStock.setText(item.getInStock() + "");
-                        recalculate();
-                    }
+                    if (item != null) recalculate();
                 }),
                 JavaFxObservable.changesOf(tfDiscount.textProperty()).subscribe(text -> {
                     recalculate();
@@ -100,8 +114,8 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
                 return EmbeddedDatabase.getInstance().getShipperStocks(shipper.getId());
             }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
                 showProgress(false);
-//                cbProducts.setItems(FXCollections.observableArrayList(items));
-                productsList.setItems(FXCollections.observableArrayList(items));
+                filteredList = new FilteredList<>(FXCollections.observableArrayList(items), p -> true);
+                productsTable.setItems(filteredList);
             }, err -> {
                 showProgress(false);
                 showErrorDialog("Database Error", "Error while fetching shipper stocks items.", err);
@@ -110,7 +124,6 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
     }
     
     private void recalculate() {
-//        ShipperStock item = cbProducts.getValue();
         ShipperStock item = selected.get();
         if (item != null) {
             double discount = 0;
@@ -160,10 +173,7 @@ public class AddDeliveryItemWindow extends AbstractWindowController {
     
     @Override
     public void onClose() {
-//        cbProducts.setItems(null);
         selected.set(null);
-        lblPrice.setText("0.00");
-        lblStock.setText("0");
         tfDiscount.setText("0");
         tfDiscountedPrice.setText("0.00");
         tfQuantity.setText("1");

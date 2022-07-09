@@ -52,7 +52,7 @@ public class AddProductWindow extends AbstractWindowController {
         this.addPurchaseWindow = addPurchaseWindow;
         disposables = new CompositeDisposable();
     }
-
+    
     @Override
     protected void initWindow(Stage stage) {
         super.initWindow(stage);
@@ -100,7 +100,7 @@ public class AddProductWindow extends AbstractWindowController {
                 }),
                 JavaFxObservable.changesOf(mTotal).subscribe(value -> {
                     if (value.getNewVal() != null) {
-                        tfTotal.setText("P " + Utils.getMoneyFormat(value.getNewVal().doubleValue()));
+                        tfTotal.setText("P " + Utils.toMoneyFormat(value.getNewVal().doubleValue()));
                     }
                 }),
                 JavaFxObservable.changesOf(tfPrice.textProperty()).subscribe(text -> {
@@ -173,7 +173,7 @@ public class AddProductWindow extends AbstractWindowController {
         product.setRetailPrice(Double.parseDouble(tfRetailPrice.getText().trim()));     // set Product Retail Price
         
         item.setProduct(product);                                                       // set PurchaseInvoiceItem Product
-        addPurchaseWindow.addProduct(item);                                             // add PurchaseInvoiceItem to AddPurchaseWindow list
+        addPurchaseWindow.addProduct(item);
         close();
     }
     

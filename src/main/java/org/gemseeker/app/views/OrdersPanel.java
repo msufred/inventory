@@ -10,8 +10,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Optional;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -19,9 +21,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -56,13 +61,21 @@ import org.gemseeker.app.views.tablecells.ProductSupplierTableCell;
 import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 
 /**
+ * WITHDRAWAL PANEL
  *
  * @author Gem
  */
 public class OrdersPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
+    @FXML private Button btnEdit;
     @FXML private Button btnPrintList;
+    
+    @FXML private RadioButton toggleShowAll;
+    @FXML private RadioButton toggleFilterDate;
+    @FXML private DatePicker dateFrom;
+    @FXML private DatePicker dateTo;
+    @FXML private ComboBox<Shipper> cbTrucks;
     
     // Orders Table
     @FXML private TableView<Order> ordersTable;
@@ -87,13 +100,19 @@ public class OrdersPanel extends AbstractPanelController {
     private final CompositeDisposable disposables;
     
     private final ObservableList<OrderItem> orderItems = FXCollections.observableArrayList();
+    private final SimpleIntegerProperty selectedOrderIndex = new SimpleIntegerProperty();
+    private final SimpleIntegerProperty selectedOrderItemIndex = new SimpleIntegerProperty();
     
     private FilteredList<Order> filteredList;
     
     private final AddOrderWindow addOrderWindow;
+    private final EditOrderWindow editOrderWindow;
     private final PrintWindow printWindow;
     
     private final DirectoryChooser dirChooser;
+    
+    private LocalDate mDateFrom;
+    private LocalDate mDateTo;
     
     public OrdersPanel(MainWindow mainWindow) {
         super(PurchasesPanel.class.getResource("orders.fxml"));
@@ -101,6 +120,7 @@ public class OrdersPanel extends AbstractPanelController {
         disposables = new CompositeDisposable();
         
         addOrderWindow = new AddOrderWindow(this, mainWindow.getWindow());
+        editOrderWindow = new EditOrderWindow(this, mainWindow.getWindow());
         printWindow = new PrintWindow(mainWindow.getWindow());
         
         dirChooser = new DirectoryChooser();
@@ -140,24 +160,76 @@ public class OrdersPanel extends AbstractPanelController {
         
         orderItemsTable.setItems(orderItems);
         
+        selectedOrderIndex.bind(ordersTable.getSelectionModel().selectedIndexProperty());
+        selectedOrderItemIndex.bind(orderItemsTable.getSelectionModel().selectedIndexProperty());
+        
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
         mShowDetails.setSelected(true);
         MenuItem mPrint = new MenuItem("Print");
+        MenuItem mEdit = new MenuItem("Edit");
         MenuItem mExport = new MenuItem("Export");
         MenuItem mDelete = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mShowDetails, mPrint, mExport, mDelete);
+        cm.getItems().addAll(mShowDetails, mPrint, mEdit, mExport, mDelete);
         ordersTable.setContextMenu(cm);
         
         // setup icons
         btnPrintList.setGraphic(new PrintIcon(14));
         
         disposables.addAll(
-                JavaFxObservable.changesOf(ordersTable.getSelectionModel().selectedItemProperty()).subscribe(order -> {
-                    refreshSelectedOrder();
+                JavaFxObservable.changesOf(selectedOrderIndex).subscribe(index -> {
+                    int selectedIndex = index.getNewVal().intValue();
+                    btnEdit.setDisable(selectedIndex == -1);
+                    if (selectedIndex > -1) refreshSelectedOrder();
                 }),
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addOrderWindow.show();
+                }),
+                JavaFxObservable.actionEventsOf(btnEdit).subscribe(evt -> {
+                    Order selected = ordersTable.getSelectionModel().getSelectedItem();
+                    if (selected != null) editOrderWindow.show(selected);
+                }),
+                JavaFxObservable.actionEventsOf(btnPrintList).subscribe(evt -> {
+                    // TODO
+                }),
+                JavaFxObservable.changesOf(toggleShowAll.selectedProperty()).subscribe(selected -> {
+                    boolean isSelected = selected.getNewVal();
+                    if (isSelected) {
+                        getOrders();
+                    }
+                }),
+                JavaFxObservable.changesOf(toggleFilterDate.selectedProperty()).subscribe(selected -> {
+                    boolean isSelected = selected.getNewVal();
+                    dateFrom.setDisable(!isSelected);
+                    dateTo.setDisable(!isSelected);
+                    if (isSelected) {
+                        getOrders(mDateFrom, mDateTo);
+                    }
+                }),
+                JavaFxObservable.changesOf(dateFrom.valueProperty()).subscribe(value -> {
+                    if (value.getNewVal() != null) {
+                        mDateFrom = value.getNewVal();
+                        if (mDateFrom.isAfter(mDateTo)) {
+                            YearMonth ym = YearMonth.from(mDateFrom);
+                            mDateTo = ym.atEndOfMonth();
+                            dateTo.setValue(mDateTo);
+                        }
+                        getOrders(mDateFrom, mDateTo);
+                    }
+                }),
+                JavaFxObservable.changesOf(dateTo.valueProperty()).subscribe(value -> {
+                    if (value.getNewVal() != null) {
+                        mDateTo = value.getNewVal();
+                        getOrders(mDateFrom, mDateTo);
+                    }
+                }),
+                JavaFxObservable.changesOf(cbTrucks.valueProperty()).subscribe(truck -> {
+                    Shipper t = truck.getNewVal();
+                    if (t != null && filteredList != null) {
+                        orderItems.clear();
+                        if (t.getName().equals("All")) filteredList.setPredicate(o -> true);
+                        else filteredList.setPredicate(o -> o.getShipperId() == t.getId());
+                    }
                 }),
                 JavaFxObservable.actionEventsOf(mShowDetails).subscribe(evt -> {
                     if (!splitController.isTargetVisible() && mShowDetails.isSelected()) splitController.showTarget();
@@ -168,6 +240,10 @@ public class OrdersPanel extends AbstractPanelController {
                     if (order != null) {
                         printOrder(order);
                     }
+                }),
+                JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
+                    Order selected = ordersTable.getSelectionModel().getSelectedItem();
+                    if (selected != null) editOrderWindow.show(selected);
                 }),
                 JavaFxObservable.actionEventsOf(mExport).subscribe(evt -> {
                     Order order = ordersTable.getSelectionModel().getSelectedItem();
@@ -203,9 +279,49 @@ public class OrdersPanel extends AbstractPanelController {
 
     @Override
     public void onResume() {
+        LocalDate now = LocalDate.now();
+        YearMonth ym = YearMonth.from(now);
+        mDateFrom = ym.atDay(1);
+        mDateTo = ym.atEndOfMonth();
+        dateFrom.setValue(mDateFrom);
+        dateTo.setValue(mDateTo);
+        
+        mainWindow.showProgress(true, "Fetching truckers...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getShippers();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(shippers -> {
+            mainWindow.showProgress(false);
+            Shipper all = new Shipper();
+            all.setName("All");
+            shippers.add(0, all);
+            cbTrucks.setItems(FXCollections.observableArrayList(shippers));
+            getOrders(mDateFrom, mDateTo);
+            cbTrucks.setValue(all);
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error while retrieving truckers...", err);
+        }));
+    }
+    
+    private void getOrders() {
         mainWindow.showProgress(true, "Fetching orders...");
         disposables.add(Single.fromCallable(() -> {
             return EmbeddedDatabase.getInstance().getOrders();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
+            mainWindow.showProgress(false);
+            filteredList = new FilteredList<>(FXCollections.observableArrayList(orders), o -> true);
+            ordersTable.setItems(filteredList);
+            ordersTable.getSelectionModel().clearSelection();
+        }, err -> {
+            mainWindow.showProgress(false);
+            showErrorDialog("Database Error", "Error occurred while fetching orders data.", err);
+        }));
+    }
+    
+    private void getOrders(LocalDate dFrom, LocalDate dTo) {
+        mainWindow.showProgress(true, "Fetching orders...");
+        disposables.add(Single.fromCallable(() -> {
+            return EmbeddedDatabase.getInstance().getOrders(dFrom, dTo);
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
             mainWindow.showProgress(false);
             filteredList = new FilteredList<>(FXCollections.observableArrayList(orders), o -> true);
@@ -229,7 +345,7 @@ public class OrdersPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             mainWindow.showProgress(false);
             orderItems.setAll(items);
-            lblTotal.setText("P " + Utils.getMoneyFormat(order.getTotal()));
+            lblTotal.setText("P " + Utils.toMoneyFormat(order.getTotal()));
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching order items.", err);
@@ -389,7 +505,7 @@ public class OrdersPanel extends AbstractPanelController {
                 }
                 
                 // Save
-                File file = new File(folder.getAbsolutePath() + Utils.getSeparator() +
+                File file = new File(folder.getAbsolutePath() + Utils.fileSeparator() +
                         String.format("order_%d_%s.xlsx", order.getId(), LocalDate.now().format(Utils.fileDateFormat)));
                 try (FileOutputStream out = new FileOutputStream(file)) {
                     workbook.write(out);

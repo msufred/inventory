@@ -6,8 +6,10 @@ import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import io.reactivex.schedulers.Schedulers;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Optional;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -17,19 +19,21 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import org.gemseeker.app.Utils;
 import org.gemseeker.app.data.EmbeddedDatabase;
 import org.gemseeker.app.data.Product;
 import org.gemseeker.app.data.PurchaseInvoice;
 import org.gemseeker.app.data.PurchaseInvoiceItem;
-import org.gemseeker.app.data.Stock;
+import org.gemseeker.app.data.Supplier;
 import org.gemseeker.app.views.frameworks.AbstractPanelController;
 import org.gemseeker.app.views.frameworks.SplitController;
 import org.gemseeker.app.views.icons.PrintIcon;
@@ -51,13 +55,17 @@ import org.gemseeker.app.views.tablecells.ProductUnitTableCell;
 public class PurchasesPanel extends AbstractPanelController {
     
     @FXML private Button btnAdd;
+    @FXML private Button btnEdit;
     @FXML private Button btnRefresh;
     @FXML private Button btnPrint;
     
     @FXML private Label lblMonthYear;
     @FXML private Label lblMonthlyTotal;
-    @FXML private ComboBox<String> cbMonths;
-    @FXML private ComboBox<Integer> cbYears;
+    @FXML private ToggleButton toggleShowAll;
+    @FXML private ToggleButton toggleFilterDate;
+    @FXML private DatePicker dpFrom;
+    @FXML private DatePicker dpTo;
+    @FXML private ComboBox<Supplier> cbSuppliers;
     
     // Purchase Invoices Table
     @FXML private TableView<PurchaseInvoice> purchaseTable;
@@ -76,11 +84,6 @@ public class PurchasesPanel extends AbstractPanelController {
     @FXML private TableColumn<PurchaseInvoiceItem, Double> colTotal;
     @FXML private Label lblTotal;
     
-    // NOT RELATED TO PURCHASE INVOICE ITEMS
-    // This columns represents the current stock and ordered quantity of the product
-    @FXML private TableColumn<PurchaseInvoiceItem, Product> colOrdered;
-    @FXML private TableColumn<PurchaseInvoiceItem, Product> colInStock;
-    
     @FXML private SplitPane splitPane;
     private SplitController splitController;
     
@@ -89,13 +92,16 @@ public class PurchasesPanel extends AbstractPanelController {
     
     private FilteredList<PurchaseInvoice> filteredList;
     private final ObservableList<PurchaseInvoiceItem> productItems = FXCollections.observableArrayList();
+    private final SimpleIntegerProperty selectedInvoiceIndex = new SimpleIntegerProperty(-1);
+    private final SimpleIntegerProperty selectedInvoiceItemIndex = new SimpleIntegerProperty(-1);
     
     private final AddPurchaseWindow addPurchaseWindow;
+    private final EditPurchaseWindow editPurchaseWindow;
     private final PrintWindow printWindow;
     
-//    private final AddProductWindow addProductWindow;
-    private final EditProductWindow editProductWindow;
-    private final ShowOrdersWindow showOrdersWindow;
+    // Date filter range
+    private LocalDate mDateFrom;
+    private LocalDate mDateTo;
     
     public PurchasesPanel(MainWindow mainWindow) {
         super(PurchasesPanel.class.getResource("purchases.fxml"));
@@ -103,11 +109,8 @@ public class PurchasesPanel extends AbstractPanelController {
         disposables = new CompositeDisposable();
         
         addPurchaseWindow = new AddPurchaseWindow(this, mainWindow.getWindow());
+        editPurchaseWindow = new EditPurchaseWindow(this, mainWindow.getWindow());
         printWindow = new PrintWindow(mainWindow.getWindow());
-        
-//        addProductWindow = new AddProductWindow(this, mainWindow.getWindow());
-        editProductWindow = new EditProductWindow(this, mainWindow.getWindow());
-        showOrdersWindow = new ShowOrdersWindow(mainWindow.getWindow());
     }
 
     @Override
@@ -135,66 +138,36 @@ public class PurchasesPanel extends AbstractPanelController {
         colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colTotal.setCellFactory(col -> new PriceTableCell<>());
-        colOrdered.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colOrdered.setCellFactory(col -> new TableCell<PurchaseInvoiceItem, Product>() {
-            @Override
-            protected void updateItem(Product item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    Stock s = item.getStock();
-                    setText(s.getQuantityOut() + "");
-                } else setText("");
-            }
-        });
-        colInStock.setCellValueFactory(new PropertyValueFactory<>("product"));
-        colInStock.setCellFactory(col -> new TableCell<PurchaseInvoiceItem, Product>() {
-            @Override
-            protected void updateItem(Product item, boolean empty) {
-                super.updateItem(item, empty);
-                if (!empty && item != null) {
-                    Stock s = item.getStock();
-                    setText(s.getInStock()+ "");
-                } else setText("");
-            }
-        });
         
         itemsTable.setItems(productItems);
-        
-        cbMonths.setItems(FXCollections.observableArrayList(
-                "January", "February", "March", "April", "May", "June", "July",
-                "August", "September", "October", "November", "December"
-        ));
-        
-        cbYears.setItems(FXCollections.observableArrayList(
-                2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028
-        ));
-        
-        // Set current month and year
-        LocalDate now = LocalDate.now();
-        cbMonths.setValue(Utils.monthStringValue(now.getMonthValue()));
-        cbYears.setValue(now.getYear());
-        updateMonthLabel();
+        selectedInvoiceIndex.bind(purchaseTable.getSelectionModel().selectedIndexProperty());
+        selectedInvoiceItemIndex.bind(itemsTable.getSelectionModel().selectedIndexProperty());
         
         // Purchase Invoice Context Menu
         CheckMenuItem mShowDetails = new CheckMenuItem("Show Details");
         mShowDetails.setSelected(true);
         MenuItem mPrint = new MenuItem("Print");
+        MenuItem mEditInvoice = new MenuItem("Edit");
         MenuItem mDeleteInvoice = new MenuItem("Delete");
         ContextMenu cm = new ContextMenu();
-        cm.getItems().addAll(mShowDetails, mPrint, mDeleteInvoice);
+        cm.getItems().addAll(mShowDetails, mPrint, mEditInvoice, mDeleteInvoice);
         purchaseTable.setContextMenu(cm);
         
-        // Purchase Invoice Item Context Menus
-        MenuItem mOrders = new MenuItem("Show Orders");
-        MenuItem mEdit = new MenuItem("Edit Details");
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.getItems().addAll(mOrders, mEdit);
-        itemsTable.setContextMenu(contextMenu);
+        // Disable typing in DatePickers' textfield
+        dpFrom.getEditor().addEventFilter(KeyEvent.KEY_TYPED, evt -> evt.consume());
+        dpTo.getEditor().addEventFilter(KeyEvent.KEY_TYPED, evt -> evt.consume());
         
         disposables.addAll(
                 // Add
                 JavaFxObservable.actionEventsOf(btnAdd).subscribe(evt -> {
                     addPurchaseWindow.show();
+                }),
+                // Edit
+                JavaFxObservable.actionEventsOf(btnEdit).subscribe(evt -> {
+                    PurchaseInvoice selected = purchaseTable.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        editPurchaseWindow.show(selected);
+                    }
                 }),
                 // Refresh
                 JavaFxObservable.actionEventsOf(btnRefresh).subscribe(evt -> {
@@ -204,10 +177,32 @@ public class PurchasesPanel extends AbstractPanelController {
                 JavaFxObservable.actionEventsOf(btnPrint).subscribe(evt -> {
                     printList();
                 }),
+                JavaFxObservable.changesOf(toggleShowAll.selectedProperty()).subscribe(selected -> {
+                    if (selected.getNewVal()) {
+                        lblMonthYear.setText("All");
+                        // show all purchase invoices
+                    }
+                }),
+                JavaFxObservable.changesOf(toggleFilterDate.selectedProperty()).subscribe(selected -> {
+                    boolean isSelected = selected.getNewVal();
+                    dpFrom.setDisable(!isSelected);
+                    dpTo.setDisable(!isSelected);
+                    if (isSelected) {
+                        updateMonthLabel();
+                        filterByDate();
+                    }
+                }),
                 // Purchase Invoice -> Print
                 JavaFxObservable.actionEventsOf(mPrint).subscribe(evt -> {
                     PurchaseInvoice inv = purchaseTable.getSelectionModel().getSelectedItem();
                     if (inv != null) printPurchaseProducts(inv);
+                }),
+                // Purchase Invoice -> Edit
+                JavaFxObservable.actionEventsOf(mEditInvoice).subscribe(evt -> {
+                    PurchaseInvoice selected = purchaseTable.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        editPurchaseWindow.show(selected);
+                    }
                 }),
                 // Purchase Invoice -> Show Details
                 JavaFxObservable.actionEventsOf(mShowDetails).subscribe(evt -> {
@@ -228,30 +223,39 @@ public class PurchasesPanel extends AbstractPanelController {
                         }
                     }
                 }),
-                // Purchase Invoice Item -> Show Orders
-                JavaFxObservable.actionEventsOf(mOrders).subscribe(evt -> {
-                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
-                    if (p != null) {
-                        showOrdersWindow.show(p.getProduct());
-                    }
-                }),
-                // Purchase Invoice Item -> Edit Details
-                JavaFxObservable.actionEventsOf(mEdit).subscribe(evt -> {
-                    PurchaseInvoiceItem p = itemsTable.getSelectionModel().getSelectedItem();
-                    if (p != null) editProductWindow.show(p.getProduct());
-                }),
                 JavaFxObservable.changesOf(purchaseTable.getSelectionModel().selectedItemProperty()).subscribe(inv -> {
                     if (inv.getNewVal() != null) {
                         getPurchaseInvoiceItems(inv.getNewVal());
                     }
                 }),
-                JavaFxObservable.changesOf(cbMonths.valueProperty()).subscribe(month -> {
+                JavaFxObservable.changesOf(dpFrom.valueProperty()).subscribe(value -> {
+                    mDateFrom = value.getNewVal();
+                    if (mDateFrom.isAfter(mDateTo)) {
+                        YearMonth ym = YearMonth.from(mDateFrom);
+                        mDateTo = ym.atEndOfMonth();
+                        dpTo.setValue(mDateTo);
+                    }
                     updateMonthLabel();
                     filterByDate();
                 }),
-                JavaFxObservable.changesOf(cbYears.valueProperty()).subscribe(month -> {
+                JavaFxObservable.changesOf(dpTo.valueProperty()).subscribe(value -> {
+                    mDateTo = value.getNewVal();
                     updateMonthLabel();
                     filterByDate();
+                }),
+                JavaFxObservable.changesOf(cbSuppliers.valueProperty()).subscribe(value -> {
+                    Supplier supplier = value.getNewVal();
+                    if (supplier != null && filteredList != null) {
+                        productItems.clear();
+                        if (supplier.getName().equals("All")) {
+                            filteredList.setPredicate(p -> true);
+                        } else {
+                            filteredList.setPredicate(p -> p.getSupplier().equals(supplier.getName()));
+                        }
+                    }
+                }),
+                JavaFxObservable.changesOf(selectedInvoiceIndex).subscribe(index -> {
+                    btnEdit.setDisable(index.getNewVal().intValue() == -1);
                 })
         );
         
@@ -268,44 +272,64 @@ public class PurchasesPanel extends AbstractPanelController {
 
     @Override
     public void onResume() {
-        filterByDate();
-    }
-    
-    private void filterByDate() {
-        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
-            int month = Utils.monthIntegerValue(cbMonths.getValue());
-            int year = cbYears.getValue();
-            LocalDate date = LocalDate.of(year, month, 1);
-            getPurchaseInvoices(date);
-        }
-    }
-    
-    private void getPurchaseInvoices(LocalDate date) {
-        mainWindow.showProgress(true, "Fetching purchase invoices...");
+        LocalDate now = LocalDate.now();
+        YearMonth ym = YearMonth.from(now);
+        mDateFrom = ym.atDay(1);
+        mDateTo = ym.atEndOfMonth();
+        dpFrom.setValue(mDateFrom);
+        dpTo.setValue(mDateTo);
+        updateMonthLabel();
+        
+        mainWindow.showProgress(true, "Fetching suppliers...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getPurchaseInvoices(date);
-        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(invoices -> {
+            return EmbeddedDatabase.getInstance().getSuppliers();
+        }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(suppliers -> {
             mainWindow.showProgress(false);
-            filteredList = new FilteredList<>(FXCollections.observableArrayList(invoices), s -> true);
-            purchaseTable.setItems(filteredList);
-            productItems.clear();
-            
-            double monthlyTotal = 0;
-            for (PurchaseInvoice invoice : invoices) {
-                monthlyTotal += invoice.getTotal();
-            }
-            lblMonthlyTotal.setText("P " + Utils.getMoneyFormat(monthlyTotal));
+            Supplier all = new Supplier();
+            all.setName("All");
+            suppliers.add(0, all);
+            cbSuppliers.setItems(FXCollections.observableArrayList(suppliers));
+            filterByDate();
+            cbSuppliers.setValue(all);
         }, err -> {
             mainWindow.showProgress(false);
-            showErrorDialog("Database Error", "Error occurred while fetching inventory data.", err);
+            showErrorDialog("Database Error", "Error while retrieving suppliers list.", err);
         }));
     }
     
+    private void filterByDate() {
+        if (mDateFrom != null && mDateTo != null) {
+            mainWindow.showProgress(true, "Fetching purchase invoices...");
+            disposables.add(Single.fromCallable(() -> {
+                return EmbeddedDatabase.getInstance().getPurchaseInvoices(mDateFrom, mDateTo);
+            }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(invoices -> {
+                mainWindow.showProgress(false);
+                filteredList = new FilteredList<>(FXCollections.observableArrayList(invoices), s -> true);
+                purchaseTable.setItems(filteredList);
+                productItems.clear();
+                
+                // reset table selections
+                purchaseTable.getSelectionModel().clearSelection();
+                itemsTable.getSelectionModel().clearSelection();
+
+                // recalculate total
+                double monthlyTotal = 0;
+                for (PurchaseInvoice invoice : invoices) {
+                    monthlyTotal += invoice.getTotal();
+                }
+                lblMonthlyTotal.setText("P " + Utils.toMoneyFormat(monthlyTotal));
+            }, err -> {
+                mainWindow.showProgress(false);
+                showErrorDialog("Database Error", "Error occurred while fetching inventory data.", err);
+            }));
+        }
+    }
+    
     private void updateMonthLabel() {
-        if (cbMonths.getValue() != null && cbYears.getValue() != -1) {
-            int month = Utils.monthIntegerValue(cbMonths.getValue());
-            int year = cbYears.getValue();
-            lblMonthYear.setText(Utils.monthStringValue(month) + " " + year);
+        if (mDateFrom != null && mDateTo != null && (mDateFrom.isBefore(mDateTo))) {
+            String rangeText = String.format("%s - %s", mDateFrom.format(Utils.dateTimeFormat2), 
+                    mDateTo.format(Utils.dateTimeFormat2));
+            lblMonthYear.setText(rangeText);
         }
     }
     
@@ -316,7 +340,7 @@ public class PurchasesPanel extends AbstractPanelController {
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(items -> {
             mainWindow.showProgress(false);
             productItems.setAll(items);
-            lblTotal.setText("P " + Utils.getMoneyFormat(invoice.getTotal()));
+            lblTotal.setText("P " + Utils.toMoneyFormat(invoice.getTotal()));
         }, err -> {
             mainWindow.showProgress(false);
             showErrorDialog("Database Error", "Error occurred while fetching purchased products", err);
@@ -402,9 +426,7 @@ public class PurchasesPanel extends AbstractPanelController {
     public void onDispose() {
         disposables.dispose();
         addPurchaseWindow.onDispose();
-//        addProductWindow.onDispose();
-        editProductWindow.onDispose();
-        showOrdersWindow.onDispose();
+        editPurchaseWindow.onDispose();
         printWindow.onDispose();
     }
 
