@@ -1,28 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="500.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="1200.0" stylesheets="@css/styles.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
             <Button fx:id="btnRefresh" mnemonicParsing="false" styleClass="primary" text="Refresh" />
             <Button fx:id="btnPrint" mnemonicParsing="false" styleClass="primary" text="Print List" />
-            <Label styleClass="form-label" text="Filter">
+            <Separator orientation="VERTICAL">
                <HBox.margin>
-                  <Insets left="32.0" />
+                  <Insets left="8.0" />
+               </HBox.margin></Separator>
+            <RadioButton fx:id="toggleShowAll" mnemonicParsing="false" text="Show All">
+               <toggleGroup>
+                  <ToggleGroup fx:id="filterDate" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="toggleFilterDate" mnemonicParsing="false" selected="true" text="Filter Date" toggleGroup="$filterDate" />
+            <Label text="From">
+               <HBox.margin>
+                  <Insets left="16.0" />
+               </HBox.margin></Label>
+            <DatePicker fx:id="dateFrom">
+               <HBox.margin>
+                  <Insets />
                </HBox.margin>
-            </Label>
-            <ComboBox fx:id="cbMonths" minHeight="32.0" prefWidth="150.0" promptText="Select Month" styleClass="form-combo-box" />
-            <ComboBox fx:id="cbYears" minHeight="32.0" prefWidth="150.0" promptText="Select Year" styleClass="form-combo-box" />
+            </DatePicker>
+            <Label text="To" />
+            <DatePicker fx:id="dateTo" />
+            <Separator orientation="VERTICAL">
+               <HBox.margin>
+                  <Insets left="8.0" />
+               </HBox.margin>
+            </Separator>
+            <Label text="Filter Supplier" />
+            <ComboBox fx:id="cbSuppliers" prefWidth="150.0" promptText="Select Supplier" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblSearch" />
+            <TextField fx:id="searchField" promptText="Search Product or SKU" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
@@ -36,20 +65,20 @@
             <TableColumn fx:id="colUnit" prefWidth="120.0" styleClass="table-cell-center-align" text="Unit" />
             <TableColumn fx:id="colUnitPrice" prefWidth="120.0" styleClass="table-cell-right-align" text="Unit Price" />
             <TableColumn fx:id="colRetailPrice" prefWidth="120.0" styleClass="table-cell-right-align" text="Retail Price" />
-            <TableColumn fx:id="colInStock" prefWidth="120.0" styleClass="table-cell-center-align" text="In Stock" />
-            <TableColumn fx:id="colMonth" prefWidth="120.0" styleClass="table-cell-center-align" text="MONTH OF JANUARY">
+            <TableColumn prefWidth="75.0" text="Total Purchased">
                <columns>
-                  <TableColumn fx:id="colPurchased" styleClass="table-cell-center-align" text="Purchased" />
-                  <TableColumn fx:id="colPurchasedTotal" styleClass="table-cell-center-align" text="Total (PHP)" />
-                  <TableColumn fx:id="colOrdered" styleClass="table-cell-center-align" text="Ordered" />
-                  <TableColumn fx:id="colOrderedTotal" styleClass="table-cell-center-align" text="Total (PHP)" />
+                  <TableColumn fx:id="colPurchased" prefWidth="61.0" styleClass="table-cell-center-align" text="Qty" />
+                  <TableColumn fx:id="colPurchasedTotal" prefWidth="123.0" styleClass="table-cell-center-align" text="Total (PHP)" />
+               </columns>
+            </TableColumn>
+            <TableColumn fx:id="colInStock" prefWidth="96.0" styleClass="table-cell-center-align" text="In Stock" />
+            <TableColumn prefWidth="75.0" text="Total Ordered">
+               <columns>
+                  <TableColumn fx:id="colOrdered" prefWidth="54.0" styleClass="table-cell-center-align" text="Qty" />
+                  <TableColumn fx:id="colOrderedTotal" prefWidth="106.0" styleClass="table-cell-center-align" text="Total (PHP)" />
                </columns>
             </TableColumn>
         </columns>
       </TableView>
    </children>
-   <stylesheets>
-      <URL value="@css/bootstrap3.css" />
-      <URL value="@css/styles.css" />
-   </stylesheets>
 </VBox>

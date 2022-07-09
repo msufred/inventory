@@ -1,70 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.String?>
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="500.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="500.0" prefWidth="1200.0" stylesheets="@css/styles.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="8.0">
+      <HBox alignment="CENTER" prefWidth="200.0" styleClass="detail-item-group">
          <children>
-            <HBox alignment="CENTER" prefWidth="200.0" styleClass="detail-item-group" HBox.hgrow="ALWAYS">
-               <children>
-                  <Label fx:id="lblPeso" prefHeight="56.0" prefWidth="32.0" style="-fx-background-color: -col-green;" />
-                  <Label fx:id="lblMonthYear" minWidth="260.0" styleClass="form-title" text="September 2022">
-                     <HBox.margin>
-                        <Insets left="8.0" />
-                     </HBox.margin>
-                  </Label>
-                  <HBox alignment="CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Label styleClass="text-big" text="Total" />
-                        <Label fx:id="lblMonthlyTotal" text="P 0.00">
-                           <styleClass>
-                              <String fx:value="text-big" />
-                              <String fx:value="text-bold" />
-                           </styleClass>
-                        </Label>
-                     </children>
-                  </HBox>
-               </children>
+            <Label fx:id="lblPeso" prefHeight="32.0" prefWidth="16.0" style="-fx-background-color: -col-green;" />
+            <Label fx:id="lblMonthYear" minWidth="260.0" text="All">
                <HBox.margin>
-                  <Insets />
+                  <Insets left="8.0" />
                </HBox.margin>
+               <styleClass>
+                  <String fx:value="text-bold" />
+                  <String fx:value="text-big" />
+               </styleClass>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER" minWidth="300.0" spacing="8.0">
+               <children>
+                  <Label styleClass="text-big" text="Total" />
+                  <Label fx:id="lblMonthlyTotal" text="P 0.00">
+                     <styleClass>
+                        <String fx:value="text-big" />
+                        <String fx:value="text-bold" />
+                     </styleClass>
+                  </Label>
+               </children>
             </HBox>
          </children>
          <VBox.margin>
-            <Insets left="8.0" right="8.0" top="8.0" />
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
          </VBox.margin>
       </HBox>
-      <Separator prefWidth="200.0" />
       <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="4.0">
          <children>
             <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Purchase" />
+            <Button fx:id="btnEdit" disable="true" mnemonicParsing="false" text="Edit" />
             <Button fx:id="btnRefresh" mnemonicParsing="false" text="Refresh" />
             <Button fx:id="btnPrint" mnemonicParsing="false" text="Print List" />
-            <Label styleClass="form-label" text="Filter">
+            <Separator orientation="VERTICAL">
                <HBox.margin>
-                  <Insets left="32.0" />
+                  <Insets left="8.0" />
+               </HBox.margin>
+            </Separator>
+            <RadioButton fx:id="toggleShowAll" mnemonicParsing="false" text="Show All">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+               <toggleGroup>
+                  <ToggleGroup fx:id="filterGroup" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="toggleFilterDate" mnemonicParsing="false" selected="true" text="Filter Date" toggleGroup="$filterGroup" />
+            <Label text="From">
+               <HBox.margin>
+                  <Insets left="16.0" />
                </HBox.margin>
             </Label>
-            <ComboBox fx:id="cbMonths" prefWidth="150.0" promptText="Select Month" styleClass="form-combo-box" />
-            <ComboBox fx:id="cbYears" prefWidth="150.0" promptText="Select Year" styleClass="form-combo-box" />
+            <DatePicker fx:id="dpFrom" promptText="From" />
+            <Label text="To" />
+            <DatePicker fx:id="dpTo" promptText="To" />
+            <Separator orientation="VERTICAL">
+               <HBox.margin>
+                  <Insets left="8.0" />
+               </HBox.margin>
+            </Separator>
+            <Label text="Filter Supplier">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Label>
+            <ComboBox fx:id="cbSuppliers" prefWidth="150.0" promptText="Select Supplier" />
          </children>
          <padding>
             <Insets bottom="8.0" left="8.0" right="8.0" />
          </padding>
       </HBox>
-      <SplitPane fx:id="splitPane" dividerPositions="0.4" VBox.vgrow="ALWAYS">
+      <SplitPane fx:id="splitPane" dividerPositions="0.5" VBox.vgrow="ALWAYS">
          <items>
             <TableView fx:id="purchaseTable" prefHeight="200.0" prefWidth="200.0">
               <columns>
@@ -89,19 +116,12 @@
                   </HBox>
                   <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                     <columns>
-                      <TableColumn fx:id="colName" prefWidth="100.0" text="Product Name" />
+                      <TableColumn fx:id="colName" prefWidth="130.0" text="Product Name" />
                         <TableColumn fx:id="colSku" prefWidth="100.0" styleClass="table-cell-center-align" text="SKU" />
                         <TableColumn fx:id="colUnit" prefWidth="100.0" styleClass="table-cell-center-align" text="Unit" />
                         <TableColumn fx:id="colUnitPrice" styleClass="table-cell-right-align" text="Unit Price" />
                         <TableColumn fx:id="colQuantity" prefWidth="70.0" styleClass="table-cell-center-align" text="Quantity" />
                         <TableColumn fx:id="colTotal" styleClass="table-cell-right-align" text="Amount" />
-                        <TableColumn maxWidth="10.0" prefWidth="10.0" />
-                        <TableColumn prefWidth="75.0" text="Inventory">
-                           <columns>
-                              <TableColumn fx:id="colInStock" prefWidth="70.0" styleClass="table-cell-center-align" text="In Stock" />
-                              <TableColumn fx:id="colOrdered" prefWidth="70.0" styleClass="table-cell-center-align" text="Ordered" />
-                           </columns>
-                        </TableColumn>
                     </columns>
                   </TableView>
                   <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="details-group">
@@ -123,8 +143,4 @@
          </items>
       </SplitPane>
    </children>
-   <stylesheets>
-      <URL value="@css/bootstrap3.css" />
-      <URL value="@css/styles.css" />
-   </stylesheets>
 </VBox>

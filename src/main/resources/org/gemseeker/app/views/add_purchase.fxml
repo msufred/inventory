@@ -47,6 +47,8 @@
       <HBox alignment="CENTER_LEFT" spacing="4.0">
          <children>
             <Button fx:id="btnAdd" mnemonicParsing="false" styleClass="primary" text="Add Product" />
+            <Button fx:id="btnEdit" disable="true" mnemonicParsing="false" text="Edit" />
+            <Button fx:id="btnRemove" disable="true" mnemonicParsing="false" text="Remove" />
             <Region HBox.hgrow="ALWAYS" />
             <Label styleClass="form-label" text="Total" />
             <Label fx:id="lblTotal" text="P 0.00">
