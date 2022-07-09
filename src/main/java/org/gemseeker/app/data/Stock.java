@@ -63,8 +63,9 @@ public class Stock implements IEntry {
     }
     
     public String updateSQL() {
-        return String.format("UPDATE stocks SET quantity='%d', quantity_out='%d', in_stock='%d'",
-                quantity, quantityOut, inStock);
+        return String.format("UPDATE stocks SET quantity='%d', quantity_out='%d', in_stock='%d' "
+                + "WHERE id='%d'",
+                quantity, quantityOut, inStock, id);
     }
 
 }
