@@ -5,7 +5,7 @@ package org.gemseeker.app.data;
  * @author Gem
  */
 public class DatabaseUtils {
-
+    
     public static String[] tables() {
         return new String[] {
             createProductsTable(),              // Products
