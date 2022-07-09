@@ -52,5 +52,10 @@ public class PurchaseInvoice implements IEntry {
                 + "VALUES ('%s', '%s', '%s', '%f')",
                 id, date, supplier, total);
     }
+    
+    public String updateSQL() {
+        return String.format("UPDATE purchase_invoices SET date='%s', supplier='%s', total='%f' WHERE id='%s'",
+                date, supplier, total, id);
+    }
 
 }
