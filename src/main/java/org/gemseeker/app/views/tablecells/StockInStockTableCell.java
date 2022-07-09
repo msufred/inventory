@@ -14,8 +14,10 @@ public class StockInStockTableCell<T> extends TableCell<T, Stock> {
         super.updateItem(item, empty);
         if (!empty && item != null) {
             setText(item.getInStock() + "");
+            getStyleClass().add("table-cell-green");
         } else {
             setText("");
+            getStyleClass().remove("table-cell-green");
         }
     }
     

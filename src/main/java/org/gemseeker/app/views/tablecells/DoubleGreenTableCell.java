@@ -13,7 +13,7 @@ public class DoubleGreenTableCell<T> extends TableCell<T, Double> {
     protected void updateItem(Double item, boolean empty) {
         super.updateItem(item, empty);
         if (!empty && item != null) {
-            setText(Utils.getMoneyFormat(item));
+            setText(Utils.toMoneyFormat(item));
             getStyleClass().add("table-cell-green");
         } else {
             setText("");

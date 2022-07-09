@@ -14,7 +14,7 @@ public class ProductRetailPriceTableCell<T> extends TableCell<T, Product> {
     protected void updateItem(Product item, boolean empty) {
         super.updateItem(item, empty);
         if (!empty && item != null) {
-            setText(Utils.getMoneyFormat(item.getRetailPrice()));
+            setText(Utils.toMoneyFormat(item.getRetailPrice()));
         } else {
             setText("");
         }
