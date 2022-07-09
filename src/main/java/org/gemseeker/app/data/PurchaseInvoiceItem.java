@@ -9,7 +9,7 @@ import org.gemseeker.app.data.frameworks.IEntry;
  */
 public class PurchaseInvoiceItem implements IEntry {
     
-    private int id;
+    private int id = -1;
     private LocalDate date;
     private String invoiceId; // purchase invoice
     private int productId = -1;
@@ -91,4 +91,9 @@ public class PurchaseInvoiceItem implements IEntry {
                 date, invoiceId, productId, unitPrice, quantity, total);
     }
 
+    public String updateSQL() {
+        return String.format("UPDATE purchase_invoice_items SET "
+                + "date='%s', unit_price='%f', quantity='%d', total='%f' "
+                + "WHERE id='%d'", date, unitPrice, quantity, total, id);
+    }
 }
