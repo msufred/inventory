@@ -136,7 +136,7 @@ public class AddOrderWindow extends AbstractWindowController {
             
             // Save Shipper entry if not yet saved
             String shipperName = cbShippers.getEditor().getText();
-            Shipper shipper = database.getShipper(shipperName);
+            Shipper shipper = database.getShipperByName(shipperName);
             if (shipper == null) {
                 shipper = new Shipper();
                 shipper.setName(cbShippers.getEditor().getText());

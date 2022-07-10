@@ -115,7 +115,7 @@ public class ShowOrdersWindow extends AbstractWindowController {
         lblProduct.setText(product.getName() + "-" + product.getSupplier());
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getOrders(product.getId());
+            return EmbeddedDatabase.getInstance().getOrdersByProductId(product.getId());
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
             showProgress(false);
             filteredList = new FilteredList<>(FXCollections.observableArrayList(orders));

@@ -296,7 +296,7 @@ public class InventoryPanel extends AbstractPanelController {
             EmbeddedDatabase database = EmbeddedDatabase.getInstance();
             ArrayList<Product> products = database.getProducts();
             ArrayList<PurchaseInvoiceItem> purchaseItems = database.getPurchaseInvoiceItems(dateFrom, dateTo);
-            ArrayList<OrderItem> orderedItems = database.getOrderItems(dateFrom, dateTo);
+            ArrayList<OrderItem> orderedItems = database.getOrderItemsByDateRange(dateFrom, dateTo);
             ArrayList<ProductMonthlyView> views = new ArrayList<>();
             for (Product p : products) {
                 ProductMonthlyView view = new ProductMonthlyView();

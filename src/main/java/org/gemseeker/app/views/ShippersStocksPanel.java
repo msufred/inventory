@@ -166,8 +166,8 @@ public class ShippersStocksPanel extends AbstractPanelController {
         disposables.add(Single.fromCallable(() -> {
             EmbeddedDatabase database = EmbeddedDatabase.getInstance();
             ArrayList<ShipperStock> stocks = database.getShipperStocks(shipper.getId());                    // get all ShipperStocks
-            ArrayList<Order> orders = database.getOrders(shipper.getId(), date);                            // get all Orders of the month
-            ArrayList<OrderItem> orderItems = database.getOrderItems(date);                                 // get all OrderItems of the month
+            ArrayList<Order> orders = database.getOrdersByShipperIdAndDate(shipper.getId(), date);                            // get all Orders of the month
+            ArrayList<OrderItem> orderItems = database.getOrderItemsByDate(date);                                 // get all OrderItems of the month
             ArrayList<DeliveryInvoice> deliveries = database.getDeliveryInvoices(shipper.getId(), date);    // get all DeliveryInvoice of the month
             ArrayList<DeliveryInvoiceItem> deliveryItems = database.getDeliveryInvoiceItems(date);          // get all DeliveryInvoiceItems of the month
             

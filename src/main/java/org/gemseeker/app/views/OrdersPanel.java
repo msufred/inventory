@@ -321,7 +321,7 @@ public class OrdersPanel extends AbstractPanelController {
     private void getOrders(LocalDate dFrom, LocalDate dTo) {
         mainWindow.showProgress(true, "Fetching orders...");
         disposables.add(Single.fromCallable(() -> {
-            return EmbeddedDatabase.getInstance().getOrders(dFrom, dTo);
+            return EmbeddedDatabase.getInstance().getOrdersByDateRange(dFrom, dTo);
         }).subscribeOn(Schedulers.io()).observeOn(JavaFxScheduler.platform()).subscribe(orders -> {
             mainWindow.showProgress(false);
             filteredList = new FilteredList<>(FXCollections.observableArrayList(orders), o -> true);
