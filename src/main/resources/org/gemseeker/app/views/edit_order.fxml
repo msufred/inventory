@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="600.0" spacing="4.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <stylesheets>
+      <URL value="@css/bootstrap3.css" />
+      <URL value="@css/styles.css" />
+   </stylesheets>
+   <children>
+      <Label styleClass="form-title" text="Edit Order" />
+      <HBox spacing="4.0">
+         <children>
+            <VBox HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="form-label" text="Shipper Name" />
+                  <TextField fx:id="tfShipper" editable="false" />
+               </children>
+            </VBox>
+            <VBox>
+               <children>
+                  <Label styleClass="form-label" text="Date" />
+                  <DatePicker fx:id="datePicker" editable="false" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <Label styleClass="form-label" text="Product Items">
+         <VBox.margin>
+            <Insets top="16.0" />
+         </VBox.margin>
+      </Label>
+      <HBox alignment="CENTER_LEFT" spacing="4.0">
+         <children>
+            <Button fx:id="btnAdd" defaultButton="true" mnemonicParsing="false" styleClass="primary" text="Add Item" />
+            <Button fx:id="btnEdit" disable="true" mnemonicParsing="false" text="Edit" />
+            <Button fx:id="btnRemove" disable="true" mnemonicParsing="false" text="Remove" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label styleClass="form-label" text="Total" />
+            <Label fx:id="lblTotal" text="P 0.00">
+               <styleClass>
+                  <String fx:value="form-label" />
+                  <String fx:value="text-bold" />
+                  <String fx:value="text-big" />
+               </styleClass>
+            </Label>
+         </children>
+      </HBox>
+      <TableView fx:id="itemsTable" prefHeight="200.0" prefWidth="200.0">
+        <columns>
+          <TableColumn fx:id="colName" prefWidth="150.0" text="Name" />
+          <TableColumn fx:id="colUnit" prefWidth="150.0" styleClass="table-cell-center-align" text="Unit" />
+            <TableColumn fx:id="colRetailPrice" prefWidth="75.0" styleClass="table-cell-right-align" text="Retail Price" />
+            <TableColumn fx:id="colQuantity" prefWidth="50.0" styleClass="table-cell-center-align" text="Qty" />
+            <TableColumn fx:id="colTotal" prefWidth="77.0" styleClass="table-cell-right-align" text="Total" />
+        </columns>
+      </TableView>
+      <ProgressBar fx:id="progressBar" prefWidth="600.0" visible="false">
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </ProgressBar>
+      <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="5.0">
+         <children>
+            <Button fx:id="btnSave" defaultButton="true" mnemonicParsing="false" prefWidth="120.0" styleClass="primary" text="Save" />
+            <Button fx:id="btnCancel" cancelButton="true" mnemonicParsing="false" prefWidth="120.0" text="Cancel" />
+         </children>
+         <VBox.margin>
+            <Insets top="8.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+   </padding>
+</VBox>
