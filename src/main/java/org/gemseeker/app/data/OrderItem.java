@@ -91,6 +91,11 @@ public class OrderItem implements IEntry {
                 date, orderId, productId, quantity, total);
     }
     
+    public String updateSQL() {
+        return String.format("UPDATE order_items SET date='%s', quantity='%d', total='%f' WHERE id='%d'",
+                date, quantity, total, id);
+    }
+    
     @Override
     public String toString() {
         return String.format("%s (%s)", product.getName(), product.getSupplier());
