@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_home"
+        android:title="@string/home"
+        android:icon="@drawable/ic_home"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_trucks"
+        android:title="@string/trucks"
+        android:icon="@drawable/ic_truck"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_orders"
+        android:title="@string/orders"
+        android:icon="@drawable/ic_shopping_cart"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_profile"
+        android:title="@string/profile"
+        android:icon="@drawable/ic_user"
+        app:showAsAction="always" />
+
+</menu>

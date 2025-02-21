@@ -23,7 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String DEBUG_NAME = "Register";
 
     private EditText etUsername, etPassword, etPasswordConfirm;
-    private Button btnRegister;
+    private Button btnRegister, btnLogin;
     private ProgressBar progress;
 
     private CompositeDisposable disposables;
@@ -34,8 +34,6 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         getWidgets();
         setListeners();
-
-        disposables = new CompositeDisposable();
     }
 
     private void getWidgets() {
@@ -43,6 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_password);
         etPasswordConfirm = findViewById(R.id.et_password_confirm);
         btnRegister = findViewById(R.id.btn_register);
+        btnLogin = findViewById(R.id.btn_login);
         progress = findViewById(R.id.progress_circular);
         progress.setVisibility(View.INVISIBLE);
     }
@@ -50,6 +49,11 @@ public class RegisterActivity extends AppCompatActivity {
     private void setListeners() {
         btnRegister.setOnClickListener(evt -> {
             if (validated()) registerAndClose();
+        });
+
+        btnLogin.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+            finish();
         });
     }
 
@@ -78,6 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
             Log.d(DEBUG_NAME, "DONE: " + Thread.currentThread());
             progress.setVisibility(View.INVISIBLE);
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         }, err -> {
             Log.e(DEBUG_NAME, "Database Error: " + err);
             progress.setVisibility(View.INVISIBLE);
@@ -85,8 +90,15 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (disposables == null) disposables = new CompositeDisposable();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(DEBUG_NAME, "Destroying resources...");
         disposables.dispose();
     }
 }

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:layout_width="500dp"
+        android:layout_height="250dp"
+        android:contentDescription="@string/vector"
+        android:src="@drawable/circle_gradient"
+        android:layout_marginTop="-100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dashboard"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="32dp"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="32dp">
+
+        <TableRow >
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_warehouses"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/warehouses"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_home"
+                    app:drawableTint="@color/purple_700" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_employees"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/employees"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_users"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+        </TableRow>
+
+        <TableRow android:layout_marginTop="8dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_vehicles"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/vehicles"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_truck"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_products"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/products"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_shopping_bag"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+        </TableRow>
+
+        <TableRow android:layout_marginTop="8dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_brands"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/brands"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_award"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_categories"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/categories"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_filter"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+        </TableRow>
+
+        <TableRow android:layout_marginTop="8dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_suppliers"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/suppliers"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_users"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_consumers"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                app:cardCornerRadius="16dp"
+                android:elevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/consumers"
+                    android:gravity="center|center_vertical"
+                    android:padding="16dp"
+                    android:background="#EBE8E8"
+                    app:drawableStartCompat="@drawable/ic_users"
+                    app:drawableTint="@color/purple_700"/>
+
+            </androidx.cardview.widget.CardView>
+
+        </TableRow>
+
+    </TableLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
