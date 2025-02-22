@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/menu_trucks"
-        android:title="@string/trucks"
+        android:title="@string/deliveries"
         android:icon="@drawable/ic_truck"
         app:showAsAction="always"/>
 

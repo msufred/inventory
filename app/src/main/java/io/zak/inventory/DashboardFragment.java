@@ -2,7 +2,6 @@ package io.zak.inventory;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,7 @@ import androidx.fragment.app.Fragment;
 
 public class DashboardFragment extends Fragment {
 
-    private static final String DEBUG_NAME = "Dashboard";
-
-    private CardView cardWarehouses, cardEmployees, cardVehicles, cardProducts, cardBrands, cardCategories, cardSuppliers, cardConsumers;
+    private static final String TAG = "Dashboard";
 
     @Nullable
     @Override
@@ -24,19 +21,19 @@ public class DashboardFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
         // get widgets
-        cardWarehouses = view.findViewById(R.id.card_warehouses);
-        cardEmployees = view.findViewById(R.id.card_employees);
-        cardVehicles = view.findViewById(R.id.card_vehicles);
-        cardProducts = view.findViewById(R.id.card_products);
-        cardBrands = view.findViewById(R.id.card_brands);
-        cardCategories = view.findViewById(R.id.card_categories);
-        cardSuppliers = view.findViewById(R.id.card_suppliers);
-        cardConsumers = view.findViewById(R.id.card_consumers);
+        CardView cardWarehouses = view.findViewById(R.id.card_warehouses);
+        CardView cardEmployees = view.findViewById(R.id.card_employees);
+        CardView cardVehicles = view.findViewById(R.id.card_vehicles);
+        CardView cardProducts = view.findViewById(R.id.card_products);
+        CardView cardBrands = view.findViewById(R.id.card_brands);
+        CardView cardCategories = view.findViewById(R.id.card_categories);
+        CardView cardSuppliers = view.findViewById(R.id.card_suppliers);
+        CardView cardConsumers = view.findViewById(R.id.card_consumers);
 
         // setup listeners
-        cardWarehouses.setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), WarehousesActivity.class));
-        });
+        cardWarehouses.setOnClickListener(v -> startActivity(new Intent(getActivity(), WarehousesActivity.class)));
+        cardEmployees.setOnClickListener(v -> startActivity(new Intent(getActivity(), EmployeesActivity.class)));
+        cardVehicles.setOnClickListener(v -> startActivity(new Intent(getActivity(), VehiclesActivity.class)));
 
         return view;
     }

@@ -14,6 +14,9 @@ import io.zak.inventory.data.entities.Employee;
 @Dao
 public interface EmployeeDao {
 
+    @Insert
+    long insert(Employee employee);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Employee...employees);
 

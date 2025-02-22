@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "warehouses")
 public class Warehouse {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     public int id;
     public String name;
     public String address;

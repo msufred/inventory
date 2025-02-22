@@ -6,9 +6,6 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -25,7 +22,7 @@ import io.zak.inventory.data.AppDatabaseImpl;
 public class MainActivity extends AppCompatActivity {
 
     // for debugging only
-    private static final String DEBUG_NAME = "Main";
+    private static final String TAG = "Main";
 
     // collects all reactive calls
     private CompositeDisposable disposables;
@@ -41,10 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        Log.d(DEBUG_NAME, "Checking user login...");
+        Log.d(TAG, "Checking user login...");
         // if no user login, check database if any user exits, if no user exist, go to Register activity
         if (Utils.getLoginId(this) == -1) {
-            disposables.add(Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).userDao().getSize())
+            disposables.add(Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).users().getSize())
                     .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(size -> {
                         if (size > 0) showLogin();
                         else showRegister();
@@ -75,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(DEBUG_NAME, "Destroying resources...");
+        Log.d(TAG, "Destroying resources...");
         disposables.dispose();
     }
 }

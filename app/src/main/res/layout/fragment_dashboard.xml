@@ -56,8 +56,9 @@
                     android:text="@string/warehouses"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
-                    app:drawableStartCompat="@drawable/ic_home"
+                    app:drawableStartCompat="@drawable/ic_building"
                     app:drawableTint="@color/purple_700" />
 
             </androidx.cardview.widget.CardView>
@@ -80,6 +81,7 @@
                     android:text="@string/employees"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_users"
                     app:drawableTint="@color/purple_700"/>
@@ -109,6 +111,7 @@
                     android:text="@string/vehicles"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_truck"
                     app:drawableTint="@color/purple_700"/>
@@ -133,6 +136,7 @@
                     android:text="@string/products"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_shopping_bag"
                     app:drawableTint="@color/purple_700"/>
@@ -162,6 +166,7 @@
                     android:text="@string/brands"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_award"
                     app:drawableTint="@color/purple_700"/>
@@ -186,6 +191,7 @@
                     android:text="@string/categories"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_filter"
                     app:drawableTint="@color/purple_700"/>
@@ -215,6 +221,7 @@
                     android:text="@string/suppliers"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_users"
                     app:drawableTint="@color/purple_700"/>
@@ -239,6 +246,7 @@
                     android:text="@string/consumers"
                     android:gravity="center|center_vertical"
                     android:padding="16dp"
+                    android:textSize="16sp"
                     android:background="#EBE8E8"
                     app:drawableStartCompat="@drawable/ic_users"
                     app:drawableTint="@color/purple_700"/>

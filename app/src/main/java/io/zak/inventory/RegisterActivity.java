@@ -20,7 +20,7 @@ import io.zak.inventory.data.entities.User;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private static final String DEBUG_NAME = "Register";
+    private static final String TAG = "Register";
 
     private EditText etUsername, etPassword, etPasswordConfirm;
     private Button btnRegister, btnLogin;
@@ -58,12 +58,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        Log.d(DEBUG_NAME, "Validating fields...");
+        Log.d(TAG, "Validating fields...");
         boolean validated = !etUsername.getText().toString().isEmpty() && !etPassword.getText().toString().isEmpty() &&
                 !etPasswordConfirm.getText().toString().isEmpty() && (
                         etPasswordConfirm.getText().toString().equals(etPassword.getText().toString())
                 );
-        Log.d(DEBUG_NAME, "Validated: " + validated);
+        Log.d(TAG, "Validated: " + validated);
         return validated;
     }
 
@@ -75,16 +75,16 @@ public class RegisterActivity extends AppCompatActivity {
         // Register and start MainActivity
         progress.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(DEBUG_NAME, "Registering new User: " + Thread.currentThread());
-            AppDatabaseImpl.getDatabase(getApplicationContext()).userDao().insertAll(user);
+            Log.d(TAG, "Registering new User: " + Thread.currentThread());
+            AppDatabaseImpl.getDatabase(getApplicationContext()).users().insertAll(user);
             return true;
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(done -> {
-            Log.d(DEBUG_NAME, "DONE: " + Thread.currentThread());
+            Log.d(TAG, "DONE: " + Thread.currentThread());
             progress.setVisibility(View.INVISIBLE);
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }, err -> {
-            Log.e(DEBUG_NAME, "Database Error: " + err);
+            Log.e(TAG, "Database Error: " + err);
             progress.setVisibility(View.INVISIBLE);
         }));
     }
@@ -98,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(DEBUG_NAME, "Destroying resources...");
+        Log.d(TAG, "Destroying resources...");
         disposables.dispose();
     }
 }

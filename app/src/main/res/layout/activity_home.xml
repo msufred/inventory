@@ -39,9 +39,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:itemIconTint="@color/purple_500"
-        app:itemTextColor="@color/purple_500"
-        app:itemIconSize="32dp"
+        app:itemIconTint="@color/purple_700"
+        app:itemIconSize="24dp"
         app:menu="@menu/bottom_appbar_menu"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

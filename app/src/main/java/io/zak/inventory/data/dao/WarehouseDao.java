@@ -14,6 +14,9 @@ import io.zak.inventory.data.entities.Warehouse;
 public interface WarehouseDao {
 
     @Insert
+    long insert(Warehouse warehouse);
+
+    @Insert
     void insertAll(Warehouse...warehouses);
 
     @Update

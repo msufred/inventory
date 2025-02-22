@@ -20,7 +20,7 @@ import io.zak.inventory.data.entities.User;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private static final String DEBUG_NAME = "Home";
+    private static final String TAG = "Home";
 
     // Widgets
     // private TextView tvUsername;
@@ -87,20 +87,24 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Change the current view in the FrameLayout.
+     * @param fragment Fragment view
+     */
     private void setView(Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, fragment).commit();
     }
 
     private void getUser(int id) {
         disposables.add(Single.fromCallable(() -> {
-            Log.d(DEBUG_NAME, "Fetch user: " + Thread.currentThread());
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).userDao().getUser(id);
+            Log.d(TAG, "Fetch user: " + Thread.currentThread());
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).users().getUser(id);
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(users -> {
             if (users.isEmpty()) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             } else {
                 mUser = users.get(0);
-                Log.d(DEBUG_NAME, "User " + mUser.username);
+                Log.d(TAG, "User " + mUser.username);
                 displayUserInfo();
             }
         }));
@@ -114,7 +118,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(DEBUG_NAME, "Destroying resources...");
+        Log.d(TAG, "Destroying resources...");
         disposables.dispose();
     }
 }

@@ -2,40 +2,42 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_gradient_main" >
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/warehouses"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp" />
+        android:layout_marginStart="16dp"
+        android:drawablePadding="16dp"/>
 
     <LinearLayout
         android:id="@+id/search_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:padding="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         app:layout_constraintTop_toBottomOf="@id/title"
         app:layout_constraintBottom_toTopOf="@id/recycler_view">
 
-        <EditText
-            android:id="@+id/et_search"
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:autofillHints="none"
-            android:hint="@string/search"
+            app:queryHint="@string/search"
+            app:iconifiedByDefault="false"
             android:background="@drawable/bg_searchfield"
-            app:drawableStartCompat="@drawable/ic_search"
-            app:drawableTint="#7C7C7C"
-            android:drawablePadding="16dp"/>
+            android:padding="0dp" />
 
     </LinearLayout>
 
@@ -44,7 +46,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/search_group"
-        app:layout_constraintBottom_toTopOf="@id/buttons"/>
+        app:layout_constraintBottom_toTopOf="@id/buttons"
+        android:background="@color/white"/>
 
     <LinearLayout
         android:id="@+id/buttons"
@@ -58,10 +61,12 @@
         <Button
             android:id="@+id/btn_back"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/home"
             android:textSize="18sp"
-            android:text="@string/go_back" />
+            app:icon="@drawable/ic_home"
+            android:backgroundTint="@color/purple_500"/>
 
         <Button
             android:id="@+id/btn_add"
@@ -70,8 +75,26 @@
             android:textSize="18sp"
             android:layout_marginStart="8dp"
             android:layout_height="wrap_content"
-            android:text="@string/add_warehouse" />
+            android:text="@string/create"
+            app:icon="@drawable/ic_building_add"
+            android:backgroundTint="@color/purple_500"/>
 
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/progress_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#aa000000"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:indeterminateTint="@color/white"/>
+
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
