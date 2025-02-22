@@ -38,6 +38,9 @@
         <activity android:name=".VehiclesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddVehicleActivity" android:parentActivityName=".VehiclesActivity" />
 
+        <!-- Brands Related Activities -->
+        <activity android:name=".BrandsActivity" android:parentActivityName=".HomeActivity" />
+
         <!-- Suppliers Related Activities -->
         <activity android:name=".SuppliersActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddSupplierActivity" android:parentActivityName=".SuppliersActivity" />

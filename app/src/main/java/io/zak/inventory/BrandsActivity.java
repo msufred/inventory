@@ -1,0 +1,188 @@
+package io.zak.inventory;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.zak.inventory.adapters.BrandListAdapter;
+import io.zak.inventory.data.AppDatabaseImpl;
+import io.zak.inventory.data.entities.Brand;
+
+public class BrandsActivity extends AppCompatActivity implements BrandListAdapter.OnItemClickListener {
+
+    private static final String TAG = "Brands";
+
+    // Widgets
+    private SearchView searchView;
+    private RecyclerView recyclerView;
+    private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
+
+    // for RecyclerView
+    private BrandListAdapter adapter;
+
+    // list reference for search filter
+    private List<Brand> brandList;
+
+    // comparator for search filter
+    private final Comparator<Brand> comparator = Comparator.comparing(brand -> brand.name);
+
+    private CompositeDisposable disposables;
+    private AlertDialog.Builder dialogBuilder;
+    private AlertDialog addDialog;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_brands);
+        getWidgets();
+        setListeners();
+    }
+
+    private void getWidgets() {
+        searchView = findViewById(R.id.search_view);
+        recyclerView = findViewById(R.id.recycler_view);
+        btnBack = findViewById(R.id.btn_back);
+        btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
+
+        // setup RecyclerView
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new BrandListAdapter(comparator, this);
+        recyclerView.setAdapter(adapter);
+
+        // create dialog builder
+        dialogBuilder = new AlertDialog.Builder(this);
+    }
+
+    private void setListeners() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                onSearch(newText);
+                return false;
+            }
+        });
+
+        btnBack.setOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+            finish();
+        });
+
+        btnAdd.setOnClickListener(v -> {
+            getAddDialog().show();
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (disposables == null) disposables = new CompositeDisposable();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if (adapter != null) {
+            Brand brand = adapter.getItem(position);
+            if (brand != null) {
+                Log.d(TAG, "Brand selected: " + brand.name);
+                // TODO show details or options for delete and edit
+            }
+        }
+    }
+
+    private void onSearch(String query) {
+        List<Brand> filteredList = filter(brandList, query);
+        adapter.replaceAll(filteredList);
+        recyclerView.scrollToPosition(0);
+    }
+
+    private List<Brand> filter(List<Brand> brandList, String query) {
+        String str = query.toLowerCase();
+        List<Brand> list = new ArrayList<>();
+        for (Brand brand : brandList) {
+            if (brand.name.toLowerCase().contains(str)) {
+                list.add(brand);
+            }
+        }
+        return list;
+    }
+
+    private AlertDialog getAddDialog() {
+        if (addDialog == null) {
+            final EditText input = new EditText(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+            );
+            input.setLayoutParams(params);
+            dialogBuilder.setTitle("Add Brand")
+                    .setView(input)
+                    .setPositiveButton("Add", (dialog, which) -> {
+                        String str = input.getText().toString();
+                        if (!str.isBlank()) addBrand(str);
+                        dialog.dismiss();
+                    }).setNegativeButton("Discard", (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+            addDialog = dialogBuilder.create();
+        }
+        return addDialog;
+    }
+
+    private void addBrand(String brandName) {
+        Brand brand = new Brand();
+        brand.name = brandName;
+
+        progressGroup.setVisibility(View.VISIBLE);
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Saving Brand entry: " + Thread.currentThread());
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().insert(brand);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.d(TAG, "Done. Returned with ID=" + id + " " + Thread.currentThread());
+            brand.id = id.intValue();
+            adapter.addItem(brand);
+        }, err -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.e(TAG, "Database Error: " + err);
+
+            // dialog
+            dialogBuilder.setTitle("Database Error").setMessage("Error while saving Brand entry: " + err);
+            AlertDialog dialog = dialogBuilder.create();
+            dialog.show();
+        }));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "Destroying resources.");
+        disposables.dispose();
+    }
+}

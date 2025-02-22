@@ -34,6 +34,7 @@ public class DashboardFragment extends Fragment {
         cardWarehouses.setOnClickListener(v -> startActivity(new Intent(getActivity(), WarehousesActivity.class)));
         cardEmployees.setOnClickListener(v -> startActivity(new Intent(getActivity(), EmployeesActivity.class)));
         cardVehicles.setOnClickListener(v -> startActivity(new Intent(getActivity(), VehiclesActivity.class)));
+        cardBrands.setOnClickListener(v -> startActivity(new Intent(getActivity(), BrandsActivity.class)));
         cardSuppliers.setOnClickListener(v -> startActivity(new Intent(getActivity(), SuppliersActivity.class)));
 
         return view;
