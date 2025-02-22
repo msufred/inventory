@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="status_array">
+        <item>Permanent</item>
+        <item>Contractual</item>
+        <item>Job Order</item>
+        <item>Temporary</item>
+    </string-array>
+
+    <string-array name="vehicle_types">
+        <item>Full Size Pickup</item>
+        <item>Mini Pickup</item>
+        <item>Mini Van</item>
+        <item>SUV</item>
+        <item>Utility Van</item>
+        <item>Container Van</item>
+        <item>Wing Van</item>
+        <item>Box Truck</item>
+        <item>Truck</item>
+        <item>Motorcycle</item>
+        <item>Tricycle</item>
+    </string-array>
+
+    <string-array name="vehicle_status">
+        <item>Idle</item>
+        <item>On Delivery</item>
+        <item>Maintenance</item>
+        <item>Retired</item>
+    </string-array>
+</resources>
