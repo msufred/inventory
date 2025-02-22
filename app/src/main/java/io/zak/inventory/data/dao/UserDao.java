@@ -14,6 +14,9 @@ import io.zak.inventory.data.entities.User;
 @Dao
 public interface UserDao {
 
+    @Insert
+    long insert(User user);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE) // replace if duplicate is found
     void insertAll(User...users);
 

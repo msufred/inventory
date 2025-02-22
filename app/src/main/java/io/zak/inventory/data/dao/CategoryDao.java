@@ -14,6 +14,9 @@ import io.zak.inventory.data.entities.Category;
 public interface CategoryDao {
 
     @Insert
+    long insert(Category category);
+
+    @Insert
     void insertAll(Category...categories);
 
     @Update

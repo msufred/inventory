@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import java.util.List;
@@ -13,6 +14,9 @@ import io.zak.inventory.data.entities.Brand;
 
 @Dao
 public interface BrandDao {
+
+    @Insert
+    long insert(Brand brand);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Brand...brands);
@@ -34,4 +38,5 @@ public interface BrandDao {
 
     @Query("SELECT COUNT(*) FROM brands")
     int getSize();
+
 }

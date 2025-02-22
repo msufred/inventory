@@ -25,15 +25,22 @@
         <activity android:name=".LoginActivity" android:parentActivityName=".MainActivity" />
         <activity android:name=".RegisterActivity" android:parentActivityName=".MainActivity" />
         <activity android:name=".HomeActivity" />
+
         <!-- Warehouse Related Activities -->
         <activity android:name=".WarehousesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddWarehouseActivity" android:parentActivityName=".WarehousesActivity" />
+
         <!-- Employee Related Activities -->
         <activity android:name=".EmployeesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddEmployeeActivity" android:parentActivityName=".EmployeesActivity" />
+
         <!-- Vehicle Related Activities -->
         <activity android:name=".VehiclesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddVehicleActivity" android:parentActivityName=".VehiclesActivity" />
+
+        <!-- Suppliers Related Activities -->
+        <activity android:name=".SuppliersActivity" android:parentActivityName=".HomeActivity" />
+        <activity android:name=".AddSupplierActivity" android:parentActivityName=".SuppliersActivity" />
     </application>
 
 </manifest>

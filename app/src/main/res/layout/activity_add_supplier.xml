@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/employee_details"
+                android:text="@string/supplier_details"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="#111"
@@ -82,7 +82,7 @@
                 android:text="@string/name"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="32dp"/>
 
             <EditText
                 android:id="@+id/et_name"
@@ -90,26 +90,8 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_textfield_grey"
                 android:autofillHints="name"
-                android:hint="@string/employee_name"
+                android:hint="@string/supplier"
                 android:inputType="text"/>
-
-            <TextView
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:text="@string/position"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:labelFor="@id/et_contact"/>
-
-            <EditText
-                android:id="@+id/et_position"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_textfield_grey"
-                android:autofillHints="text"
-                android:hint="@string/designation_position"
-                android:inputType="text" />
 
             <TextView
                 android:layout_width="90dp"
@@ -132,6 +114,24 @@
             <TextView
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
+                android:text="@string/email"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:labelFor="@id/et_contact"/>
+
+            <EditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_textfield_grey"
+                android:autofillHints="emailAddress"
+                android:hint="@string/email_address"
+                android:inputType="textEmailAddress" />
+
+            <TextView
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
                 android:text="@string/address"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -143,47 +143,7 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_textfield_grey"
                 android:autofillHints="postalAddress"
-                android:hint="@string/current_address"
-                android:inputType="text" />
-
-            <TextView
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:text="@string/status"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"/>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:background="@drawable/bg_textfield_grey">
-
-                <Spinner
-                    android:id="@+id/status_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp" />
-
-            </RelativeLayout>
-
-            <TextView
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:text="@string/license"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"/>
-
-            <EditText
-                android:id="@+id/et_license"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_textfield_grey"
-                android:autofillHints="phone"
-                android:hint="@string/license_no"
+                android:hint="@string/business_address"
                 android:inputType="text"/>
 
         </LinearLayout>
