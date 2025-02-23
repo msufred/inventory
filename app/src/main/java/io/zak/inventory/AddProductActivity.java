@@ -41,7 +41,6 @@ public class AddProductActivity extends AppCompatActivity {
     private Spinner supplierSpinner, brandSpinner, categorySpinner;
     private ImageButton btnBack, btnMinus, btnPlus;
     private Button btnCancel, btnSave;
-    private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
 
@@ -78,7 +77,6 @@ public class AddProductActivity extends AppCompatActivity {
         btnPlus = findViewById(R.id.btn_plus);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
-        progressGroup = findViewById(R.id.progress_group);
         dialogBuilder = new AlertDialog.Builder(this);
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
     }
@@ -140,7 +138,6 @@ public class AddProductActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
@@ -161,9 +158,7 @@ public class AddProductActivity extends AppCompatActivity {
             Log.d(TAG, "Returned with category size: " +categories.size() + " " + Thread.currentThread());
             categoryList = categories;
             setupSpinners();
-            progressGroup.setVisibility(View.GONE);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
@@ -231,16 +226,13 @@ public class AddProductActivity extends AppCompatActivity {
         product.criticalLevel = level;
         product.description = Utils.normalize(etDescription.getText().toString());
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Product entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().insert(product);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID:" + id + " " + Thread.currentThread());
             goBack();
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog

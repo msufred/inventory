@@ -33,7 +33,6 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
     // RecyclerView adapter
     private SupplierListAdapter adapter;
@@ -59,7 +58,6 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         recyclerView = findViewById(R.id.recycler_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SupplierListAdapter(comparator, this);
@@ -95,17 +93,14 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             supplierList = list;
             adapter.replaceAll(list);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
         }));
     }

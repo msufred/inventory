@@ -32,7 +32,6 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private WarehouseListAdapter adapter;
@@ -57,7 +56,6 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         searchView = findViewById(R.id.search_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
         // set up RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
@@ -104,17 +102,14 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Warehouse items: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             warehouseList = list;
             adapter.replaceAll(list);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
         }));
     }

@@ -32,7 +32,6 @@ public class AddVehicleActivity extends AppCompatActivity {
     private Spinner typeSpinner, statusSpinner;
     private ImageButton btnBack;
     private Button btnCancel, btnSave;
-    private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
     private AlertDialog.Builder dialogBuilder;
@@ -53,7 +52,6 @@ public class AddVehicleActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
-        progressGroup = findViewById(R.id.progress_group);
 
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
 
@@ -116,16 +114,13 @@ public class AddVehicleActivity extends AppCompatActivity {
         vehicle.plateNo = Utils.normalize(etPlateNo.getText().toString());
         vehicle.status = statusSpinner.getSelectedItem().toString();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Vehicle entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().insert(vehicle);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Done. Returned with ID: " + id + " " + Thread.currentThread());
             goBack();
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             dialogBuilder.setTitle("Database Error").setMessage("Failed to save Vehicle entry: " + err);

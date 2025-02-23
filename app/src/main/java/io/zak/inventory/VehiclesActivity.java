@@ -33,7 +33,6 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private List<Vehicle> vehicleList;
@@ -55,7 +54,6 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         recyclerView = findViewById(R.id.recycler_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new VehicleListAdapter(comparator, this);
@@ -89,17 +87,14 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Vehicle entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             vehicleList = list;
             adapter.replaceAll(list);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
         }));
     }

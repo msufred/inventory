@@ -35,7 +35,6 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
     // RecyclerView adapter
     private CategoryListAdapter adapter;
@@ -63,7 +62,6 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         recyclerView = findViewById(R.id.recycler_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -121,17 +119,14 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Category entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             categoryList = list;
             adapter.replaceAll(list);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // error dialog
@@ -174,17 +169,14 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         Category category = new Category();
         category.category = Utils.normalize(str);
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Category entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().insert(category);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID=" + id + " " + Thread.currentThread());
             category.id = id.intValue();
             adapter.addItem(category);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog

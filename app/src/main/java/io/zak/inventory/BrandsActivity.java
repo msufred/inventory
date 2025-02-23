@@ -38,7 +38,6 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private BrandListAdapter adapter;
@@ -66,7 +65,6 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         recyclerView = findViewById(R.id.recycler_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -104,17 +102,14 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             brandList = list;
             adapter.replaceAll(list);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // error dialog
@@ -183,17 +178,14 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         Brand brand = new Brand();
         brand.name = brandName;
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Brand entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().insert(brand);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Done. Returned with ID=" + id + " " + Thread.currentThread());
             brand.id = id.intValue();
             adapter.addItem(brand);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog

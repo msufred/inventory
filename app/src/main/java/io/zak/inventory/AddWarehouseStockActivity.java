@@ -42,7 +42,6 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
     private EditText etQuantity, etDate;
     private ImageButton btnBack, btnMinus, btnPlus, btnPickDate;
     private Button btnCancel, btnSave;
-    private RelativeLayout progressGroup;
 
     // list reference
     private List<Supplier> supplierList;
@@ -78,7 +77,6 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
         btnPickDate = findViewById(R.id.btn_pick_date);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
-        progressGroup = findViewById(R.id.progress_group);
 
         dialogBuilder = new AlertDialog.Builder(this);
         datePickerDialog = new DatePickerDialog(this);
@@ -135,18 +133,15 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
             return database.suppliers().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(suppliers -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size " + suppliers.size() + " " + Thread.currentThread());
             supplierList = suppliers;
             supplierSpinner.setAdapter(new SupplierSpinnerAdapter(this, supplierList));
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
@@ -161,17 +156,14 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
     }
 
     private void loadProducts(int id) {
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Product entries with supplierId=" + id + " " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().getProductsFromSupplier(id);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(products -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + products.size() + " " + Thread.currentThread());
             productList = products;
             productSpinner.setAdapter(new ProductSpinnerAdapter(this, productList));
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Database Error: " + err);
 
             dialogBuilder.setTitle("Database Error")
@@ -227,16 +219,13 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
         stock.dateAcquired = mDateAcquired.getTime();
         stock.totalAmount = (qty * mProduct.price);
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving WarehouseStock entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks().insert(stock);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID " + id + " " + Thread.currentThread());
             goBack();
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             dialogBuilder.setTitle("Database Error")

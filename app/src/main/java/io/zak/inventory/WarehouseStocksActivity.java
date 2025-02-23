@@ -41,7 +41,6 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
     private RecyclerView recyclerView;
     private ImageButton btnClose, btnEdit;
     private Button btnAddStock;
-    private RelativeLayout progressGroup;
 
     private WarehouseStockListAdapter adapter;
     private List<WarehouseStockDetails> stockDetailsList;
@@ -70,7 +69,6 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         btnClose = findViewById(R.id.btn_close);
         btnEdit = findViewById(R.id.btn_edit);
         btnAddStock = findViewById(R.id.btn_add_stock);
-        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new WarehouseStockListAdapter(comparator, this);
@@ -123,7 +121,6 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             dialogBuilder.create().show();
         }
 
-        progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
             // get warehouse entry
@@ -137,7 +134,6 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
                 return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks().getWarehouseStocks(warehouseId);
             });
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size " + list.size() + " " + Thread.currentThread());
 
             // populate list
@@ -156,7 +152,6 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             }
             tvStocksAmount.setText(String.format(Locale.getDefault(), "%.2f", amount));
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
