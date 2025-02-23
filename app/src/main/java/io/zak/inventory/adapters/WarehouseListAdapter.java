@@ -136,8 +136,8 @@ public class WarehouseListAdapter extends RecyclerView.Adapter<WarehouseListAdap
         Warehouse warehouse = sortedList.get(position);
         if (warehouse != null) {
             holder.tvName.setText(warehouse.name);
-            holder.tvAddress.setText(warehouse.address);
-            holder.tvContact.setText(warehouse.contactNo);
+            if (!warehouse.address.isBlank()) holder.tvAddress.setText(warehouse.address);
+            if (!warehouse.contactNo.isBlank()) holder.tvContact.setText(warehouse.contactNo);
         }
     }
 

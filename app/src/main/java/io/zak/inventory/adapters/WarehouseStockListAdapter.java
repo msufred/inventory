@@ -10,13 +10,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.zak.inventory.R;
-import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.data.relations.WarehouseStockDetails;
 
-public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.ViewHolder> {
+public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseStockListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -24,25 +27,26 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView name, type, plateNo, status;
+        private final TextView name, quantity, dateAcquired;
 
         public ViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             name = view.findViewById(R.id.tv_name);
-            type = view.findViewById(R.id.tv_type);
-            plateNo = view.findViewById(R.id.tv_plate_no);
-            status = view.findViewById(R.id.tv_status);
+            quantity = view.findViewById(R.id.tv_quantity);
+            dateAcquired = view.findViewById(R.id.tv_date);
             LinearLayout layout = view.findViewById(R.id.layout);
-            layout.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
+            layout.setOnClickListener(v -> {
+                onItemClickListener.onItemClick(getAdapterPosition());
+            });
         }
 
     }
 
-    private final Comparator<Vehicle> comparator;
+    private final Comparator<WarehouseStockDetails> comparator;
 
-    private final SortedList<Vehicle> sortedList = new SortedList<>(Vehicle.class, new SortedList.Callback<Vehicle>() {
+    private final SortedList<WarehouseStockDetails> sortedList = new SortedList<>(WarehouseStockDetails.class, new SortedList.Callback<WarehouseStockDetails>() {
         @Override
-        public int compare(Vehicle o1, Vehicle o2) {
+        public int compare(WarehouseStockDetails o1, WarehouseStockDetails o2) {
             return comparator.compare(o1, o2);
         }
 
@@ -52,13 +56,13 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         }
 
         @Override
-        public boolean areContentsTheSame(Vehicle oldItem, Vehicle newItem) {
-            return oldItem.equals(newItem);
+        public boolean areContentsTheSame(WarehouseStockDetails oldItem, WarehouseStockDetails newItem) {
+            return oldItem.warehouseStock.equals(newItem.warehouseStock);
         }
 
         @Override
-        public boolean areItemsTheSame(Vehicle item1, Vehicle item2) {
-            return item1.id == item2.id;
+        public boolean areItemsTheSame(WarehouseStockDetails item1, WarehouseStockDetails item2) {
+            return item1.warehouseStock.id == item2.warehouseStock.id;
         }
 
         @Override
@@ -78,8 +82,9 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     });
 
     private final OnItemClickListener onItemClickListener;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
-    public VehicleListAdapter(Comparator<Vehicle> comparator, OnItemClickListener onItemClickListener) {
+    public WarehouseStockListAdapter(Comparator<WarehouseStockDetails> comparator, OnItemClickListener onItemClickListener) {
         this.comparator = comparator;
         this.onItemClickListener = onItemClickListener;
     }
@@ -87,18 +92,18 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_vehicle, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_stock, parent, false);
         return new ViewHolder(view, onItemClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Vehicle vehicle = sortedList.get(position);
-        if (vehicle != null) {
-            holder.name.setText(vehicle.name);
-            holder.type.setText(vehicle.type);
-            if (!vehicle.plateNo.isBlank()) holder.plateNo.setText(vehicle.plateNo);
-            holder.status.setText(vehicle.status);
+        WarehouseStockDetails stockDetails = sortedList.get(position);
+        if (stockDetails != null) {
+            holder.name.setText(stockDetails.productName);
+            holder.quantity.setText(stockDetails.warehouseStock.quantity);
+            Date date = new Date(stockDetails.warehouseStock.dateAcquired);
+            holder.dateAcquired.setText(dateFormat.format(date));
         }
     }
 
@@ -107,19 +112,15 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         return sortedList.size();
     }
 
-    public void clear() {
-        sortedList.clear();
-    }
-
-    public Vehicle getItem(int position) {
+    public WarehouseStockDetails getItem(int position) {
         return sortedList.get(position);
     }
 
-    public void replaceAll(List<Vehicle> list) {
+    public void replaceAll(List<WarehouseStockDetails> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
-            Vehicle vehicle = sortedList.get(i);
-            if (!list.contains(vehicle)) sortedList.remove(vehicle);
+            WarehouseStockDetails stockDetails = sortedList.get(i);
+            if (!list.contains(stockDetails)) sortedList.remove(stockDetails);
         }
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();

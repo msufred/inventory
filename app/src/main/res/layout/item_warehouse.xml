@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:textColor="#333"
-            android:text="@string/address" />
+            android:text="@string/no_address" />
 
         <TextView
             android:id="@+id/tv_contact"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:textColor="#333"
-            android:text="@string/contact_no" />
+            android:text="@string/no_contact_no" />
 
     </LinearLayout>
 

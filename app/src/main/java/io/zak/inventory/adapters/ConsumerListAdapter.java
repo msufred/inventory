@@ -14,9 +14,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.zak.inventory.R;
-import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.data.entities.Consumer;
 
-public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.ViewHolder> {
+public class ConsumerListAdapter extends RecyclerView.Adapter<ConsumerListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -24,25 +24,26 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView name, type, plateNo, status;
+        private final TextView name, contact, address;
 
         public ViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             name = view.findViewById(R.id.tv_name);
-            type = view.findViewById(R.id.tv_type);
-            plateNo = view.findViewById(R.id.tv_plate_no);
-            status = view.findViewById(R.id.tv_status);
+            contact = view.findViewById(R.id.tv_contact);
+            address = view.findViewById(R.id.tv_address);
             LinearLayout layout = view.findViewById(R.id.layout);
-            layout.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
+            layout.setOnClickListener(v -> {
+                onItemClickListener.onItemClick(getAdapterPosition());
+            });
         }
 
     }
 
-    private final Comparator<Vehicle> comparator;
+    private final Comparator<Consumer> comparator;
 
-    private final SortedList<Vehicle> sortedList = new SortedList<>(Vehicle.class, new SortedList.Callback<Vehicle>() {
+    private final SortedList<Consumer> sortedList = new SortedList<>(Consumer.class, new SortedList.Callback<>() {
         @Override
-        public int compare(Vehicle o1, Vehicle o2) {
+        public int compare(Consumer o1, Consumer o2) {
             return comparator.compare(o1, o2);
         }
 
@@ -52,12 +53,12 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         }
 
         @Override
-        public boolean areContentsTheSame(Vehicle oldItem, Vehicle newItem) {
+        public boolean areContentsTheSame(Consumer oldItem, Consumer newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(Vehicle item1, Vehicle item2) {
+        public boolean areItemsTheSame(Consumer item1, Consumer item2) {
             return item1.id == item2.id;
         }
 
@@ -79,7 +80,7 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     private final OnItemClickListener onItemClickListener;
 
-    public VehicleListAdapter(Comparator<Vehicle> comparator, OnItemClickListener onItemClickListener) {
+    public ConsumerListAdapter(Comparator<Consumer> comparator, OnItemClickListener onItemClickListener) {
         this.comparator = comparator;
         this.onItemClickListener = onItemClickListener;
     }
@@ -87,18 +88,17 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_vehicle, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_supplier, parent, false);
         return new ViewHolder(view, onItemClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Vehicle vehicle = sortedList.get(position);
-        if (vehicle != null) {
-            holder.name.setText(vehicle.name);
-            holder.type.setText(vehicle.type);
-            if (!vehicle.plateNo.isBlank()) holder.plateNo.setText(vehicle.plateNo);
-            holder.status.setText(vehicle.status);
+        Consumer consumer = sortedList.get(position);
+        if (consumer != null) {
+            holder.name.setText(consumer.name);
+            if (!consumer.contactNo.isBlank()) holder.contact.setText(consumer.contactNo);
+            if (!consumer.address.isBlank()) holder.address.setText(consumer.address);
         }
     }
 
@@ -111,15 +111,15 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         sortedList.clear();
     }
 
-    public Vehicle getItem(int position) {
+    public Consumer getItem(int position) {
         return sortedList.get(position);
     }
 
-    public void replaceAll(List<Vehicle> list) {
+    public void replaceAll(List<Consumer> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
-            Vehicle vehicle = sortedList.get(i);
-            if (!list.contains(vehicle)) sortedList.remove(vehicle);
+            Consumer consumer = sortedList.get(i);
+            if (!list.contains(consumer)) sortedList.remove(consumer);
         }
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();

@@ -29,6 +29,7 @@
         <!-- Warehouse Related Activities -->
         <activity android:name=".WarehousesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddWarehouseActivity" android:parentActivityName=".WarehousesActivity" />
+        <activity android:name=".WarehouseStocksActivity" android:parentActivityName=".WarehousesActivity" />
 
         <!-- Employee Related Activities -->
         <activity android:name=".EmployeesActivity" android:parentActivityName=".HomeActivity" />
@@ -41,9 +42,20 @@
         <!-- Brands Related Activities -->
         <activity android:name=".BrandsActivity" android:parentActivityName=".HomeActivity" />
 
+        <!-- Category Related Activities -->
+        <activity android:name=".CategoriesActivity" android:parentActivityName=".HomeActivity" />
+
+        <!-- Products Related Activities -->
+        <activity android:name=".ProductsActivity" android:parentActivityName=".HomeActivity" />
+        <activity android:name=".AddProductActivity" android:parentActivityName=".ProductsActivity" />
+
         <!-- Suppliers Related Activities -->
         <activity android:name=".SuppliersActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddSupplierActivity" android:parentActivityName=".SuppliersActivity" />
+
+        <!-- Consumer Related Activities -->
+        <activity android:name=".ConsumersActivity" android:parentActivityName=".HomeActivity" />
+        <activity android:name=".AddConsumerActivity" android:parentActivityName=".ConsumersActivity" />
     </application>
 
 </manifest>

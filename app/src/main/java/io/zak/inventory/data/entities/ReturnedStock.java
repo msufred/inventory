@@ -3,8 +3,6 @@ package io.zak.inventory.data.entities;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.sql.Date;
-
 @Entity(tableName = "returned_stocks")
 public class ReturnedStock {
 

@@ -9,6 +9,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.WarehouseStock;
+import io.zak.inventory.data.relations.WarehouseStockDetails;
 
 @Dao
 public interface WarehouseStockDao {
@@ -30,4 +31,9 @@ public interface WarehouseStockDao {
 
     @Query("SELECT COUNT(*) FROM warehouse_stocks")
     int getSize();
+
+    @Query("SELECT warehouse_stocks.*, products.name FROM warehouse_stocks " +
+            "INNER JOIN products ON warehouse_stocks.productId=products.id " +
+            "WHERE warehouseId=:id")
+    List<WarehouseStockDetails> getWarehouseStocks(int id);
 }

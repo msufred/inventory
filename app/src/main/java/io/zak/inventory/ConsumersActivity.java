@@ -21,48 +21,48 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.zak.inventory.adapters.WarehouseListAdapter;
+import io.zak.inventory.adapters.ConsumerListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
-import io.zak.inventory.data.entities.Warehouse;
+import io.zak.inventory.data.entities.Consumer;
 
-public class WarehousesActivity extends AppCompatActivity implements WarehouseListAdapter.OnItemClickListener {
+public class ConsumersActivity extends AppCompatActivity implements ConsumerListAdapter.OnItemClickListener {
 
-    private static final String TAG = "Warehouses";
+    private static final String TAG = "Consumers";
 
+    // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
     private Button btnBack, btnAdd;
     private RelativeLayout progressGroup;
 
-    // for RecyclerView
-    private WarehouseListAdapter adapter;
+    // RecyclerView adapter
+    private ConsumerListAdapter adapter;
 
-    // list reference for search filtering
-    private List<Warehouse> warehouseList;
+    // list reference for search filter
+    private List<Consumer> consumerList;
 
-    // used for search filter
-    private final Comparator<Warehouse> comparator = Comparator.comparing(o -> o.name);
+    // Comparator used for search filter; passed to SupplierListAdapter
+    private final Comparator<Consumer> comparator = Comparator.comparing(supplier -> supplier.name);
 
     private CompositeDisposable disposables;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_warehouses);
+        setContentView(R.layout.activity_consumers);
         getWidgets();
         setListeners();
     }
 
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
+        recyclerView = findViewById(R.id.recycler_view);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
         progressGroup = findViewById(R.id.progress_group);
 
-        // set up RecyclerView
-        recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new WarehouseListAdapter(comparator, this);
+        adapter = new ConsumerListAdapter(comparator, this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -80,23 +80,14 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
             }
         });
 
-        btnBack.setOnClickListener(v -> goBack());
+        btnBack.setOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+            finish();
+        });
 
         btnAdd.setOnClickListener(v -> {
-            startActivity(new Intent(this, AddWarehouseActivity.class));
+            startActivity(new Intent(this, AddConsumerActivity.class));
         });
-    }
-
-    @Override
-    public void onItemClick(int position) {
-        if (adapter != null) {
-            Warehouse warehouse = adapter.getItem(position);
-            if (warehouse != null) {
-                Intent intent = new Intent(this, WarehouseStocksActivity.class);
-                intent.putExtra("warehouse_id", warehouse.id);
-                startActivity(intent);
-            }
-        }
     }
 
     @Override
@@ -106,12 +97,12 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching Warehouse items: " + Thread.currentThread());
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().getAll();
+            Log.d(TAG, "Fetching Consumer entries: " + Thread.currentThread());
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
-            warehouseList = list;
+            consumerList = list;
             adapter.replaceAll(list);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
@@ -119,32 +110,38 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         }));
     }
 
+    @Override
+    public void onItemClick(int position) {
+        if (adapter != null) {
+            Consumer consumer = adapter.getItem(position);
+            if (consumer != null) {
+                Log.d(TAG, "Consumer selected: " + consumer.name);
+                // TODO
+            }
+        }
+    }
+
     private void onSearch(String query) {
-        final List<Warehouse> filteredList = filter(warehouseList, query);
+        List<Consumer> filteredList = filter(consumerList, query);
         adapter.replaceAll(filteredList);
         recyclerView.scrollToPosition(0);
     }
 
-    private List<Warehouse> filter(List<Warehouse> ref, String query) {
+    private List<Consumer> filter(List<Consumer> consumers, String query) {
         String str = query.toLowerCase();
-        final List<Warehouse> list = new ArrayList<>();
-        for (Warehouse warehouse : ref) {
-            if (warehouse.name.toLowerCase().contains(str)) {
-                list.add(warehouse);
+        List<Consumer> list = new ArrayList<>();
+        for (Consumer consumer : consumers) {
+            if (consumer.name.toLowerCase().contains(str)) {
+                list.add(consumer);
             }
         }
         return list;
     }
 
-    private void goBack() {
-        getOnBackPressedDispatcher().onBackPressed();
-        finish();
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "Destroying resources");
+        Log.d(TAG, "Destroying resources.");
         disposables.dispose();
     }
 }

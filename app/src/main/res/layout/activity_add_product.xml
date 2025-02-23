@@ -33,7 +33,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_supplier"
+        android:text="@string/add_product"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/white"
@@ -67,12 +67,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/supplier_details"
+                android:text="@string/product_details"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#111"
                 android:drawablePadding="16dp"
-                app:drawableStartCompat="@drawable/ic_user"
+                app:drawableStartCompat="@drawable/ic_shopping_bag"
                 app:drawableTint="#111" />
 
             <TextView
@@ -89,60 +89,84 @@
                 android:layout_height="50dp"
                 android:background="@drawable/bg_textfield_grey"
                 android:autofillHints="name"
-                android:hint="@string/supplier"
+                android:hint="@string/product_name"
                 android:inputType="text"/>
 
             <TextView
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
-                android:text="@string/contact"
+                android:text="@string/brand"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:labelFor="@id/et_contact"/>
+                android:layout_marginTop="16dp" />
 
-            <EditText
-                android:id="@+id/et_contact"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_textfield_grey"
-                android:autofillHints="phone"
-                android:hint="@string/phone_or_mobile"
-                android:inputType="text" />
+                android:layout_height="48dp"
+                android:background="@drawable/bg_textfield_grey">
+
+                <Spinner
+                    android:id="@+id/brand_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:prompt="@string/no_brands"/>
+
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
-                android:text="@string/email"
+                android:text="@string/category"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_textfield_grey">
+
+                <Spinner
+                    android:id="@+id/category_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:prompt="@string/no_categories"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
+                android:text="@string/price"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
                 android:labelFor="@id/et_contact"/>
 
             <EditText
-                android:id="@+id/et_email"
+                android:id="@+id/et_price"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_textfield_grey"
                 android:autofillHints="emailAddress"
-                android:hint="@string/email_address"
-                android:inputType="textEmailAddress" />
+                android:hint="@string/product_price"
+                android:inputType="numberDecimal" />
 
             <TextView
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
-                android:text="@string/address"
+                android:text="@string/description"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"/>
 
             <EditText
-                android:id="@+id/et_address"
+                android:id="@+id/et_description"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_textfield_grey"
                 android:autofillHints="postalAddress"
-                android:hint="@string/business_address"
+                android:hint="@string/description"
                 android:inputType="text"/>
 
         </LinearLayout>
@@ -163,7 +187,7 @@
             android:id="@+id/btn_cancel"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="@string/cancel"
             android:textSize="18sp"
             android:textColor="#111"
@@ -173,7 +197,7 @@
             android:id="@+id/btn_save"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="@string/save"
             android:textSize="18sp"
             android:layout_marginStart="8dp"

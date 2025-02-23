@@ -97,8 +97,8 @@ public class SupplierListAdapter extends RecyclerView.Adapter<SupplierListAdapte
         Supplier supplier = sortedList.get(position);
         if (supplier != null) {
             holder.name.setText(supplier.name);
-            holder.contact.setText(supplier.contactNo);
-            holder.address.setText(supplier.address);
+            if (!supplier.contactNo.isBlank()) holder.contact.setText(supplier.contactNo);
+            if (!supplier.address.isBlank()) holder.address.setText(supplier.address);
         }
     }
 

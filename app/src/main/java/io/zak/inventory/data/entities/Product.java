@@ -1,14 +1,9 @@
 package io.zak.inventory.data.entities;
 
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "products", foreignKeys = {
-        @ForeignKey(entity = Brand.class, parentColumns = "id", childColumns = "brandId"),
-        @ForeignKey(entity = Category.class, parentColumns = "id", childColumns = "categoryId"),
-        @ForeignKey(entity = Supplier.class, parentColumns = "id", childColumns = "supplierId")
-})
+@Entity(tableName = "products")
 public class Product {
 
     @PrimaryKey(autoGenerate = true)
@@ -19,5 +14,6 @@ public class Product {
     public int supplierId;
     public int criticalLevel; // indicates when stock is in critical level
     public double price;
+    public String description;
 
 }

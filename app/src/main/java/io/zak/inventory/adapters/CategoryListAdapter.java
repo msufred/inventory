@@ -14,9 +14,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.zak.inventory.R;
-import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.data.entities.Category;
 
-public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.ViewHolder> {
+public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -24,25 +24,24 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView name, type, plateNo, status;
+        private TextView name;
 
         public ViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             name = view.findViewById(R.id.tv_name);
-            type = view.findViewById(R.id.tv_type);
-            plateNo = view.findViewById(R.id.tv_plate_no);
-            status = view.findViewById(R.id.tv_status);
             LinearLayout layout = view.findViewById(R.id.layout);
-            layout.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
+            layout.setOnClickListener(v -> {
+                onItemClickListener.onItemClick(getAdapterPosition());
+            });
         }
 
     }
 
-    private final Comparator<Vehicle> comparator;
+    private final Comparator<Category> comparator;
 
-    private final SortedList<Vehicle> sortedList = new SortedList<>(Vehicle.class, new SortedList.Callback<Vehicle>() {
+    private final SortedList<Category> sortedList = new SortedList<>(Category.class, new SortedList.Callback<>() {
         @Override
-        public int compare(Vehicle o1, Vehicle o2) {
+        public int compare(Category o1, Category o2) {
             return comparator.compare(o1, o2);
         }
 
@@ -52,12 +51,12 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         }
 
         @Override
-        public boolean areContentsTheSame(Vehicle oldItem, Vehicle newItem) {
+        public boolean areContentsTheSame(Category oldItem, Category newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(Vehicle item1, Vehicle item2) {
+        public boolean areItemsTheSame(Category item1, Category item2) {
             return item1.id == item2.id;
         }
 
@@ -79,7 +78,7 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     private final OnItemClickListener onItemClickListener;
 
-    public VehicleListAdapter(Comparator<Vehicle> comparator, OnItemClickListener onItemClickListener) {
+    public CategoryListAdapter(Comparator<Category> comparator, OnItemClickListener onItemClickListener) {
         this.comparator = comparator;
         this.onItemClickListener = onItemClickListener;
     }
@@ -87,19 +86,14 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_vehicle, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_category, parent, false);
         return new ViewHolder(view, onItemClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Vehicle vehicle = sortedList.get(position);
-        if (vehicle != null) {
-            holder.name.setText(vehicle.name);
-            holder.type.setText(vehicle.type);
-            if (!vehicle.plateNo.isBlank()) holder.plateNo.setText(vehicle.plateNo);
-            holder.status.setText(vehicle.status);
-        }
+        Category category = sortedList.get(position);
+        if (category != null) holder.name.setText(category.category);
     }
 
     @Override
@@ -107,21 +101,25 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         return sortedList.size();
     }
 
-    public void clear() {
-        sortedList.clear();
+    public void addItem(Category category) {
+        sortedList.add(category);
     }
 
-    public Vehicle getItem(int position) {
+    public Category getItem(int position) {
         return sortedList.get(position);
     }
 
-    public void replaceAll(List<Vehicle> list) {
+    public void replaceAll(List<Category> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
-            Vehicle vehicle = sortedList.get(i);
-            if (!list.contains(vehicle)) sortedList.remove(vehicle);
+            Category category = sortedList.get(i);
+            if (!list.contains(category)) sortedList.remove(category);
         }
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();
+    }
+
+    public void clear() {
+        sortedList.clear();
     }
 }

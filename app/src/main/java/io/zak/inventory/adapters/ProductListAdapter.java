@@ -3,6 +3,7 @@ package io.zak.inventory.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,11 +13,12 @@ import androidx.recyclerview.widget.SortedList;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import io.zak.inventory.R;
-import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.data.entities.Product;
 
-public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.ViewHolder> {
+public class ProductListAdapter extends RecyclerView.Adapter<ProductListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -24,25 +26,28 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView name, type, plateNo, status;
+        private final TextView name, price, description;
+        private final ImageView imageView;
 
         public ViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             name = view.findViewById(R.id.tv_name);
-            type = view.findViewById(R.id.tv_type);
-            plateNo = view.findViewById(R.id.tv_plate_no);
-            status = view.findViewById(R.id.tv_status);
+            price = view.findViewById(R.id.tv_price);
+            description = view.findViewById(R.id.tv_description);
+            imageView = view.findViewById(R.id.image_view);
             LinearLayout layout = view.findViewById(R.id.layout);
-            layout.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
+            layout.setOnClickListener(v -> {
+                onItemClickListener.onItemClick(getAdapterPosition());
+            });
         }
 
     }
 
-    private final Comparator<Vehicle> comparator;
+    private final Comparator<Product> comparator;
 
-    private final SortedList<Vehicle> sortedList = new SortedList<>(Vehicle.class, new SortedList.Callback<Vehicle>() {
+    private final SortedList<Product> sortedList = new SortedList<>(Product.class, new SortedList.Callback<>() {
         @Override
-        public int compare(Vehicle o1, Vehicle o2) {
+        public int compare(Product o1, Product o2) {
             return comparator.compare(o1, o2);
         }
 
@@ -52,12 +57,12 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         }
 
         @Override
-        public boolean areContentsTheSame(Vehicle oldItem, Vehicle newItem) {
+        public boolean areContentsTheSame(Product oldItem, Product newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(Vehicle item1, Vehicle item2) {
+        public boolean areItemsTheSame(Product item1, Product item2) {
             return item1.id == item2.id;
         }
 
@@ -79,7 +84,7 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
     private final OnItemClickListener onItemClickListener;
 
-    public VehicleListAdapter(Comparator<Vehicle> comparator, OnItemClickListener onItemClickListener) {
+    public ProductListAdapter(Comparator<Product> comparator, OnItemClickListener onItemClickListener) {
         this.comparator = comparator;
         this.onItemClickListener = onItemClickListener;
     }
@@ -87,18 +92,18 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_vehicle, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
         return new ViewHolder(view, onItemClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Vehicle vehicle = sortedList.get(position);
-        if (vehicle != null) {
-            holder.name.setText(vehicle.name);
-            holder.type.setText(vehicle.type);
-            if (!vehicle.plateNo.isBlank()) holder.plateNo.setText(vehicle.plateNo);
-            holder.status.setText(vehicle.status);
+        Product product = sortedList.get(position);
+        if (product != null) {
+            holder.name.setText(product.name);
+            holder.price.setText(String.format(Locale.getDefault(), "Php %.2f", product.price));
+            if (!product.description.isBlank()) holder.description.setText(product.description);
+            // TODO image view
         }
     }
 
@@ -111,15 +116,15 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         sortedList.clear();
     }
 
-    public Vehicle getItem(int position) {
+    public Product getItem(int position) {
         return sortedList.get(position);
     }
 
-    public void replaceAll(List<Vehicle> list) {
+    public void replaceAll(List<Product> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
-            Vehicle vehicle = sortedList.get(i);
-            if (!list.contains(vehicle)) sortedList.remove(vehicle);
+            Product product = sortedList.get(i);
+            if (!list.contains(product)) sortedList.remove(product);
         }
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();

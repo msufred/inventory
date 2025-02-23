@@ -19,7 +19,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/vehicles"
+        android:text="@string/categories"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/white"
@@ -44,10 +44,10 @@
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:queryHint="@string/search"
-            app:iconifiedByDefault="false"
             android:background="@drawable/bg_searchfield"
-            android:padding="0dp" />
+            android:padding="0dp"
+            app:iconifiedByDefault="false"
+            app:queryHint="@string/search" />
 
     </LinearLayout>
 
@@ -85,9 +85,9 @@
             android:textSize="18sp"
             android:layout_marginStart="8dp"
             android:layout_height="wrap_content"
-            android:text="@string/add_vehicle"
-            app:icon="@drawable/ic_truck"
-            android:backgroundTint="@color/purple_500" />
+            android:text="@string/add_category"
+            app:icon="@drawable/ic_filter"
+            android:backgroundTint="@color/purple_500"/>
 
     </LinearLayout>
 

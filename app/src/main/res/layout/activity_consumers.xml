@@ -19,7 +19,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/vehicles"
+        android:text="@string/consumers"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/white"
@@ -85,9 +85,9 @@
             android:textSize="18sp"
             android:layout_marginStart="8dp"
             android:layout_height="wrap_content"
-            android:text="@string/add_vehicle"
-            app:icon="@drawable/ic_truck"
-            android:backgroundTint="@color/purple_500" />
+            android:text="@string/new_str"
+            app:icon="@drawable/ic_user"
+            android:backgroundTint="@color/purple_500"/>
 
     </LinearLayout>
 
