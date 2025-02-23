@@ -38,4 +38,7 @@ public interface ProductDao {
             "INNER JOIN brands ON products.brandId=brands.id " +
             "INNER JOIN categories ON products.categoryId=categories.category")
     List<ProductWithDetails> getProductsWithDetails();
+
+    @Query("SELECT * FROM products WHERE supplierId=:supplierId")
+    List<Product> getProductsFromSupplier(int supplierId);
 }

@@ -14,11 +14,13 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="10dp"
         android:src="@drawable/ic_package"
-        app:tint="@color/purple_200"
-        android:contentDescription="@string/vector"/>
+        app:tint="@color/purple_500"
+        android:contentDescription="@string/vector"
+        android:background="@drawable/bg_circle"/>
 
     <LinearLayout
         android:layout_width="0dp"

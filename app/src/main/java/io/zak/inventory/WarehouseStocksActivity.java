@@ -1,5 +1,6 @@
 package io.zak.inventory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -99,7 +100,9 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         });
 
         btnAddStock.setOnClickListener(v -> {
-            // TODO add
+            Intent intent = new Intent(this, AddWarehouseStockActivity.class);
+            intent.putExtra("warehouse_id", mWarehouse.id);
+            startActivity(intent);
         });
     }
 

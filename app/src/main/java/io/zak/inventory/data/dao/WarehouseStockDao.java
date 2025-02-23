@@ -33,7 +33,7 @@ public interface WarehouseStockDao {
     int getSize();
 
     @Query("SELECT warehouse_stocks.*, products.name FROM warehouse_stocks " +
-            "INNER JOIN products ON warehouse_stocks.productId=products.id " +
+            "INNER JOIN products ON products.id=warehouse_stocks.productId " +
             "WHERE warehouseId=:id")
     List<WarehouseStockDetails> getWarehouseStocks(int id);
 }

@@ -24,32 +24,36 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.BrandSpinnerAdapter;
 import io.zak.inventory.adapters.CategorySpinnerAdapter;
+import io.zak.inventory.adapters.SupplierSpinnerAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 import io.zak.inventory.data.entities.Product;
+import io.zak.inventory.data.entities.Supplier;
 
 public class AddProductActivity extends AppCompatActivity {
 
     private static final String TAG = "AddProduct";
 
     // Widgets
-    private EditText etName, etPrice, etDescription;
-    private Spinner brandSpinner, categorySpinner;
-    private ImageButton btnBack;
+    private EditText etName, etPrice, etDescription, etCritLevel;
+    private Spinner supplierSpinner, brandSpinner, categorySpinner;
+    private ImageButton btnBack, btnMinus, btnPlus;
     private Button btnCancel, btnSave;
     private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
 
     // list references to Brands and Categories
+    private List<Supplier> supplierList;
     private List<Brand> brandList;
     private List<Category> categoryList;
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
+    private Supplier mSelectedSupplier;
     private Brand mSelectedBrand;
     private Category mSelectedCategory;
 
@@ -65,19 +69,35 @@ public class AddProductActivity extends AppCompatActivity {
         etName = findViewById(R.id.et_name);
         etPrice = findViewById(R.id.et_price);
         etDescription = findViewById(R.id.et_description);
+        etCritLevel = findViewById(R.id.et_crit_level);
+        supplierSpinner = findViewById(R.id.supplier_spinner);
         brandSpinner = findViewById(R.id.brand_spinner);
         categorySpinner = findViewById(R.id.category_spinner);
         btnBack = findViewById(R.id.btn_back);
+        btnMinus = findViewById(R.id.btn_minus);
+        btnPlus = findViewById(R.id.btn_plus);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
         progressGroup = findViewById(R.id.progress_group);
-
         dialogBuilder = new AlertDialog.Builder(this);
-
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
     }
 
     private void setListeners() {
+        supplierSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (supplierList != null && !supplierList.isEmpty()) {
+                    mSelectedSupplier = supplierList.get(position);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         brandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -107,6 +127,8 @@ public class AddProductActivity extends AppCompatActivity {
         });
 
         btnBack.setOnClickListener(v -> goBack());
+        btnMinus.setOnClickListener(v -> decrementQuantity());
+        btnPlus.setOnClickListener(v -> incrementQuantity());
         btnCancel.setOnClickListener(v -> goBack());
         btnSave.setOnClickListener(v -> {
             if (validated()) saveAndClose();
@@ -121,8 +143,14 @@ public class AddProductActivity extends AppCompatActivity {
         progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
-            return  database.brands().getAll();
+            Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
+            return database.suppliers().getAll();
+        }).flatMap(suppliers -> {
+            supplierList = suppliers;
+            return Single.fromCallable(() -> {
+                Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
+                return  database.brands().getAll();
+            });
         }).flatMap(brands -> {
             brandList = brands;
             return Single.fromCallable(() -> {
@@ -147,7 +175,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        if (brandList == null || categoryList == null) {
+        if (supplierList == null || brandList == null || categoryList == null) {
             dialogBuilder.setTitle("Error")
                     .setMessage("Unable to display Brands and Categories")
                     .setPositiveButton("OK", ((dialog, which) -> {
@@ -158,10 +186,9 @@ public class AddProductActivity extends AppCompatActivity {
             return;
         }
 
-        BrandSpinnerAdapter brandSpinnerAdapter = new BrandSpinnerAdapter(this, brandList);
-        brandSpinner.setAdapter(brandSpinnerAdapter);
-        CategorySpinnerAdapter categorySpinnerAdapter = new CategorySpinnerAdapter(this, categoryList);
-        categorySpinner.setAdapter(categorySpinnerAdapter);
+        supplierSpinner.setAdapter(new SupplierSpinnerAdapter(this, supplierList));
+        brandSpinner.setAdapter(new BrandSpinnerAdapter(this, brandList));
+        categorySpinner.setAdapter(new CategorySpinnerAdapter(this, categoryList));
     }
 
     private boolean validated() {
@@ -194,9 +221,14 @@ public class AddProductActivity extends AppCompatActivity {
 
         Product product = new Product();
         product.name = Utils.normalize(etName.getText().toString());
+        product.supplierId = mSelectedSupplier.id;
         product.brandId = mSelectedBrand.id;
         product.categoryId = mSelectedCategory.id;
         product.price = Double.parseDouble(etPrice.getText().toString().trim());
+        String str = etCritLevel.getText().toString().trim();
+        int level = str.isBlank() ? 1 : Integer.parseInt(str);
+        if (level < 1) level = 1;
+        product.criticalLevel = level;
         product.description = Utils.normalize(etDescription.getText().toString());
 
         progressGroup.setVisibility(View.VISIBLE);
@@ -220,6 +252,21 @@ public class AddProductActivity extends AppCompatActivity {
                     }));
             dialogBuilder.create().show();
         }));
+    }
+
+    private void decrementQuantity() {
+        String str = etCritLevel.getText().toString();
+        int qty = str.isBlank() ? 1 : Integer.parseInt(str.trim());
+        qty -= 1;
+        if (qty < 1) qty = 1;
+        etCritLevel.setText(String.valueOf(qty));
+    }
+
+    private void incrementQuantity() {
+        String str = etCritLevel.getText().toString();
+        int qty = str.isBlank() ? 1 : Integer.parseInt(str.trim());
+        qty += 1;
+        etCritLevel.setText(String.valueOf(qty));
     }
 
     private void goBack() {

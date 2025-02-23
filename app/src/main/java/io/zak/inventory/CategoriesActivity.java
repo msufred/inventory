@@ -71,6 +71,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         recyclerView.setAdapter(adapter);
 
         dialogBuilder = new AlertDialog.Builder(this);
+        createDialog();
     }
 
     private void setListeners() {
@@ -92,7 +93,27 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             finish();
         });
 
-        btnAdd.setOnClickListener(v -> showAddDialog());
+        btnAdd.setOnClickListener(v -> addDialog.show());
+    }
+
+    private void createDialog() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_add_category, null);
+
+        EditText etName = dialogView.findViewById(R.id.et_brand_name);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        Button btnSave = dialogView.findViewById(R.id.btn_save);
+
+        dialogBuilder.setView(dialogView);
+        addDialog = dialogBuilder.create();
+
+        btnCancel.setOnClickListener(v -> addDialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            String str = etName.getText().toString();
+            if (!str.isBlank()) addCategory(str);
+            etName.getText().clear();
+            addDialog.dismiss();
+        });
     }
 
     @Override
@@ -147,31 +168,6 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             }
         }
         return list;
-    }
-
-    private void showAddDialog() {
-        if (addDialog == null) createDialog();
-        addDialog.show();
-    }
-
-    private void createDialog() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View dialogView = inflater.inflate(R.layout.dialog_add_category, null);
-
-        EditText etName = dialogView.findViewById(R.id.et_brand_name);
-        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-        Button btnSave = dialogView.findViewById(R.id.btn_save);
-
-        dialogBuilder.setView(dialogView);
-        addDialog = dialogBuilder.create();
-
-        btnCancel.setOnClickListener(v -> addDialog.dismiss());
-        btnSave.setOnClickListener(v -> {
-            String str = etName.getText().toString();
-            if (!str.isBlank()) addCategory(str);
-            etName.getText().clear();
-            addDialog.dismiss();
-        });
     }
 
     private void addCategory(String str) {

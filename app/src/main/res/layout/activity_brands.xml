@@ -9,7 +9,7 @@
         android:layout_height="250dp"
         android:contentDescription="@string/vector"
         android:src="@drawable/circle_gradient"
-        android:layout_marginTop="-50dp"
+        android:layout_marginTop="-60dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -70,7 +70,7 @@
         <Button
             android:id="@+id/btn_back"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_weight="1"
             android:text="@string/home"
             android:textSize="18sp"
@@ -83,7 +83,7 @@
             android:layout_weight="1"
             android:textSize="18sp"
             android:layout_marginStart="8dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:text="@string/add_brand"
             app:icon="@drawable/ic_award"
             android:backgroundTint="@color/purple_500"/>

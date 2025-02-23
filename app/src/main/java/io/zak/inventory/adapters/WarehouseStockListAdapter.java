@@ -1,5 +1,6 @@
 package io.zak.inventory.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,7 +102,7 @@ public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseSto
         WarehouseStockDetails stockDetails = sortedList.get(position);
         if (stockDetails != null) {
             holder.name.setText(stockDetails.productName);
-            holder.quantity.setText(stockDetails.warehouseStock.quantity);
+            holder.quantity.setText(String.valueOf(stockDetails.warehouseStock.quantity));
             Date date = new Date(stockDetails.warehouseStock.dateAcquired);
             holder.dateAcquired.setText(dateFormat.format(date));
         }

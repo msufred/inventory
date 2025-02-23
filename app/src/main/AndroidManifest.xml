@@ -30,6 +30,7 @@
         <activity android:name=".WarehousesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddWarehouseActivity" android:parentActivityName=".WarehousesActivity" />
         <activity android:name=".WarehouseStocksActivity" android:parentActivityName=".WarehousesActivity" />
+        <activity android:name=".AddWarehouseStockActivity" android:parentActivityName=".WarehouseStocksActivity" />
 
         <!-- Employee Related Activities -->
         <activity android:name=".EmployeesActivity" android:parentActivityName=".HomeActivity" />
