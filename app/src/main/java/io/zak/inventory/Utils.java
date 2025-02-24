@@ -36,4 +36,11 @@ public class Utils {
         return sp.getInt("user_id", -1);
     }
 
+    public static void logout(Context context) {
+        SharedPreferences sp = context.getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove("user_id");
+        editor.apply();
+    }
+
 }
