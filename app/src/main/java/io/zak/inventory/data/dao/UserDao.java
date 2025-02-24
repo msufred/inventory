@@ -21,10 +21,13 @@ public interface UserDao {
     void insertAll(User...users);
 
     @Update
+    int update(User user);
+
+    @Update
     void updateAll(User...users);
 
     @Delete
-    void delete(User user);
+    int delete(User user);
 
     @Query("SELECT * FROM users WHERE username=:username AND password=:password")
     List<User> getUser(String username, String password);
