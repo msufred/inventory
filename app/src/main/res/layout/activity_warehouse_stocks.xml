@@ -177,4 +177,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/purple_500"/>
 
+    <RelativeLayout
+        android:id="@+id/progress_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#20000000"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:indeterminateTint="@color/purple_500"/>
+
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

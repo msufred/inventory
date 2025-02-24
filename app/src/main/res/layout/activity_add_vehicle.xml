@@ -205,15 +205,15 @@
         android:id="@+id/progress_group"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#aa000000"
+        android:background="#20000000"
         android:elevation="20dp"
         android:gravity="center"
         android:visibility="gone">
 
         <ProgressBar
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:indeterminateTint="@color/white"/>
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:indeterminateTint="@color/purple_500"/>
 
     </RelativeLayout>
 

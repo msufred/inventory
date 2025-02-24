@@ -64,16 +64,36 @@
             android:paddingStart="32dp"
             android:paddingEnd="32dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/warehouse_details"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#111"
-                android:drawablePadding="16dp"
-                app:drawableStartCompat="@drawable/ic_building"
-                app:drawableTint="#111" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/warehouse_details"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#111"
+                    android:drawablePadding="16dp"
+                    app:drawableStartCompat="@drawable/ic_building"
+                    app:drawableTint="#111" />
+
+                <ImageButton
+                    android:id="@+id/btn_delete"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_trash"
+                    app:tint="#ccff0000"
+                    android:background="#00000000"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:contentDescription="@string/button"
+                    android:visibility="invisible"/>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="90dp"
@@ -172,15 +192,15 @@
         android:id="@+id/progress_group"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#aa000000"
+        android:background="#20000000"
         android:elevation="20dp"
         android:gravity="center"
         android:visibility="gone">
 
         <ProgressBar
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:indeterminateTint="@color/white"/>
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:indeterminateTint="@color/purple_500"/>
 
     </RelativeLayout>
 
