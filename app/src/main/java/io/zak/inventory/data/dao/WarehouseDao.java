@@ -22,10 +22,13 @@ public interface WarehouseDao {
     void insertAll(Warehouse...warehouses);
 
     @Update
+    int update(Warehouse warehouse);
+
+    @Update
     void updateAll(Warehouse...warehouses);
 
     @Delete
-    void delete(Warehouse warehouse);
+    int delete(Warehouse warehouse);
 
     @Query("SELECT * FROM warehouses")
     List<Warehouse> getAll();
