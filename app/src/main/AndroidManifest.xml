@@ -26,11 +26,15 @@
         <activity android:name=".RegisterActivity" android:parentActivityName=".MainActivity" />
         <activity android:name=".HomeActivity" />
 
+        <!-- User Related Activities -->
+        <activity android:name=".EditProfileActivity" android:parentActivityName=".HomeActivity" />
+
         <!-- Warehouse Related Activities -->
         <activity android:name=".WarehousesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddWarehouseActivity" android:parentActivityName=".WarehousesActivity" />
         <activity android:name=".WarehouseStocksActivity" android:parentActivityName=".WarehousesActivity" />
         <activity android:name=".AddWarehouseStockActivity" android:parentActivityName=".WarehouseStocksActivity" />
+        <activity android:name=".EditWarehouseActivity" android:parentActivityName=".WarehouseStocksActivity" />
 
         <!-- Employee Related Activities -->
         <activity android:name=".EmployeesActivity" android:parentActivityName=".HomeActivity" />
