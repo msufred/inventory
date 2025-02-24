@@ -2,6 +2,7 @@ package io.zak.inventory;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,22 +41,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (disposables == null) disposables = new CompositeDisposable();
+        new Handler().postDelayed(() -> {
+            if (disposables == null) disposables = new CompositeDisposable();
 
-        Log.d(TAG, "Checking user login...");
-        // if no user login, check database if any user exits, if no user exist, go to Register activity
-        if (Utils.getLoginId(this) == -1) {
-            disposables.add(Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).users().getSize())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(size -> {
-                        if (size > 0) showLogin();
-                        else showRegister();
-                    }, err -> {
-                        throw new RuntimeException("Database Error:\n" + err);
-                    }));
-        } else {
-            // user login exists, go to Home activity
-            showHome();
-        }
+            Log.d(TAG, "Checking user login...");
+            // if no user login, check database if any user exits, if no user exist, go to Register activity
+            if (Utils.getLoginId(this) == -1) {
+                disposables.add(Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).users().getSize())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(size -> {
+                            if (size > 0) showLogin();
+                            else showRegister();
+                        }, err -> {
+                            throw new RuntimeException("Database Error:\n" + err);
+                        }));
+            } else {
+                // user login exists, go to Home activity
+                showHome();
+            }
+        }, 2000);
     }
 
     private void showLogin() {

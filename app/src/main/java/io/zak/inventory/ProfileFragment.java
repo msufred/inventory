@@ -54,6 +54,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setListeners() {
+        btnEdit.setOnClickListener(v -> {
+            startActivity(new Intent(requireActivity(), EditProfileActivity.class));
+        });
         btnLogout.setOnClickListener(v -> logout());
     }
 

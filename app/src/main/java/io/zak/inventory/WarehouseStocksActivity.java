@@ -94,7 +94,9 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         btnClose.setOnClickListener(v -> goBack());
 
         btnEdit.setOnClickListener(v -> {
-            // TODO edit
+            Intent intent = new Intent(this, EditWarehouseActivity.class);
+            intent.putExtra("warehouse_id", mWarehouse.id);
+            startActivity(intent);
         });
 
         btnAddStock.setOnClickListener(v -> {
@@ -150,7 +152,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             for (WarehouseStockDetails details : list) {
                 amount += details.warehouseStock.totalAmount;
             }
-            tvStocksAmount.setText(String.format(Locale.getDefault(), "%.2f", amount));
+            tvStocksAmount.setText(Utils.toStringMoneyFormat(amount));
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
 

@@ -1,10 +1,13 @@
 package io.zak.inventory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -23,7 +26,7 @@ public class EditWarehouseActivity extends AppCompatActivity {
 
     // Widgets
     private EditText etName, etContact, etAddress;
-    private ImageButton btnBack;
+    private ImageButton btnBack, btnDelete;
     private Button btnCancel, btnSave;
 
     private CompositeDisposable disposables;
@@ -47,6 +50,8 @@ public class EditWarehouseActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
+        btnDelete = findViewById(R.id.btn_delete);
+        btnDelete.setVisibility(View.VISIBLE);
     }
 
     private void setListeners() {
@@ -54,6 +59,20 @@ public class EditWarehouseActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> goBack());
         btnSave.setOnClickListener(v -> {
             if (validated()) saveAndClose();
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            if (mWarehouse != null) {
+                dialogBuilder.setTitle("Confirm Delete")
+                        .setMessage("This will delete this Warehouse entry and all of its stocks. " +
+                                "Are you sure you want to delete this Warehouse entry?")
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton("Confirm", (dialog, which) -> {
+                            dialog.dismiss();
+                            deleteWarehouse();
+                        });
+                dialogBuilder.create().show();
+            }
         });
     }
 
@@ -103,14 +122,13 @@ public class EditWarehouseActivity extends AppCompatActivity {
     }
 
     private void saveAndClose() {
-        Warehouse warehouse = new Warehouse();
-        warehouse.name = Utils.normalize(etName.getText().toString());
-        warehouse.address = Utils.normalize(etAddress.getText().toString());
-        warehouse.contactNo = Utils.normalize(etContact.getText().toString());
+        mWarehouse.name = Utils.normalize(etName.getText().toString());
+        mWarehouse.address = Utils.normalize(etAddress.getText().toString());
+        mWarehouse.contactNo = Utils.normalize(etContact.getText().toString());
 
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Saving Warehouse entry: " + Thread.currentThread());
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().insert(warehouse);
+            Log.d(TAG, "Updating Warehouse entry: " + Thread.currentThread());
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().update(mWarehouse);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Done. Returned with ID " + id + ": " + Thread.currentThread());
             goBack();
@@ -121,6 +139,31 @@ public class EditWarehouseActivity extends AppCompatActivity {
             dialogBuilder.setTitle("Database Error").setMessage(err.toString());
             AlertDialog dialog = dialogBuilder.create();
             dialog.show();
+        }));
+    }
+
+    private void deleteWarehouse() {
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Deleting Warehouse entry: " + Thread.currentThread());
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().delete(mWarehouse);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
+            Log.d(TAG, "Done. Row affected=" + rowCount + " " + Thread.currentThread());
+
+            if (rowCount > 0) {
+                Toast.makeText(this, "Warehouse Entry Deleted", Toast.LENGTH_SHORT).show();
+            }
+
+            // return to WarehousesActivity
+            startActivity(new Intent(this, WarehousesActivity.class));
+            finish();
+        }, err -> {
+            Log.e(TAG, "Database Error: " + err);
+
+            // dialog
+            dialogBuilder.setTitle("Database Error")
+                    .setMessage("Error while deleting Warehouse entry: " + err)
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            dialogBuilder.create().show();
         }));
     }
 
