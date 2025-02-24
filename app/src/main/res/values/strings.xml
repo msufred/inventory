@@ -14,6 +14,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
+    <string name="full_name">Full Name</string>
     <string name="name">Name</string>
     <string name="address">Address</string>
     <string name="current_address">Current Address</string>
@@ -57,6 +58,9 @@
     <string name="go_back">Go Back</string>
     <string name="create">Create</string>
 
+    <string name="edit_profile">Edit Profile</string>
+    <string name="user_details">User Details</string>
+
     <!-- warehouse related -->
     <string name="add_warehouse">Add Warehouse</string>
     <string name="warehouse_details">Warehouse Details</string>
@@ -69,6 +73,7 @@
     <string name="date_acquired">Date Acquired</string>
     <string name="stock_details">Stock Details</string>
     <string name="critical_level">Critical Level</string>
+    <string name="delete_warehouse">Delete Warehouse</string>
 
     <!-- employee related -->
     <string name="add_employee">Add Employee</string>
