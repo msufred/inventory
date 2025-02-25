@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -39,8 +40,10 @@ public class AddProductActivity extends AppCompatActivity {
     // Widgets
     private EditText etName, etPrice, etDescription, etCritLevel;
     private Spinner supplierSpinner, brandSpinner, categorySpinner;
+    private TextView emptySupplierSpinner, emptyBrandSpinner, emptyCategorySpinner;
     private ImageButton btnBack, btnMinus, btnPlus;
     private Button btnCancel, btnSave;
+    private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
 
@@ -70,13 +73,17 @@ public class AddProductActivity extends AppCompatActivity {
         etDescription = findViewById(R.id.et_description);
         etCritLevel = findViewById(R.id.et_crit_level);
         supplierSpinner = findViewById(R.id.supplier_spinner);
+        emptySupplierSpinner = findViewById(R.id.empty_supplier_spinner);
         brandSpinner = findViewById(R.id.brand_spinner);
+        emptyBrandSpinner = findViewById(R.id.empty_brand_spinner);
         categorySpinner = findViewById(R.id.category_spinner);
+        emptyCategorySpinner = findViewById(R.id.empty_category_spinner);
         btnBack = findViewById(R.id.btn_back);
         btnMinus = findViewById(R.id.btn_minus);
         btnPlus = findViewById(R.id.btn_plus);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
+        progressGroup = findViewById(R.id.progress_group);
         dialogBuilder = new AlertDialog.Builder(this);
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
     }
@@ -92,7 +99,7 @@ public class AddProductActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // empty
             }
         });
 
@@ -138,6 +145,7 @@ public class AddProductActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
@@ -155,10 +163,12 @@ public class AddProductActivity extends AppCompatActivity {
                 return  database.categories().getAll();
             });
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(categories -> {
+            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with category size: " +categories.size() + " " + Thread.currentThread());
             categoryList = categories;
             setupSpinners();
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
@@ -184,6 +194,10 @@ public class AddProductActivity extends AppCompatActivity {
         supplierSpinner.setAdapter(new SupplierSpinnerAdapter(this, supplierList));
         brandSpinner.setAdapter(new BrandSpinnerAdapter(this, brandList));
         categorySpinner.setAdapter(new CategorySpinnerAdapter(this, categoryList));
+
+        emptySupplierSpinner.setVisibility(supplierList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        emptyBrandSpinner.setVisibility(brandList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        emptyCategorySpinner.setVisibility(categoryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
     }
 
     private boolean validated() {
@@ -226,13 +240,16 @@ public class AddProductActivity extends AppCompatActivity {
         product.criticalLevel = level;
         product.description = Utils.normalize(etDescription.getText().toString());
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Product entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().insert(product);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
+            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID:" + id + " " + Thread.currentThread());
             goBack();
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog

@@ -38,6 +38,7 @@
     <string name="brand_name">Brand Name</string>
     <string name="description">Description</string>
     <string name="no_description">No Description</string>
+    <string name="set_date">Set Date</string>
 
     <!-- Actions -->
     <string name="login">Login</string>

@@ -114,6 +114,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp" />
 
+                <TextView
+                    android:id="@+id/empty_supplier_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="@string/no_suppliers"
+                    android:textSize="16sp"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="8dp"/>
+
             </RelativeLayout>
 
             <TextView
@@ -137,6 +146,15 @@
                     android:id="@+id/product_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="50dp" />
+
+                <TextView
+                    android:id="@+id/empty_products_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="@string/no_products"
+                    android:textSize="16sp"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="8dp"/>
 
             </RelativeLayout>
 
@@ -163,8 +181,8 @@
                     android:layout_height="50dp"
                     android:background="@drawable/bg_textfield_grey"
                     android:autofillHints="none"
-                    android:hint="@string/date_acquired"
-                    android:inputType="none"
+                    android:hint="@string/set_date"
+                    android:inputType="date"
                     android:textSize="16sp"/>
 
                 <ImageButton
@@ -174,7 +192,8 @@
                     android:src="@drawable/ic_calendar"
                     android:contentDescription="@string/button"
                     app:tint="@color/purple_500"
-                    android:backgroundTint="#00000000"/>
+                    android:backgroundTint="#00000000"
+                    android:foreground="?android:attr/selectableItemBackground"/>
 
             </LinearLayout>
 
@@ -201,7 +220,8 @@
                     android:src="@drawable/ic_minus_circle"
                     android:contentDescription="@string/button"
                     android:backgroundTint="#00000000"
-                    app:tint="@color/purple_500"/>
+                    app:tint="@color/purple_500"
+                    android:foreground="?android:attr/selectableItemBackground"/>
 
                 <EditText
                     android:id="@+id/et_quantity"
@@ -223,7 +243,8 @@
                     android:src="@drawable/ic_plus_circle"
                     android:contentDescription="@string/button"
                     android:backgroundTint="#00000000"
-                    app:tint="@color/purple_500"/>
+                    app:tint="@color/purple_500"
+                    android:foreground="?android:attr/selectableItemBackground"/>
 
             </LinearLayout>
 
@@ -251,7 +272,7 @@
             android:text="@string/cancel"
             android:textSize="18sp"
             android:textColor="#111"
-            android:background="#00000000"/>
+            android:backgroundTint="@color/transparent"/>
 
         <Button
             android:id="@+id/btn_save"

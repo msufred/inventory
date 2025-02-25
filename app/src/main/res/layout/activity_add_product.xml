@@ -141,6 +141,15 @@
                         android:layout_height="50dp"
                         android:prompt="@string/no_brands"/>
 
+                    <TextView
+                        android:id="@+id/empty_supplier_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/no_suppliers"
+                        android:textSize="16sp"
+                        android:layout_marginStart="8dp" />
+
                 </RelativeLayout>
 
                 <TextView
@@ -166,6 +175,15 @@
                         android:layout_height="50dp"
                         android:prompt="@string/no_brands"/>
 
+                    <TextView
+                        android:id="@+id/empty_brand_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/no_brands"
+                        android:textSize="16sp"
+                        android:layout_marginStart="8dp" />
+
                 </RelativeLayout>
 
                 <TextView
@@ -190,6 +208,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:prompt="@string/no_categories"/>
+
+                    <TextView
+                        android:id="@+id/empty_category_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/no_categories"
+                        android:textSize="16sp"
+                        android:layout_marginStart="8dp" />
 
                 </RelativeLayout>
 
