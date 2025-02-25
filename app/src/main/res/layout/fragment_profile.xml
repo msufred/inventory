@@ -4,15 +4,13 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:layout_width="500dp"
-        android:layout_height="250dp"
-        android:contentDescription="@string/vector"
-        android:src="@drawable/circle_gradient"
-        android:layout_marginTop="-100dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_round_rect_bottom_gradient"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="-40dp"
+        android:layout_marginEnd="-40dp"/>
 
     <ImageButton
         android:id="@+id/btn_edit"

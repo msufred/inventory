@@ -5,15 +5,13 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:layout_width="550dp"
-        android:layout_height="280dp"
-        android:contentDescription="@string/vector"
-        android:src="@drawable/circle_gradient"
-        android:layout_marginTop="-100dp"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/bg_gradient_main"/>
 
     <ImageButton
         android:id="@+id/btn_back"
@@ -43,18 +41,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp"/>
 
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:orientation="vertical"
         android:layout_marginTop="80dp"
-        app:cardCornerRadius="30dp"
-        app:cardElevation="10dp"
-        android:elevation="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="-100dp">
+        app:layout_constraintBottom_toTopOf="@id/button_group"
+        android:background="@drawable/bg_round_rect_top">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,16 +61,36 @@
             android:paddingStart="32dp"
             android:paddingEnd="32dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/stock_details"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#111"
-                android:drawablePadding="16dp"
-                app:drawableStartCompat="@drawable/ic_package"
-                app:drawableTint="#111" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stock_details"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#111"
+                    android:drawablePadding="16dp"
+                    app:drawableStartCompat="@drawable/ic_package"
+                    app:drawableTint="#111" />
+
+                <ImageButton
+                    android:id="@+id/btn_delete"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_trash"
+                    app:tint="#ccff0000"
+                    android:background="#00000000"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:contentDescription="@string/button"
+                    android:visibility="invisible"/>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -213,9 +229,10 @@
 
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/button_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
