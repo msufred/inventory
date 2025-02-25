@@ -67,6 +67,7 @@
     <string name="add_warehouse">Add Warehouse</string>
     <string name="edit_warehouse">Edit Warehouse</string>
     <string name="warehouse_details">Warehouse Details</string>
+    <string name="no_warehouses">No Warehouses</string>
     <string name="warehouse_name">Warehouse Name</string>
     <string name="add_stock">Add Stock</string>
     <string name="add_warehouse_stock">Add Warehouse Stock</string>
