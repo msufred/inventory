@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -34,6 +35,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoCategories;
     private Button btnBack, btnAdd;
 
     // RecyclerView adapter
@@ -60,6 +62,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
+        tvNoCategories = findViewById(R.id.tv_no_categories);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
 
@@ -126,6 +129,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             categoryList = list;
             adapter.replaceAll(list);
+            tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
 

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
 
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoWarehouses;
     private Button btnBack, btnAdd;
 
     // for RecyclerView
@@ -54,6 +56,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
 
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
+        tvNoWarehouses = findViewById(R.id.tv_no_warehouses);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
 
@@ -109,6 +112,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             warehouseList = list;
             adapter.replaceAll(list);
+            tvNoWarehouses.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
         }));

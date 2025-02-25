@@ -7,11 +7,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -22,9 +24,10 @@ import io.zak.inventory.data.entities.Warehouse;
 
 public class EditWarehouseActivity extends AppCompatActivity {
 
-    private static final String TAG = "AddWarehouse";
+    private static final String TAG = "EditWarehouse";
 
     // Widgets
+    private TextView tvTitle;
     private EditText etName, etContact, etAddress;
     private ImageButton btnBack, btnDelete;
     private Button btnCancel, btnSave;
@@ -44,6 +47,8 @@ public class EditWarehouseActivity extends AppCompatActivity {
     }
 
     private void getWidgets() {
+        tvTitle = findViewById(R.id.title);
+        tvTitle.setText(R.string.edit_warehouse);
         etName = findViewById(R.id.et_name);
         etContact = findViewById(R.id.et_contact);
         etAddress = findViewById(R.id.et_address);

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoConsumers;
     private Button btnBack, btnAdd;
 
     // RecyclerView adapter
@@ -56,6 +58,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
+        tvNoConsumers = findViewById(R.id.tv_no_consumers);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
 
@@ -100,6 +103,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             consumerList = list;
             adapter.replaceAll(list);
+            tvNoConsumers.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
         }));

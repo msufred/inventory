@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoEmployees;
     private Button btnBack, btnAdd;
     private RelativeLayout progressGroup;
 
@@ -54,6 +56,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
 
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
+        tvNoEmployees = findViewById(R.id.tv_no_employees);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
         progressGroup = findViewById(R.id.progress_group);
@@ -99,6 +102,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             employeeList = list;
             adapter.replaceAll(list);
+            tvNoEmployees.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);

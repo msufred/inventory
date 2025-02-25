@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -33,6 +34,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoProducts;
     private Button btnBack, btnAdd;
     private RelativeLayout progressGroup;
 
@@ -59,6 +61,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
+        tvNoProducts = findViewById(R.id.tv_no_products);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
         progressGroup = findViewById(R.id.progress_group);
@@ -107,6 +110,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             productList = list;
             adapter.replaceAll(list);
+            tvNoProducts.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);

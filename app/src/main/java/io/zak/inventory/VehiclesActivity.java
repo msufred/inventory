@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoVehicles;
     private Button btnBack, btnAdd;
 
     // for RecyclerView
@@ -52,6 +54,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
+        tvNoVehicles = findViewById(R.id.tv_no_vehicles);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
 
@@ -94,6 +97,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
             vehicleList = list;
             adapter.replaceAll(list);
+            tvNoVehicles.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
         }));

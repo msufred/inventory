@@ -1,15 +1,12 @@
 package io.zak.inventory;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -37,6 +34,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
+    private TextView tvNoBrands;
     private Button btnBack, btnAdd;
 
     // for RecyclerView
@@ -63,6 +61,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private void getWidgets() {
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
+        tvNoBrands = findViewById(R.id.tv_no_brands);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
 
@@ -109,6 +108,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             brandList = list;
             adapter.replaceAll(list);
+            tvNoBrands.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
 
