@@ -61,6 +61,9 @@
         <!-- Consumer Related Activities -->
         <activity android:name=".ConsumersActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddConsumerActivity" android:parentActivityName=".ConsumersActivity" />
+        <!-- TODO: ViewConsumerActivity -->
+        <!-- TODO: EditConsumerActivity's parent must be ViewConsumerActivity -->
+        <activity android:name=".EditConsumerActivity" android:parentActivityName=".ConsumersActivity" />
     </application>
 
 </manifest>
