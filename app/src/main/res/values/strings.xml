@@ -86,6 +86,7 @@
     <string name="designation_position">Designation/Position</string>
     <string name="employee_status">Permanent/Contractual etc.</string>
     <string name="no_employees">No Employees</string>
+    <string name="edit_employee">Edit Employee</string>
 
     <!-- vehicle related -->
     <string name="add_vehicle">Add Vehicle</string>

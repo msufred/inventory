@@ -10,6 +10,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.Employee;
+import io.zak.inventory.data.entities.Warehouse;
 
 @Dao
 public interface EmployeeDao {
@@ -34,4 +35,7 @@ public interface EmployeeDao {
 
     @Query("SELECT COUNT(*) FROM employees")
     int getSize();
+
+    @Update
+    int update(Employee employee);
 }

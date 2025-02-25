@@ -22,8 +22,9 @@
         android:background="@drawable/bg_circle"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:layout_marginStart="16dp">
 
@@ -54,4 +55,15 @@
 
     </LinearLayout>
 
+    <ImageButton
+        android:id="@+id/btn_edit"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_edit_2"
+        app:tint="@color/purple_500"
+        android:backgroundTint="@color/zxing_transparent"
+        android:contentDescription="@string/button"
+        android:foreground="?android:attr/selectableItemBackground"/>
+
 </LinearLayout>
+

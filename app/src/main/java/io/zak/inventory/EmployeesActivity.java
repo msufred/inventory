@@ -25,6 +25,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.EmployeeListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Employee;
+import io.zak.inventory.data.entities.Warehouse;
 
 public class EmployeesActivity extends AppCompatActivity implements EmployeeListAdapter.OnItemClickListener {
 
@@ -113,8 +114,11 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
     public void onItemClick(int position) {
         if (adapter != null) {
             Employee employee = adapter.getItem(position);
-            Log.d(TAG, "Employee selected (ID: " + employee.id + ")");
-            // TODO
+            if (employee != null) {
+                Intent intent = new Intent(this, EditEmployeeActivity.class);
+                intent.putExtra("employee_id", employee.id);
+                startActivity(intent);
+            }
         }
     }
 
