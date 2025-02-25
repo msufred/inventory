@@ -11,4 +11,6 @@
     <color name="bg_gradient_top">#7C00FE</color>
     <color name="bg_gradient_bottom">#944AB5</color>
     <color name="accent">#DCB21C</color>
+
+    <color name="transparent">#00000000</color>
 </resources>
