@@ -180,6 +180,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             Log.d(TAG, "Returned with ID=" + id + " " + Thread.currentThread());
             category.id = id.intValue();
             adapter.addItem(category);
+            if (tvNoCategories.getVisibility() == View.VISIBLE) tvNoCategories.setVisibility(View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
 
