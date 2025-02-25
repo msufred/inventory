@@ -17,6 +17,9 @@ public interface ConsumerDao {
     long insert(Consumer consumer);
 
     @Update
+    int update(Consumer consumer);
+
+    @Update
     void updateAll(Consumer...consumers);
 
     @Delete
