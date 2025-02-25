@@ -12,6 +12,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="reenter_password">Re-Enter Password</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="full_name">Full Name</string>
@@ -57,12 +58,14 @@
     <string name="new_str">New</string>
     <string name="go_back">Go Back</string>
     <string name="create">Create</string>
+    <string name="add">Add</string>
 
     <string name="edit_profile">Edit Profile</string>
     <string name="user_details">User Details</string>
 
     <!-- warehouse related -->
     <string name="add_warehouse">Add Warehouse</string>
+    <string name="edit_warehouse">Edit Warehouse</string>
     <string name="warehouse_details">Warehouse Details</string>
     <string name="warehouse_name">Warehouse Name</string>
     <string name="add_stock">Add Stock</string>
@@ -81,6 +84,7 @@
     <string name="employee_name">Name of Employee</string>
     <string name="designation_position">Designation/Position</string>
     <string name="employee_status">Permanent/Contractual etc.</string>
+    <string name="no_employees">No Employees</string>
 
     <!-- vehicle related -->
     <string name="add_vehicle">Add Vehicle</string>
@@ -88,6 +92,7 @@
     <string name="vehicle_model">Vehicle Model</string>
     <string name="plate_no">Plate No.</string>
     <string name="no_plate_no">No Plate No.</string>
+    <string name="no_vehicles">No Vehicles</string>
 
     <!-- brand related -->
     <string name="add_brand">Add Brand</string>
@@ -102,16 +107,19 @@
     <string name="product_details">Product Details</string>
     <string name="product_name">Product Name</string>
     <string name="product_price">Product Price</string>
+    <string name="no_products">No Products</string>
 
     <!-- supplier related -->
     <string name="add_supplier">Add Supplier</string>
     <string name="supplier_name">Supplier Name</string>
     <string name="supplier_details">Supplier Details</string>
+    <string name="no_suppliers">No Suppliers</string>
 
     <!-- consumer related -->
     <string name="add_consumer">Add Consumer</string>
     <string name="consumer_name">Consumer Name</string>
     <string name="consumer_details">Consumer Details</string>
+    <string name="no_consumers">No Consumers</string>
 
     <!-- figures/numbers -->
     <string name="zero">0</string>
