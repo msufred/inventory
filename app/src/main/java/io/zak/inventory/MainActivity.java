@@ -41,9 +41,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (disposables == null) disposables = new CompositeDisposable();
         new Handler().postDelayed(() -> {
-            if (disposables == null) disposables = new CompositeDisposable();
-
             Log.d(TAG, "Checking user login...");
             // if no user login, check database if any user exits, if no user exist, go to Register activity
             if (Utils.getLoginId(this) == -1) {
