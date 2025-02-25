@@ -185,6 +185,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
             Log.d(TAG, "Done. Returned with ID=" + id + " " + Thread.currentThread());
             brand.id = id.intValue();
             adapter.addItem(brand);
+            if (tvNoBrands.getVisibility() == View.VISIBLE) tvNoBrands.setVisibility(View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
 
