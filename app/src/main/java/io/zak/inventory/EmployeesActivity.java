@@ -81,7 +81,10 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
             }
         });
 
-        btnBack.setOnClickListener(v -> goBack());
+        btnBack.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+        });
 
         btnAdd.setOnClickListener(v -> {
             startActivity(new Intent(this, AddEmployeeActivity.class));
@@ -117,6 +120,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
             Intent intent = new Intent(this, ViewEmployeeActivity.class);
             intent.putExtra("employee_id", employee.id);
             startActivity(intent);
+            finish();
         }
     }
 
@@ -135,11 +139,6 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
             }
         }
         return list;
-    }
-
-    private void goBack() {
-        getOnBackPressedDispatcher().onBackPressed();
-        finish();
     }
 
     @Override

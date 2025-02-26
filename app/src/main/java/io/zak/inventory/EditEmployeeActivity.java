@@ -96,6 +96,7 @@ public class EditEmployeeActivity extends AppCompatActivity {
                             dialog.dismiss();
                             deleteEmployee();
                         });
+                dialogBuilder.create().show();
             }
         });
         btnCancel.setOnClickListener(v -> goBack());
@@ -217,8 +218,7 @@ public class EditEmployeeActivity extends AppCompatActivity {
             if (rowCount > 0) {
                 Toast.makeText(this, "Deleted Employee entry.", Toast.LENGTH_SHORT).show();
             }
-            startActivity(new Intent(this, EmployeesActivity.class));
-            finish();
+            goToEmployeeList();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
@@ -226,7 +226,7 @@ public class EditEmployeeActivity extends AppCompatActivity {
                     .setMessage("Error while deleting Employee entry: " + err)
                     .setPositiveButton("OK", (d, w) -> {
                         d.dismiss();
-                        goBack();
+                        goToEmployeeList();
                     });
             dialogBuilder.create().show();
         }));
@@ -234,6 +234,11 @@ public class EditEmployeeActivity extends AppCompatActivity {
 
     private void goBack() {
         getOnBackPressedDispatcher().onBackPressed();
+        finish();
+    }
+
+    private void goToEmployeeList() {
+        startActivity(new Intent(this, EmployeesActivity.class));
         finish();
     }
 

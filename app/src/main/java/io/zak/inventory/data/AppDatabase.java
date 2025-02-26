@@ -1,5 +1,6 @@
 package io.zak.inventory.data;
 
+import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 

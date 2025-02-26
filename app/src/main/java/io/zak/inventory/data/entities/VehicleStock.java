@@ -20,4 +20,5 @@ public class VehicleStock {
     public int criticalLevel;
     public double price; // selling price
     public double totalAmount;
+    public long dateOrdered;
 }

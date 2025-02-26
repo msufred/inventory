@@ -40,7 +40,7 @@
         <activity android:name=".EmployeesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddEmployeeActivity" android:parentActivityName=".EmployeesActivity" />
         <activity android:name=".ViewEmployeeActivity" android:parentActivityName=".EmployeesActivity" />
-        <activity android:name=".EditEmployeeActivity" android:parentActivityName=".ViewEmployeeActivity" />
+        <activity android:name=".EditEmployeeActivity" />
 
         <!-- Vehicle Related Activities -->
         <activity android:name=".VehiclesActivity" android:parentActivityName=".HomeActivity" />

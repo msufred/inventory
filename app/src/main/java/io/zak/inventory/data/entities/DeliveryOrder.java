@@ -1,5 +1,6 @@
 package io.zak.inventory.data.entities;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -11,4 +12,5 @@ public class DeliveryOrder {
     public int vehicleId; // assigned vehicle
     public int employeeId; // assigned driver
     public double totalAmount;
+    public long dateOrdered;
 }

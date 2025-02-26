@@ -124,10 +124,15 @@
     <string name="consumer_details">Consumer Details</string>
     <string name="no_consumers">No Consumers</string>
 
+    <!-- delivery related -->
+    <string name="add_delivery">Add Delivery</string>
+    <string name="no_deliveries">No Deliveries</string>
+
     <!-- figures/numbers -->
     <string name="zero">0</string>
     <string name="zero_amount">Php 0.00</string>
     <string name="one">1</string>
+    <string name="date_sample">Feb 01, 2025</string>
 
     <!-- -->
     <string name="welcome">Welcome</string>

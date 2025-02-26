@@ -25,7 +25,7 @@ public class ViewEmployeeActivity extends AppCompatActivity {
     private static final String TAG = "ViewEmployee";
 
     // Widgets
-    private ImageButton btnBack, btnEdit, btnSelectProfile;
+    private ImageButton btnClose, btnEdit, btnSelectProfile;
     private TextView tvName, tvPosition, tvStatus;
     private ImageView profile;
     private RelativeLayout progressGroup;
@@ -44,7 +44,7 @@ public class ViewEmployeeActivity extends AppCompatActivity {
     }
 
     private void getWidgets() {
-        btnBack = findViewById(R.id.btn_back);
+        btnClose = findViewById(R.id.btn_close);
         btnEdit = findViewById(R.id.btn_edit);
         btnSelectProfile = findViewById(R.id.btn_select_profile);
         tvName = findViewById(R.id.tv_name);
@@ -57,12 +57,13 @@ public class ViewEmployeeActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        btnBack.setOnClickListener(v -> goBack());
+        btnClose.setOnClickListener(v -> goBack());
         btnEdit.setOnClickListener(v -> {
             if (mEmployee != null) {
                 Intent intent = new Intent(this, EditEmployeeActivity.class);
                 intent.putExtra("employee_id", mEmployee.id);
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -101,6 +102,7 @@ public class ViewEmployeeActivity extends AppCompatActivity {
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
+                        finish();
                     });
             dialogBuilder.create().show();
         }));
