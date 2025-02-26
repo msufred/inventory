@@ -11,6 +11,8 @@ public class DeliveryOrder {
     public int id;
     public int vehicleId; // assigned vehicle
     public int employeeId; // assigned driver
+    public String employeeName;
     public double totalAmount;
     public long dateOrdered;
+    public String status; // Processing, Checked-Out (can't add more items)
 }

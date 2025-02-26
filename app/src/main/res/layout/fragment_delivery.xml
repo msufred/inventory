@@ -64,12 +64,28 @@
             android:background="@color/white"/>
 
         <TextView
-            android:id="@+id/tv_no_suppliers"
+            android:id="@+id/tv_no_deliveries"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="@string/no_deliveries"
             android:textColor="#90000000"/>
+
+        <RelativeLayout
+            android:id="@+id/progress_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#20000000"
+            android:elevation="20dp"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:indeterminateTint="@color/purple_500"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
@@ -90,22 +106,6 @@
             app:icon="@drawable/ic_truck_speed"
             app:iconSize="32dp"
             android:backgroundTint="@color/purple_500"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/progress_group"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#20000000"
-        android:elevation="20dp"
-        android:gravity="center"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:layout_width="84dp"
-            android:layout_height="84dp"
-            android:indeterminateTint="@color/purple_500"/>
 
     </RelativeLayout>
 

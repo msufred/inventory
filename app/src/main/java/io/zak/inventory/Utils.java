@@ -3,9 +3,14 @@ package io.zak.inventory;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
+
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
 
     /**
      * Returns a database-safe String. MUST BE USED when saving entry to the database.
@@ -45,6 +50,38 @@ public class Utils {
             output = output.substring(2);
         }
         return output;
+    }
+
+    /**
+     * Return a human readable date. Ex. Today, Yesterday, 2 days ago etc.
+     * @param date Date
+     * @return String human readable date
+     */
+    public static String humanizeDate(Date date) {
+        Calendar now = Calendar.getInstance();
+        int currDay = now.get(Calendar.DAY_OF_MONTH);
+        int currMonth = now.get(Calendar.MONTH);
+        int currYear = now.get(Calendar.YEAR);
+
+        Calendar calDate = Calendar.getInstance();
+        calDate.setTime(date);
+        int day = calDate.get(Calendar.DAY_OF_MONTH);
+        int month = calDate.get(Calendar.MONTH);
+        int year = calDate.get(Calendar.YEAR);
+
+
+        if (day == currDay && month == currMonth && year == currYear) {
+            return "Today";
+        }
+
+        int diffDays = currDay - day;
+
+        if (diffDays == 1) return "Yesterday";
+        if (diffDays > 1 && diffDays <= 5) {
+            return day + " days ago";
+        } else {
+            return dateFormat.format(date);
+        }
     }
 
     /**

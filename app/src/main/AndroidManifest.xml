@@ -66,6 +66,9 @@
         <!-- TODO: ViewConsumerActivity -->
         <!-- TODO: EditConsumerActivity's parent must be ViewConsumerActivity -->
         <activity android:name=".EditConsumerActivity" android:parentActivityName=".ConsumersActivity" />
+
+        <!-- Delivery Related Activitys -->
+        <activity android:name=".DeliveryOrderItemsActivity" android:parentActivityName=".HomeActivity" />
     </application>
 
 </manifest>

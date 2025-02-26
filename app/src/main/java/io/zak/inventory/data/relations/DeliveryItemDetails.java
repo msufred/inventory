@@ -3,12 +3,12 @@ package io.zak.inventory.data.relations;
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 
-import io.zak.inventory.data.entities.Product;
-import io.zak.inventory.data.entities.WarehouseStock;
+import io.zak.inventory.data.entities.DeliveryOrderItem;
 
-public class WarehouseStockDetails {
+public class DeliveryItemDetails {
+
     @Embedded
-    public WarehouseStock warehouseStock;
+    public DeliveryOrderItem deliveryOrderItem;
 
     @ColumnInfo(name = "name")
     public String productName;

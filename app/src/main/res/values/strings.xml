@@ -39,6 +39,8 @@
     <string name="description">Description</string>
     <string name="no_description">No Description</string>
     <string name="set_date">Set Date</string>
+    <string name="select_item">Select Item</string>
+    <string name="items">Items</string>
 
     <!-- Actions -->
     <string name="login">Login</string>
@@ -81,6 +83,7 @@
     <string name="delete_warehouse">Delete Warehouse</string>
 
     <!-- employee related -->
+    <string name="employee">Employee</string>
     <string name="add_employee">Add Employee</string>
     <string name="edit_employee">Edit Employee</string>
     <string name="employee_details">Employee Details</string>
@@ -90,6 +93,7 @@
     <string name="no_employees">No Employees</string>
 
     <!-- vehicle related -->
+    <string name="vehicle">Vehicle</string>
     <string name="add_vehicle">Add Vehicle</string>
     <string name="vehicle_details">Vehicle Details</string>
     <string name="vehicle_model">Vehicle Model</string>
@@ -127,12 +131,16 @@
     <!-- delivery related -->
     <string name="add_delivery">Add Delivery</string>
     <string name="no_deliveries">No Deliveries</string>
+    <string name="delivery_details">Delivery Details</string>
+    <string name="vehicle_load">Vehicle Load</string>
+    <string name="load_to_vehicle">Load to Vehicle</string>
 
     <!-- figures/numbers -->
     <string name="zero">0</string>
     <string name="zero_amount">Php 0.00</string>
     <string name="one">1</string>
     <string name="date_sample">Feb 01, 2025</string>
+    <string name="x">x</string>
 
     <!-- -->
     <string name="welcome">Welcome</string>

@@ -90,10 +90,4 @@ public class ProfileFragment extends Fragment {
         Utils.logout(requireActivity());
         startActivity(new Intent(getActivity(), LoginActivity.class));
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "Destroying resources.");
-    }
 }

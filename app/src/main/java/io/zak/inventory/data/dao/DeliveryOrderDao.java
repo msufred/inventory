@@ -9,7 +9,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.relations.DeliveryOrderDetails;
+import io.zak.inventory.data.relations.DeliveryDetails;
 
 @Dao
 public interface DeliveryOrderDao {
@@ -33,9 +33,14 @@ public interface DeliveryOrderDao {
     int getSize();
 
     // Custom queries
-    @Query("SELECT delivery_orders.*, vehicles.name, employees.name " +
+    @Query("SELECT delivery_orders.*, vehicles.name, vehicles.plateNo " +
+            "FROM delivery_orders " +
+            "INNER JOIN vehicles ON delivery_orders.vehicleId=vehicles.id")
+    List<DeliveryDetails> getDeliveryOrdersWithDetails();
+
+    @Query("SELECT delivery_orders.*, vehicles.name, vehicles.plateNo " +
             "FROM delivery_orders " +
             "INNER JOIN vehicles ON delivery_orders.vehicleId=vehicles.id " +
-            "INNER JOIN employees ON delivery_orders.employeeId=employees.id")
-    List<DeliveryOrderDetails> getDeliveryOrdersWithDetails();
+            "WHERE delivery_orders.id=:deliveryOrderId")
+    List<DeliveryDetails> getDeliveryOrderDetails(int deliveryOrderId);
 }

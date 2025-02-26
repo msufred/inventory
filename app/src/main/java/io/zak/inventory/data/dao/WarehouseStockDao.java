@@ -32,7 +32,12 @@ public interface WarehouseStockDao {
     @Query("SELECT COUNT(*) FROM warehouse_stocks")
     int getSize();
 
-    @Query("SELECT warehouse_stocks.*, products.name FROM warehouse_stocks " +
+//    @Query("SELECT warehouse_stocks.*, products.name FROM warehouse_stocks " +
+//            "INNER JOIN products ON products.id=warehouse_stocks.productId " +
+//            "WHERE warehouseId=:id")
+//    List<WarehouseStockDetails> getWarehouseStocks(int id);
+
+    @Query("SELECT warehouse_stocks.*, products.name, products.price FROM warehouse_stocks " +
             "INNER JOIN products ON products.id=warehouse_stocks.productId " +
             "WHERE warehouseId=:id")
     List<WarehouseStockDetails> getWarehouseStocks(int id);

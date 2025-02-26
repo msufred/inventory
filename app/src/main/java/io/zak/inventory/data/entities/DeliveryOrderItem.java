@@ -13,6 +13,7 @@ public class DeliveryOrderItem {
     public int id;
     public int deliveryOrderId;
     public int warehouseStockId;
+    public int productId;
     public int quantity;
     public double totalAmount;
 }

@@ -29,13 +29,15 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView name, amount, date;
+        private final TextView name, amount, employee, date, status;
 
         public ViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             name = view.findViewById(R.id.tv_name);
             amount = view.findViewById(R.id.tv_amount);
+            employee = view.findViewById(R.id.tv_employee);
             date = view.findViewById(R.id.tv_date);
+            status = view.findViewById(R.id.tv_status);
             LinearLayout layout = view.findViewById(R.id.layout);
             layout.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
         }
@@ -100,9 +102,11 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DeliveryDetails details = sortedList.get(position);
         if (details != null) {
-            holder.name.setText(String.format("%s-%s", details.vehicleName, details.plateNo));
+            holder.name.setText(String.format("%s (%s)", details.vehicleName, details.plateNo));
             holder.amount.setText(Utils.toStringMoneyFormat(details.deliveryOrder.totalAmount));
-            holder.date.setText(dateFormat.format(new Date(details.deliveryOrder.dateOrdered)));
+            holder.employee.setText(details.deliveryOrder.employeeName);
+            holder.date.setText(Utils.humanizeDate(new Date(details.deliveryOrder.dateOrdered)));
+            holder.status.setText(details.deliveryOrder.status);
         }
     }
 
