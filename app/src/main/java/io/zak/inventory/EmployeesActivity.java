@@ -114,7 +114,9 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
         if (adapter != null) {
             Employee employee = adapter.getItem(position);
             Log.d(TAG, "Employee selected (ID: " + employee.id + ")");
-            // TODO
+            Intent intent = new Intent(this, ViewEmployeeActivity.class);
+            intent.putExtra("employee_id", employee.id);
+            startActivity(intent);
         }
     }
 

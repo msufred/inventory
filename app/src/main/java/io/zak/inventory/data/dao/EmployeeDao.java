@@ -21,10 +21,13 @@ public interface EmployeeDao {
     void insertAll(Employee...employees);
 
     @Update
+    int update(Employee employee);
+
+    @Update
     void updateAll(Employee...employees);
 
     @Delete
-    void delete(Employee employee);
+    int delete(Employee employee);
 
     @Query("SELECT * FROM employees")
     List<Employee> getAll();

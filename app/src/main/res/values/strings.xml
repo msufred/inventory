@@ -82,6 +82,7 @@
 
     <!-- employee related -->
     <string name="add_employee">Add Employee</string>
+    <string name="edit_employee">Edit Employee</string>
     <string name="employee_details">Employee Details</string>
     <string name="employee_name">Name of Employee</string>
     <string name="designation_position">Designation/Position</string>
