@@ -252,7 +252,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with id=" + id + " " + Thread.currentThread());
 
-            Intent intent = new Intent(getActivity(), DeliveryOrderItemsActivity.class);
+            Intent intent = new Intent(getActivity(), ViewDeliveryOrderActivity.class);
             intent.putExtra("delivery_id", id);
             startActivity(intent);
         }, err -> {

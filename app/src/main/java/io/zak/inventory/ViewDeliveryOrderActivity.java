@@ -11,15 +11,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Comparator;
+import java.util.List;
+
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.zak.inventory.adapters.DeliveryItemListAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.relations.DeliveryDetails;
+import io.zak.inventory.data.relations.DeliveryItemDetails;
 
-public class DeliveryOrderItemsActivity extends AppCompatActivity {
+public class ViewDeliveryOrderActivity extends AppCompatActivity implements DeliveryItemListAdapter.OnItemClickListener {
 
     private static final String TAG = "DeliveryOrderItems";
 
@@ -29,6 +34,11 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
     private Button btnAddItem;
     private TextView tvItemCount, tvTotalAmount;
     private Button btnLoadToVehicle;
+
+    // for RecyclerView
+    private DeliveryItemListAdapter adapter;
+    private List<DeliveryItemDetails> deliveryItemList;
+    private final Comparator<DeliveryItemDetails> comparator = Comparator.comparing(deliveryItemDetails -> deliveryItemDetails.product.productName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -54,7 +64,8 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
         btnLoadToVehicle = findViewById(R.id.btn_load_to_vehicle);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // TODO
+        adapter = new DeliveryItemListAdapter(comparator, this);
+        recyclerView.setAdapter(adapter);
 
         dialogBuilder = new AlertDialog.Builder(this);
     }
@@ -114,8 +125,30 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
             Log.d(TAG, "Fetching DeliveryItemDetails: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrderItems().getDeliveryItemDetails(id);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            // TODO
+            Log.d(TAG, "Returned with list size=" + list.size());
+            deliveryItemList = list;
+            adapter.replaceAll(deliveryItemList);
+        }, err -> {
+            Log.e(TAG, "Database Error: " + err);
+            dialogBuilder.setTitle("Database Error")
+                    .setMessage("Error while fetching DeliveryOrderItem entries: " + err)
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        dialog.dismiss();
+                        goBack();
+                    });
+            dialogBuilder.create().show();
         }));
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if (adapter != null) {
+            DeliveryItemDetails details = adapter.getItem(position);
+            if (details != null) {
+                Log.d(TAG, "Selected item: " + details.product.productName);
+                // TODO
+            }
+        }
     }
 
     private void goBack() {

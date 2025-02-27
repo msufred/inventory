@@ -13,10 +13,4 @@ public class DeliveryItemDetails {
 
     @Embedded
     public Product product;
-
-//    @ColumnInfo(name = "name")
-//    public String productName;
-//
-//    @ColumnInfo(name = "price")
-//    public double productPrice;
 }
