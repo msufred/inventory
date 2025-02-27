@@ -105,14 +105,17 @@
 
     <!-- brand related -->
     <string name="add_brand">Add Brand</string>
+    <string name="edit_brand">Edit Brand</string>
     <string name="no_brands">No Brands</string>
 
     <!-- category related -->
     <string name="add_category">Add Category</string>
+    <string name="edit_category">Edit Category</string>
     <string name="no_categories">No Categories</string>
 
     <!-- product related -->
     <string name="add_product">Add Product</string>
+    <string name="edit_product">Edit Product</string>
     <string name="product_details">Product Details</string>
     <string name="product_name">Product Name</string>
     <string name="product_price">Product Price</string>
@@ -143,6 +146,7 @@
     <string name="one">1</string>
     <string name="date_sample">Feb 01, 2025</string>
     <string name="x">x</string>
+    <string name="php">PHP</string>
 
     <!-- -->
     <string name="welcome">Welcome</string>

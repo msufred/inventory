@@ -9,4 +9,5 @@ public class Brand {
     @PrimaryKey(autoGenerate = true)
     public int brandId;
     public String brandName;
+
 }

@@ -11,6 +11,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.Brand;
+import io.zak.inventory.data.entities.Employee;
 
 @Dao
 public interface BrandDao {
@@ -38,5 +39,8 @@ public interface BrandDao {
 
     @Query("SELECT COUNT(*) FROM brands")
     int getSize();
+
+    @Update
+    int update(Brand brand);
 
 }

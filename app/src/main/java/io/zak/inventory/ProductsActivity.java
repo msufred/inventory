@@ -129,6 +129,9 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
             if (product != null) {
                 Log.d(TAG, "Product selected: " + product.productName);
                 // TODO
+                Intent intent = new Intent(this, ViewProductActivity.class);
+                intent.putExtra("product_id", product.productId);
+                startActivity(intent);
             }
         }
     }

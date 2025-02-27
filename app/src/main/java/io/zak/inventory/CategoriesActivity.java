@@ -1,12 +1,12 @@
 package io.zak.inventory;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -32,22 +32,14 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
 
     private static final String TAG = "Categories";
 
-    // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
     private Button btnBack, btnAdd;
-    private RelativeLayout progressGroup;
 
-    // RecyclerView adapter
     private CategoryListAdapter adapter;
-
-    // list reference for search filter
     private List<Category> categoryList;
-
-    // comparator for search filter
     private final Comparator<Category> comparator = Comparator.comparing(category -> category.categoryName);
-
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog addDialog;
@@ -66,15 +58,12 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         tvNoCategories = findViewById(R.id.tv_no_categories);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
-        progressGroup = findViewById(R.id.progress_group);
 
-        // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CategoryListAdapter(comparator, this);
         recyclerView.setAdapter(adapter);
 
         dialogBuilder = new AlertDialog.Builder(this);
-        createDialog();
     }
 
     private void setListeners() {
@@ -96,27 +85,11 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             finish();
         });
 
-        btnAdd.setOnClickListener(v -> addDialog.show());
+        btnAdd.setOnClickListener(v -> showAddDialog());
     }
 
-    private void createDialog() {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View dialogView = inflater.inflate(R.layout.dialog_add_category, null);
-
-        EditText etName = dialogView.findViewById(R.id.et_brand_name);
-        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-        Button btnSave = dialogView.findViewById(R.id.btn_save);
-
-        dialogBuilder.setView(dialogView);
-        addDialog = dialogBuilder.create();
-
-        btnCancel.setOnClickListener(v -> addDialog.dismiss());
-        btnSave.setOnClickListener(v -> {
-            String str = etName.getText().toString();
-            if (!str.isBlank()) addCategory(str);
-            etName.getText().clear();
-            addDialog.dismiss();
-        });
+    private void showAddDialog() {
+        showAddDialog(null);
     }
 
     @Override
@@ -124,20 +97,16 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Category entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
-            progressGroup.setVisibility(View.GONE);
             categoryList = list;
             adapter.replaceAll(list);
             tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-            progressGroup.setVisibility(View.GONE);
-            // error dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while fetching Category entries: " + err)
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
@@ -150,8 +119,8 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         if (adapter != null) {
             Category category = adapter.getItem(position);
             if (category != null) {
-                Log.d(TAG, "Selected category=" + category.categoryName);
-                // TODO
+                Log.d(TAG, "Category selected: " + category.categoryName);
+                showAddDialog(category);
             }
         }
     }
@@ -173,26 +142,72 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         return list;
     }
 
-    private void addCategory(String str) {
-        Category category = new Category();
-        category.categoryName = Utils.normalize(str);
 
-        progressGroup.setVisibility(View.VISIBLE);
+
+    private void showAddDialog(Category categoryToEdit) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_add_category, null);
+
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) TextView tvTitle = dialogView.findViewById(R.id.et_title);
+        EditText etName = dialogView.findViewById(R.id.et_category_name);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+        Button btnSave = dialogView.findViewById(R.id.btn_save);
+
+        tvTitle.setText(categoryToEdit == null ? R.string.add_category : R.string.edit_category);
+        if (categoryToEdit != null) {
+            etName.setText(categoryToEdit.categoryName);
+        }
+
+        dialogBuilder.setView(dialogView);
+        addDialog = dialogBuilder.create();
+
+        btnCancel.setOnClickListener(v -> addDialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            String str = etName.getText().toString();
+            if (!str.isBlank()) {
+                if (categoryToEdit == null) {
+                    addCategory(str);
+                } else {
+                    updateCategory(categoryToEdit.categoryId, str);
+                }
+            }
+            etName.getText().clear();
+            addDialog.dismiss();
+        });
+
+        addDialog.show();
+    }
+
+    private void addCategory(String categoryName) {
+        Category category = new Category();
+        category.categoryName = categoryName;
+
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Saving Category entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().insert(category);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            Log.d(TAG, "Returned with ID=" + id + " " + Thread.currentThread());
-            progressGroup.setVisibility(View.GONE);
             category.categoryId = id.intValue();
             adapter.addItem(category);
             if (tvNoCategories.getVisibility() == View.VISIBLE) tvNoCategories.setVisibility(View.INVISIBLE);
         }, err -> {
-            Log.e(TAG, "Database Error: " + err);
-            progressGroup.setVisibility(View.GONE);
-            // dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while saving Category entry: " + err)
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            dialogBuilder.create().show();
+        }));
+    }
+
+    private void updateCategory(int categoryId, String categoryName) {
+        Category category = new Category();
+        category.categoryId = categoryId;
+        category.categoryName = categoryName;
+
+        disposables.add(Single.fromCallable(() -> {
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().update(category);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowsAffected -> {
+            adapter.updateItem(category);
+        }, err -> {
+            dialogBuilder.setTitle("Database Error")
+                    .setMessage("Error while updating Category entry: " + err)
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
             dialogBuilder.create().show();
         }));
@@ -201,7 +216,6 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "Destroying resources.");
         disposables.dispose();
     }
 }

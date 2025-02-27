@@ -14,10 +14,26 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.zak.inventory.R;
+import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 
 public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapter.ViewHolder> {
 
+    public void updateItem(Category updatedCategory) {
+        // Find the position of the brand with the same ID
+        for (int i = 0; i < sortedList.size(); i++) {
+            Category category = sortedList.get(i);
+            if (category.categoryId == updatedCategory.categoryId) {
+                // Remove the old item and add the updated one
+                // SortedList will handle the sorting and notification
+                sortedList.beginBatchedUpdates();
+                sortedList.remove(category);
+                sortedList.add(updatedCategory);
+                sortedList.endBatchedUpdates();
+                return;
+            }
+        }
+    }
     public interface OnItemClickListener {
         void onItemClick(int position);
     }

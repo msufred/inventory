@@ -111,6 +111,22 @@ public class BrandListAdapter extends RecyclerView.Adapter<BrandListAdapter.View
         sortedList.add(brand);
     }
 
+    public void updateItem(Brand updatedBrand) {
+        // Find the position of the brand with the same ID
+        for (int i = 0; i < sortedList.size(); i++) {
+            Brand brand = sortedList.get(i);
+            if (brand.brandId == updatedBrand.brandId) {
+                // Remove the old item and add the updated one
+                // SortedList will handle the sorting and notification
+                sortedList.beginBatchedUpdates();
+                sortedList.remove(brand);
+                sortedList.add(updatedBrand);
+                sortedList.endBatchedUpdates();
+                return;
+            }
+        }
+    }
+
     public void replaceAll(List<Brand> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
@@ -124,4 +140,5 @@ public class BrandListAdapter extends RecyclerView.Adapter<BrandListAdapter.View
     public void clear() {
         sortedList.clear();
     }
+
 }
