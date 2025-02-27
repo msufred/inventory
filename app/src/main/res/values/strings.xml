@@ -67,6 +67,7 @@
     <string name="user_details">User Details</string>
 
     <!-- warehouse related -->
+    <string name="warehouse">Warehouse</string>
     <string name="add_warehouse">Add Warehouse</string>
     <string name="edit_warehouse">Edit Warehouse</string>
     <string name="warehouse_details">Warehouse Details</string>
@@ -81,6 +82,7 @@
     <string name="stock_details">Stock Details</string>
     <string name="critical_level">Critical Level</string>
     <string name="delete_warehouse">Delete Warehouse</string>
+    <string name="remaining_stocks">Remaining Stocks:</string>
 
     <!-- employee related -->
     <string name="employee">Employee</string>

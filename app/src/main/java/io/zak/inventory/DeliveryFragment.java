@@ -159,8 +159,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         if (adapter != null) {
             DeliveryDetails deliveryDetails = adapter.getItem(position);
             if (deliveryDetails != null) {
-                Log.d(TAG, "Selected " + deliveryDetails.vehicle.vehicleName);
-                // TODO
+                viewDeliveryItems(deliveryDetails.deliveryOrder.deliveryOrderId);
             }
         }
     }
@@ -252,9 +251,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with id=" + id + " " + Thread.currentThread());
 
-            Intent intent = new Intent(getActivity(), ViewDeliveryOrderActivity.class);
-            intent.putExtra("delivery_id", id);
-            startActivity(intent);
+            viewDeliveryItems(id.intValue());
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
@@ -263,6 +260,12 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
             dialogBuilder.create().show();
         }));
+    }
+
+    private void viewDeliveryItems(int id) {
+        Intent intent = new Intent(getActivity(), ViewDeliveryOrderActivity.class);
+        intent.putExtra("delivery_id", id);
+        startActivity(intent);
     }
 
     @Override
