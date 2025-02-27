@@ -63,7 +63,7 @@ public class ProductListAdapter extends RecyclerView.Adapter<ProductListAdapter.
 
         @Override
         public boolean areItemsTheSame(Product item1, Product item2) {
-            return item1.id == item2.id;
+            return item1.productId == item2.productId;
         }
 
         @Override
@@ -100,9 +100,9 @@ public class ProductListAdapter extends RecyclerView.Adapter<ProductListAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = sortedList.get(position);
         if (product != null) {
-            holder.name.setText(product.name);
+            holder.name.setText(product.productName);
             holder.price.setText(String.format(Locale.getDefault(), "Php %.2f", product.price));
-            if (!product.description.isBlank()) holder.description.setText(product.description);
+            if (!product.productDescription.isBlank()) holder.description.setText(product.productDescription);
             // TODO image view
         }
     }

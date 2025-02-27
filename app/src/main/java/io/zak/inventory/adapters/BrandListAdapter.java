@@ -57,7 +57,7 @@ public class BrandListAdapter extends RecyclerView.Adapter<BrandListAdapter.View
 
         @Override
         public boolean areItemsTheSame(Brand item1, Brand item2) {
-            return item1.id == item2.id;
+            return item1.brandId == item2.brandId;
         }
 
         @Override
@@ -94,7 +94,7 @@ public class BrandListAdapter extends RecyclerView.Adapter<BrandListAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Brand brand = sortedList.get(position);
         if (brand != null) {
-            holder.name.setText(brand.name);
+            holder.name.setText(brand.brandName);
         }
     }
 

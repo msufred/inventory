@@ -59,7 +59,7 @@ public class SupplierListAdapter extends RecyclerView.Adapter<SupplierListAdapte
 
         @Override
         public boolean areItemsTheSame(Supplier item1, Supplier item2) {
-            return item1.id == item2.id;
+            return item1.supplierId == item2.supplierId;
         }
 
         @Override
@@ -96,9 +96,9 @@ public class SupplierListAdapter extends RecyclerView.Adapter<SupplierListAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Supplier supplier = sortedList.get(position);
         if (supplier != null) {
-            holder.name.setText(supplier.name);
-            if (!supplier.contactNo.isBlank()) holder.contact.setText(supplier.contactNo);
-            if (!supplier.address.isBlank()) holder.address.setText(supplier.address);
+            holder.name.setText(supplier.supplierName);
+            if (!supplier.supplierContactNo.isBlank()) holder.contact.setText(supplier.supplierContactNo);
+            if (!supplier.supplierAddress.isBlank()) holder.address.setText(supplier.supplierAddress);
         }
     }
 

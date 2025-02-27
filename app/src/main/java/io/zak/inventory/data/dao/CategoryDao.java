@@ -28,10 +28,10 @@ public interface CategoryDao {
     @Query("SELECT * FROM categories")
     List<Category> getAll();
 
-    @Query("SELECT * FROM categories WHERE id=:id")
+    @Query("SELECT * FROM categories WHERE categoryId=:id")
     List<Category> getCategory(int id);
 
-    @Query("SELECT * FROM categories WHERE category=:category")
+    @Query("SELECT * FROM categories WHERE categoryName=:category")
     List<Category> getCategory(String category);
 
     @Query("SELECT COUNT(*) FROM categories")

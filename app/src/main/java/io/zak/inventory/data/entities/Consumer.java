@@ -7,9 +7,9 @@ import androidx.room.PrimaryKey;
 public class Consumer {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
-    public String address;
-    public String email;
-    public String contactNo;
+    public int consumerId;
+    public String consumerName;
+    public String consumerAddress;
+    public String consumerEmail;
+    public String consumerContactNo;
 }

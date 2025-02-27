@@ -148,14 +148,14 @@ public class EditEmployeeActivity extends AppCompatActivity {
 
     private void displayInfo(Employee employee) {
         if (employee != null) {
-            etName.setText(employee.name);
-            etAddress.setText(employee.address);
-            etContact.setText(employee.contactNo);
+            etName.setText(employee.employeeName);
+            etAddress.setText(employee.employeeAddress);
+            etContact.setText(employee.employeeContactNo);
             etPosition.setText(employee.position);
             etLicense.setText(employee.licenseNo);
 
             List<String> statusList = Arrays.asList(getResources().getStringArray(R.array.status_array));
-            int pos = statusList.indexOf(employee.status);
+            int pos = statusList.indexOf(employee.employeeStatus);
             statusSpinner.setSelection(pos);
         }
     }
@@ -177,11 +177,11 @@ public class EditEmployeeActivity extends AppCompatActivity {
     }
 
     private void saveAndClose() {
-        mEmployee.name = Utils.normalize(etName.getText().toString());
+        mEmployee.employeeName = Utils.normalize(etName.getText().toString());
         mEmployee.position = Utils.normalize(etPosition.getText().toString());
-        mEmployee.contactNo = Utils.normalize(etContact.getText().toString());
-        mEmployee.address = Utils.normalize(etAddress.getText().toString());
-        mEmployee.status = statusSpinner.getSelectedItem().toString();
+        mEmployee.employeeContactNo = Utils.normalize(etContact.getText().toString());
+        mEmployee.employeeAddress = Utils.normalize(etAddress.getText().toString());
+        mEmployee.employeeStatus = statusSpinner.getSelectedItem().toString();
         mEmployee.licenseNo = Utils.normalize(etLicense.getText().toString());
 
         disposables.add(Single.fromCallable(() -> {

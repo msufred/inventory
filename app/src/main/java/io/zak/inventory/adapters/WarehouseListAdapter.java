@@ -1,6 +1,5 @@
 package io.zak.inventory.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import io.zak.inventory.R;
-import io.zak.inventory.WarehousesActivity;
 import io.zak.inventory.data.entities.Warehouse;
 
 public class WarehouseListAdapter extends RecyclerView.Adapter<WarehouseListAdapter.WarehouseViewHolder> {
@@ -68,7 +65,7 @@ public class WarehouseListAdapter extends RecyclerView.Adapter<WarehouseListAdap
 
         @Override
         public boolean areItemsTheSame(Warehouse item1, Warehouse item2) {
-            return item1.id == item2.id;
+            return item1.warehouseId == item2.warehouseId;
         }
 
         @Override
@@ -135,9 +132,9 @@ public class WarehouseListAdapter extends RecyclerView.Adapter<WarehouseListAdap
     public void onBindViewHolder(@NonNull WarehouseViewHolder holder, int position) {
         Warehouse warehouse = sortedList.get(position);
         if (warehouse != null) {
-            holder.tvName.setText(warehouse.name);
-            if (!warehouse.address.isBlank()) holder.tvAddress.setText(warehouse.address);
-            if (!warehouse.contactNo.isBlank()) holder.tvContact.setText(warehouse.contactNo);
+            holder.tvName.setText(warehouse.warehouseName);
+            if (!warehouse.warehouseAddress.isBlank()) holder.tvAddress.setText(warehouse.warehouseAddress);
+            if (!warehouse.warehouseContactNo.isBlank()) holder.tvContact.setText(warehouse.warehouseContactNo);
         }
     }
 

@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -64,7 +63,7 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
 
         @Override
         public boolean areItemsTheSame(DeliveryDetails item1, DeliveryDetails item2) {
-            return item1.deliveryOrder.id == item2.deliveryOrder.id;
+            return item1.deliveryOrder.deliveryOrderId == item2.deliveryOrder.deliveryOrderId;
         }
 
         @Override
@@ -102,11 +101,11 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DeliveryDetails details = sortedList.get(position);
         if (details != null) {
-            holder.name.setText(String.format("%s (%s)", details.vehicleName, details.plateNo));
+            holder.name.setText(String.format("%s (%s)", details.vehicle.vehicleName, details.vehicle.plateNo));
             holder.amount.setText(Utils.toStringMoneyFormat(details.deliveryOrder.totalAmount));
-            holder.employee.setText(details.deliveryOrder.employeeName);
-            holder.date.setText(Utils.humanizeDate(new Date(details.deliveryOrder.dateOrdered)));
-            holder.status.setText(details.deliveryOrder.status);
+            holder.employee.setText(details.employee.employeeName);
+            holder.date.setText(Utils.humanizeDate(new Date(details.deliveryOrder.deliveryDate)));
+            holder.status.setText(details.deliveryOrder.deliveryOrderStatus);
         }
     }
 

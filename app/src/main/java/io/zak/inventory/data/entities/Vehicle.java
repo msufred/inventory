@@ -7,9 +7,9 @@ import androidx.room.PrimaryKey;
 public class Vehicle {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
-    public String type;
+    public int vehicleId;
+    public String vehicleName;
+    public String vehicleType;
     public String plateNo;
-    public String status;
+    public String vehicleStatus;
 }

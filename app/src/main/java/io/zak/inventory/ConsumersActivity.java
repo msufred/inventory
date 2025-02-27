@@ -35,6 +35,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
     private RecyclerView recyclerView;
     private TextView tvNoConsumers;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // RecyclerView adapter
     private ConsumerListAdapter adapter;
@@ -43,7 +44,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
     private List<Consumer> consumerList;
 
     // Comparator used for search filter; passed to SupplierListAdapter
-    private final Comparator<Consumer> comparator = Comparator.comparing(supplier -> supplier.name);
+    private final Comparator<Consumer> comparator = Comparator.comparing(consumer ->consumer.consumerName);
 
     private CompositeDisposable disposables;
 
@@ -61,6 +62,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
         tvNoConsumers = findViewById(R.id.tv_no_consumers);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ConsumerListAdapter(comparator, this);
@@ -96,16 +98,19 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Consumer entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             consumerList = list;
             adapter.replaceAll(list);
             tvNoConsumers.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
@@ -114,7 +119,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
         if (adapter != null) {
             Consumer consumer = adapter.getItem(position);
             if (consumer != null) {
-                Log.d(TAG, "Consumer selected: " + consumer.name);
+                Log.d(TAG, "Consumer selected: " + consumer.consumerName);
                 // TODO
             }
         }
@@ -130,7 +135,7 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
         String str = query.toLowerCase();
         List<Consumer> list = new ArrayList<>();
         for (Consumer consumer : consumers) {
-            if (consumer.name.toLowerCase().contains(str)) {
+            if (consumer.consumerName.toLowerCase().contains(str)) {
                 list.add(consumer);
             }
         }

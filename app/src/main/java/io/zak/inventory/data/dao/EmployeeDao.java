@@ -32,7 +32,7 @@ public interface EmployeeDao {
     @Query("SELECT * FROM employees")
     List<Employee> getAll();
 
-    @Query("SELECT * FROM employees WHERE id=:id")
+    @Query("SELECT * FROM employees WHERE employeeId=:id")
     List<Employee> getEmployee(int id);
 
     @Query("SELECT COUNT(*) FROM employees")

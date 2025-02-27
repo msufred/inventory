@@ -32,6 +32,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
     private Spinner statusSpinner;
     private ImageButton btnBack;
     private Button btnCancel, btnSave;
+    private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
 
@@ -56,6 +57,7 @@ public class AddEmployeeActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
+        progressGroup = findViewById(R.id.progress_group);
 
         errorDrawable =AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
 
@@ -100,22 +102,24 @@ public class AddEmployeeActivity extends AppCompatActivity {
 
     private void saveAndClose() {
         Employee employee = new Employee();
-        employee.name = Utils.normalize(etName.getText().toString());
+        employee.employeeName = Utils.normalize(etName.getText().toString());
         employee.position = Utils.normalize(etPosition.getText().toString());
-        employee.contactNo = Utils.normalize(etContact.getText().toString());
-        employee.address = Utils.normalize(etAddress.getText().toString());
-        employee.status = statusSpinner.getSelectedItem().toString();
+        employee.employeeContactNo = Utils.normalize(etContact.getText().toString());
+        employee.employeeAddress = Utils.normalize(etAddress.getText().toString());
+        employee.employeeStatus = statusSpinner.getSelectedItem().toString();
+        employee.licenseNo = Utils.normalize(etLicense.getText().toString());
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Employee entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).employees().insert(employee);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Done. Returned with ID " + id + ": " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
-            // show dialog
+            progressGroup.setVisibility(View.GONE);
             dialogBuilder.setTitle("Database Error").setMessage(err.toString());
             AlertDialog dialog = dialogBuilder.create();
             dialog.show();

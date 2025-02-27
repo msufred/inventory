@@ -37,6 +37,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // RecyclerView adapter
     private CategoryListAdapter adapter;
@@ -45,7 +46,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private List<Category> categoryList;
 
     // comparator for search filter
-    private final Comparator<Category> comparator = Comparator.comparing(category -> category.category);
+    private final Comparator<Category> comparator = Comparator.comparing(category -> category.categoryName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -65,6 +66,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         tvNoCategories = findViewById(R.id.tv_no_categories);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -122,17 +124,19 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Category entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             categoryList = list;
             adapter.replaceAll(list);
             tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
+            progressGroup.setVisibility(View.GONE);
             // error dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while fetching Category entries: " + err)
@@ -146,7 +150,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         if (adapter != null) {
             Category category = adapter.getItem(position);
             if (category != null) {
-                Log.d(TAG, "Selected category=" + category.category);
+                Log.d(TAG, "Selected category=" + category.categoryName);
                 // TODO
             }
         }
@@ -162,7 +166,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         String str = query.toLowerCase();
         List<Category> list = new ArrayList<>();
         for (Category category : categoryList) {
-            if (category.category.toLowerCase().contains(str)) {
+            if (category.categoryName.toLowerCase().contains(str)) {
                 list.add(category);
             }
         }
@@ -171,19 +175,21 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
 
     private void addCategory(String str) {
         Category category = new Category();
-        category.category = Utils.normalize(str);
+        category.categoryName = Utils.normalize(str);
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Category entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().insert(category);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Returned with ID=" + id + " " + Thread.currentThread());
-            category.id = id.intValue();
+            progressGroup.setVisibility(View.GONE);
+            category.categoryId = id.intValue();
             adapter.addItem(category);
             if (tvNoCategories.getVisibility() == View.VISIBLE) tvNoCategories.setVisibility(View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
+            progressGroup.setVisibility(View.GONE);
             // dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while saving Category entry: " + err)

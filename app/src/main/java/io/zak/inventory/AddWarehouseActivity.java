@@ -27,6 +27,7 @@ public class AddWarehouseActivity extends AppCompatActivity {
     private EditText etName, etContact, etAddress;
     private ImageButton btnBack;
     private Button btnCancel, btnSave;
+    private RelativeLayout progressGroup;
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -53,6 +54,7 @@ public class AddWarehouseActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
+        progressGroup = findViewById(R.id.progress_group);
     }
 
     private void setListeners() {
@@ -74,19 +76,21 @@ public class AddWarehouseActivity extends AppCompatActivity {
 
     private void saveAndClose() {
         Warehouse warehouse = new Warehouse();
-        warehouse.name = Utils.normalize(etName.getText().toString());
-        warehouse.address = Utils.normalize(etAddress.getText().toString());
-        warehouse.contactNo = Utils.normalize(etContact.getText().toString());
+        warehouse.warehouseName = Utils.normalize(etName.getText().toString());
+        warehouse.warehouseAddress = Utils.normalize(etAddress.getText().toString());
+        warehouse.warehouseContactNo = Utils.normalize(etContact.getText().toString());
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Warehouse entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().insert(warehouse);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Done. Returned with ID " + id + ": " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
+            progressGroup.setVisibility(View.GONE);
             // show dialog
             dialogBuilder.setTitle("Database Error").setMessage(err.toString());
             AlertDialog dialog = dialogBuilder.create();

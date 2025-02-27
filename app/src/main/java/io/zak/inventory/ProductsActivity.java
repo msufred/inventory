@@ -45,7 +45,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     private List<Product> productList;
 
     // comparator for search filter
-    private final Comparator<Product> comparator = Comparator.comparing(product -> product.name);
+    private final Comparator<Product> comparator = Comparator.comparing(product -> product.productName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -127,7 +127,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
         if (adapter != null) {
             Product product = adapter.getItem(position);
             if (product != null) {
-                Log.d(TAG, "Product selected: " + product.name);
+                Log.d(TAG, "Product selected: " + product.productName);
                 // TODO
             }
         }
@@ -143,7 +143,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
         String str = query.toLowerCase();
         List<Product> list = new ArrayList<>();
         for (Product product : products) {
-            if (product.name.toLowerCase().contains(str)) {
+            if (product.productName.toLowerCase().contains(str)) {
                 list.add(product);
             }
         }

@@ -28,7 +28,7 @@ public interface VehicleDao {
     @Query("SELECT * FROM vehicles")
     List<Vehicle> getAll();
 
-    @Query("SELECT * FROM vehicles WHERE id=:id")
+    @Query("SELECT * FROM vehicles WHERE vehicleId=:id")
     List<Vehicle> getVehicle(int id);
 
     @Query("SELECT COUNT(*) FROM vehicles")

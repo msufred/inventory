@@ -25,10 +25,10 @@ public interface OrderItemDao {
     @Query("SELECT * FROM order_items")
     List<OrderItem> getAll();
 
-    @Query("SELECT * FROM order_items WHERE id=:id")
+    @Query("SELECT * FROM order_items WHERE orderItemId=:id")
     List<OrderItem> getOrderItem(int id);
 
-    @Query("SELECT * FROM order_items WHERE orderId=:orderId")
+    @Query("SELECT * FROM order_items WHERE fkOrderId=:orderId")
     List<OrderItem> getOrderItemsByOrder(int orderId);
 
     @Query("SELECT COUNT(*) FROM order_items")

@@ -1,6 +1,5 @@
 package io.zak.inventory.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 import io.zak.inventory.R;
+import io.zak.inventory.Utils;
 import io.zak.inventory.data.relations.WarehouseStockDetails;
 
 public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseStockListAdapter.ViewHolder> {
@@ -63,7 +63,7 @@ public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseSto
 
         @Override
         public boolean areItemsTheSame(WarehouseStockDetails item1, WarehouseStockDetails item2) {
-            return item1.warehouseStock.id == item2.warehouseStock.id;
+            return item1.warehouseStock.warehouseStockId == item2.warehouseStock.warehouseStockId;
         }
 
         @Override
@@ -83,7 +83,6 @@ public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseSto
     });
 
     private final OnItemClickListener onItemClickListener;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
     public WarehouseStockListAdapter(Comparator<WarehouseStockDetails> comparator, OnItemClickListener onItemClickListener) {
         this.comparator = comparator;
@@ -101,10 +100,10 @@ public class WarehouseStockListAdapter extends RecyclerView.Adapter<WarehouseSto
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WarehouseStockDetails stockDetails = sortedList.get(position);
         if (stockDetails != null) {
-            holder.name.setText(stockDetails.productName);
+            holder.name.setText(stockDetails.product.productName);
             holder.quantity.setText(String.valueOf(stockDetails.warehouseStock.quantity));
             Date date = new Date(stockDetails.warehouseStock.dateAcquired);
-            holder.dateAcquired.setText(dateFormat.format(date));
+            holder.dateAcquired.setText(Utils.humanizeDate(date));
         }
     }
 

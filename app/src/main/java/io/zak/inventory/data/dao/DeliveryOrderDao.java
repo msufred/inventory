@@ -26,21 +26,23 @@ public interface DeliveryOrderDao {
     @Query("SELECT * FROM delivery_orders")
     List<DeliveryOrder> getAll();
 
-    @Query("SELECT * FROM delivery_orders WHERE id=:id")
+    @Query("SELECT * FROM delivery_orders WHERE deliveryOrderId=:id")
     List<DeliveryOrder> getDeliveryOrder(int id);
 
     @Query("SELECT COUNT(*) FROM delivery_orders")
     int getSize();
 
     // Custom queries
-    @Query("SELECT delivery_orders.*, vehicles.name, vehicles.plateNo " +
+    @Query("SELECT delivery_orders.*, vehicles.*, employees.* " +
             "FROM delivery_orders " +
-            "INNER JOIN vehicles ON delivery_orders.vehicleId=vehicles.id")
+            "INNER JOIN vehicles ON delivery_orders.fkVehicleId=vehicles.vehicleId " +
+            "INNER JOIN employees ON delivery_orders.fkEmployeeId=employees.employeeId")
     List<DeliveryDetails> getDeliveryOrdersWithDetails();
 
-    @Query("SELECT delivery_orders.*, vehicles.name, vehicles.plateNo " +
+    @Query("SELECT delivery_orders.*, vehicles.*, employees.* " +
             "FROM delivery_orders " +
-            "INNER JOIN vehicles ON delivery_orders.vehicleId=vehicles.id " +
-            "WHERE delivery_orders.id=:deliveryOrderId")
+            "INNER JOIN vehicles ON delivery_orders.fkVehicleId=vehicles.vehicleId " +
+            "INNER JOIN employees ON delivery_orders.fkEmployeeId=employees.employeeId " +
+            "WHERE delivery_orders.deliveryOrderId=:deliveryOrderId")
     List<DeliveryDetails> getDeliveryOrderDetails(int deliveryOrderId);
 }

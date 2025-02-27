@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey;
 public class Brand {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
+    public int brandId;
+    public String brandName;
 }

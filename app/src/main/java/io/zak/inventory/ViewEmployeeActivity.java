@@ -61,7 +61,7 @@ public class ViewEmployeeActivity extends AppCompatActivity {
         btnEdit.setOnClickListener(v -> {
             if (mEmployee != null) {
                 Intent intent = new Intent(this, EditEmployeeActivity.class);
-                intent.putExtra("employee_id", mEmployee.id);
+                intent.putExtra("employee_id", mEmployee.employeeId);
                 startActivity(intent);
                 finish();
             }
@@ -102,7 +102,6 @@ public class ViewEmployeeActivity extends AppCompatActivity {
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
-                        finish();
                     });
             dialogBuilder.create().show();
         }));
@@ -110,9 +109,9 @@ public class ViewEmployeeActivity extends AppCompatActivity {
 
     private void displayInfo(Employee employee) {
         if (employee != null) {
-            tvName.setText(employee.name);
+            tvName.setText(employee.employeeName);
             tvPosition.setText(employee.position);
-            tvStatus.setText(employee.status);
+            tvStatus.setText(employee.employeeStatus);
         }
     }
 

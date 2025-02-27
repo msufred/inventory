@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey;
 public class Warehouse {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
-    public String address;
-    public String contactNo;
+    public int warehouseId;
+    public String warehouseName;
+    public String warehouseAddress;
+    public String warehouseContactNo;
 }

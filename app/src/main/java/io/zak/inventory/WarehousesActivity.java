@@ -34,6 +34,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
     private RecyclerView recyclerView;
     private TextView tvNoWarehouses;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private WarehouseListAdapter adapter;
@@ -42,7 +43,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
     private List<Warehouse> warehouseList;
 
     // used for search filter
-    private final Comparator<Warehouse> comparator = Comparator.comparing(o -> o.name);
+    private final Comparator<Warehouse> comparator = Comparator.comparing(warehouse -> warehouse.warehouseName);
 
     private CompositeDisposable disposables;
 
@@ -59,6 +60,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         tvNoWarehouses = findViewById(R.id.tv_no_warehouses);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         // set up RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
@@ -94,7 +96,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
             Warehouse warehouse = adapter.getItem(position);
             if (warehouse != null) {
                 Intent intent = new Intent(this, WarehouseStocksActivity.class);
-                intent.putExtra("warehouse_id", warehouse.id);
+                intent.putExtra("warehouse_id", warehouse.warehouseId);
                 startActivity(intent);
             }
         }
@@ -105,16 +107,19 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Warehouse items: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             warehouseList = list;
             adapter.replaceAll(list);
             tvNoWarehouses.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
@@ -128,7 +133,7 @@ public class WarehousesActivity extends AppCompatActivity implements WarehouseLi
         String str = query.toLowerCase();
         final List<Warehouse> list = new ArrayList<>();
         for (Warehouse warehouse : ref) {
-            if (warehouse.name.toLowerCase().contains(str)) {
+            if (warehouse.warehouseName.toLowerCase().contains(str)) {
                 list.add(warehouse);
             }
         }

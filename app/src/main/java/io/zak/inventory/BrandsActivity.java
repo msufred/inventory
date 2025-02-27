@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -36,6 +37,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private RecyclerView recyclerView;
     private TextView tvNoBrands;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private BrandListAdapter adapter;
@@ -44,7 +46,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private List<Brand> brandList;
 
     // comparator for search filter
-    private final Comparator<Brand> comparator = Comparator.comparing(brand -> brand.name);
+    private final Comparator<Brand> comparator = Comparator.comparing(brand -> brand.brandName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -64,6 +66,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         tvNoBrands = findViewById(R.id.tv_no_brands);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -101,17 +104,19 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             brandList = list;
             adapter.replaceAll(list);
             tvNoBrands.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
+            progressGroup.setVisibility(View.GONE);
             // error dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while fetching Brand entries: " + err)
@@ -125,7 +130,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         if (adapter != null) {
             Brand brand = adapter.getItem(position);
             if (brand != null) {
-                Log.d(TAG, "Brand selected: " + brand.name);
+                Log.d(TAG, "Brand selected: " + brand.brandName);
                 // TODO show details or options for delete and edit
             }
         }
@@ -142,7 +147,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         String str = query.toLowerCase();
         List<Brand> list = new ArrayList<>();
         for (Brand brand : brandList) {
-            if (brand.name.toLowerCase().contains(str)) {
+            if (brand.brandName.toLowerCase().contains(str)) {
                 list.add(brand);
             }
         }
@@ -176,19 +181,21 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
 
     private void addBrand(String brandName) {
         Brand brand = new Brand();
-        brand.name = brandName;
+        brand.brandName = brandName;
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Brand entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().insert(brand);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Done. Returned with ID=" + id + " " + Thread.currentThread());
-            brand.id = id.intValue();
+            progressGroup.setVisibility(View.GONE);
+            brand.brandId = id.intValue();
             adapter.addItem(brand);
             if (tvNoBrands.getVisibility() == View.VISIBLE) tvNoBrands.setVisibility(View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
+            progressGroup.setVisibility(View.GONE);
             // dialog
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while saving Brand entry: " + err)

@@ -59,7 +59,7 @@ public class ConsumerListAdapter extends RecyclerView.Adapter<ConsumerListAdapte
 
         @Override
         public boolean areItemsTheSame(Consumer item1, Consumer item2) {
-            return item1.id == item2.id;
+            return item1.consumerId == item2.consumerId;
         }
 
         @Override
@@ -96,9 +96,9 @@ public class ConsumerListAdapter extends RecyclerView.Adapter<ConsumerListAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Consumer consumer = sortedList.get(position);
         if (consumer != null) {
-            holder.name.setText(consumer.name);
-            if (!consumer.contactNo.isBlank()) holder.contact.setText(consumer.contactNo);
-            if (!consumer.address.isBlank()) holder.address.setText(consumer.address);
+            holder.name.setText(consumer.consumerName);
+            if (!consumer.consumerContactNo.isBlank()) holder.contact.setText(consumer.consumerContactNo);
+            if (!consumer.consumerAddress.isBlank()) holder.address.setText(consumer.consumerAddress);
         }
     }
 

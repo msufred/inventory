@@ -29,6 +29,7 @@ public class AddConsumerActivity extends AppCompatActivity {
     private EditText etName, etContact, etEmail, etAddress;
     private ImageButton btnBack;
     private Button btnCancel, btnSave;
+    private RelativeLayout progressGroup;
 
     private Drawable errorDrawable;
 
@@ -51,6 +52,7 @@ public class AddConsumerActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
+        progressGroup = findViewById(R.id.progress_group);
 
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
 
@@ -82,7 +84,7 @@ public class AddConsumerActivity extends AppCompatActivity {
 
         boolean isBlank = etName.getText().toString().isBlank();
         if (isBlank) {
-            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
         }
 
         return !isBlank;
@@ -90,23 +92,29 @@ public class AddConsumerActivity extends AppCompatActivity {
 
     private void saveAndClose() {
         Consumer consumer = new Consumer();
-        consumer.name = Utils.normalize(etName.getText().toString());
-        consumer.contactNo = Utils.normalize(etContact.getText().toString());
-        consumer.email = Utils.normalize(etEmail.getText().toString());
-        consumer.address = Utils.normalize(etAddress.getText().toString());
+        consumer.consumerName = Utils.normalize(etName.getText().toString());
+        consumer.consumerContactNo = Utils.normalize(etContact.getText().toString());
+        consumer.consumerEmail = Utils.normalize(etEmail.getText().toString());
+        consumer.consumerAddress = Utils.normalize(etAddress.getText().toString());
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Consumer entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().insert(consumer);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Returned with ID: " + id + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
-
-            dialogBuilder.setTitle("Database Error").setMessage("Error while saving Consumer entry: " + err);
-            AlertDialog dialog = dialogBuilder.create();
-            dialog.show();
+            progressGroup.setVisibility(View.GONE);
+            dialogBuilder.setTitle("Database Error")
+                    .setMessage("Error while saving Consumer entry: " + err)
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        dialog.dismiss();
+                        goBack();
+                    });
+            dialogBuilder.create().show();
         }));
     }
 

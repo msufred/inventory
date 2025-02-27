@@ -5,16 +5,17 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "order_items", foreignKeys = {
-        @ForeignKey(entity = Order.class, parentColumns = "id", childColumns = "orderId", onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = Product.class, parentColumns = "id", childColumns = "productId", onDelete = ForeignKey.CASCADE)
+        @ForeignKey(entity = Order.class, parentColumns = "orderId", childColumns = "fkOrderId", onDelete = ForeignKey.CASCADE),
+        @ForeignKey(entity = Product.class, parentColumns = "productId", childColumns = "fkProductId", onDelete = ForeignKey.CASCADE),
+        @ForeignKey(entity = VehicleStock.class, parentColumns = "vehicleStockId", childColumns = "fkVehicleStockId")
 })
 public class OrderItem {
 
     @PrimaryKey
-    public int id;
-    public int orderId;
-    public int productId;
-    public int vehicleStockId;
+    public int orderItemId;
+    public int fkOrderId;
+    public int fkProductId;
+    public int fkVehicleStockId;
     public int quantity;
     public double subtotal;
 }

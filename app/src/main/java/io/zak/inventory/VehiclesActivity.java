@@ -35,11 +35,12 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
     private RecyclerView recyclerView;
     private TextView tvNoVehicles;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private List<Vehicle> vehicleList;
     private VehicleListAdapter adapter;
-    private final Comparator<Vehicle> comparator = Comparator.comparing(vehicle -> vehicle.name);
+    private final Comparator<Vehicle> comparator = Comparator.comparing(vehicle -> vehicle.vehicleName);
 
     private CompositeDisposable disposables;
 
@@ -57,6 +58,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         tvNoVehicles = findViewById(R.id.tv_no_vehicles);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new VehicleListAdapter(comparator, this);
@@ -90,16 +92,19 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Vehicle entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             vehicleList = list;
             adapter.replaceAll(list);
             tvNoVehicles.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
@@ -108,7 +113,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         if (adapter != null) {
             Vehicle vehicle = adapter.getItem(position);
             if (vehicle != null) {
-                Log.d(TAG, "Vehicle: " + vehicle.name);
+                Log.d(TAG, "Vehicle: " + vehicle.vehicleName);
                 // TODO
             }
         }
@@ -124,7 +129,7 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         String str = query.toLowerCase();
         final List<Vehicle> list = new ArrayList<>();
         for (Vehicle vehicle : ref) {
-            if (vehicle.name.toLowerCase().contains(str)) {
+            if (vehicle.vehicleName.toLowerCase().contains(str)) {
                 list.add(vehicle);
             }
         }

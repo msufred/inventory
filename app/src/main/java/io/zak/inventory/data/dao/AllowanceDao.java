@@ -25,7 +25,7 @@ public interface AllowanceDao {
     @Query("SELECT * FROM allowances")
     List<Allowance> getAll();
 
-    @Query("SELECT * FROM allowances WHERE id=:id")
+    @Query("SELECT * FROM allowances WHERE allowanceId=:id")
     List<Allowance> getAllowance(int id);
 
     @Query("SELECT COUNT(*) FROM allowances")

@@ -1,6 +1,5 @@
 package io.zak.inventory;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -64,7 +63,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private Vehicle mVehicle;
     private Employee mEmployee;
 
-    private final Comparator<DeliveryDetails> comparator = Comparator.comparing(deliveryDetails -> deliveryDetails.vehicleName);
+    private final Comparator<DeliveryDetails> comparator = Comparator.comparing(deliveryDetails -> deliveryDetails.vehicle.vehicleName);
 
     @Nullable
     @Override
@@ -125,12 +124,14 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
             Log.d(TAG, "Fetching Vehicle entries: " + Thread.currentThread());
             return database.vehicles().getAll();
         }).flatMap(vehicles -> {
+            Log.d(TAG, "Returned with list size=" + vehicles.size());
             vehicleList = vehicles;
             return Single.fromCallable(() -> {
                Log.d(TAG, "Fetching Employee entries: " + Thread.currentThread());
                return database.employees().getAll();
             });
         }).flatMap(employees -> {
+            Log.d(TAG, "Returned with list size=" + employees.size());
             employeeList = employees;
             return Single.fromCallable(() -> {
                 Log.d(TAG, "Fetching DeliveryOrder entries: " + Thread.currentThread());
@@ -158,7 +159,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         if (adapter != null) {
             DeliveryDetails deliveryDetails = adapter.getItem(position);
             if (deliveryDetails != null) {
-                Log.d(TAG, "Selected " + deliveryDetails.vehicleName);
+                Log.d(TAG, "Selected " + deliveryDetails.vehicle.vehicleName);
                 // TODO
             }
         }
@@ -174,7 +175,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         String str = query.toLowerCase();
         List<DeliveryDetails> list = new ArrayList<>();
         for (DeliveryDetails deliveryDetails : deliveryDetailsList) {
-            if (deliveryDetails.vehicleName.contentEquals(str)) {
+            if (deliveryDetails.vehicle.vehicleName.contains(str)) {
                 list.add(deliveryDetails);
             }
         }
@@ -237,12 +238,11 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private void addDelivery(Vehicle vehicle, Employee employee) {
         Date now = new Date();
         DeliveryOrder deliveryOrder = new DeliveryOrder();
-        deliveryOrder.vehicleId = vehicle.id;
-        deliveryOrder.employeeId = employee.id;
-        deliveryOrder.employeeName = employee.name;
-        deliveryOrder.dateOrdered = now.getTime();
+        deliveryOrder.fkVehicleId = vehicle.vehicleId;
+        deliveryOrder.fkEmployeeId = employee.employeeId;
+        deliveryOrder.deliveryDate = now.getTime();
         deliveryOrder.totalAmount = 0.0;
-        deliveryOrder.status = "Processing";
+        deliveryOrder.deliveryOrderStatus = "Processing";
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
@@ -263,5 +263,11 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
             dialogBuilder.create().show();
         }));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        addDialog = null;
     }
 }

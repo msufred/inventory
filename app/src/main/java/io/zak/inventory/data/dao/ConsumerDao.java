@@ -28,7 +28,7 @@ public interface ConsumerDao {
     @Query("SELECT * FROM consumers")
     List<Consumer> getAll();
 
-    @Query("SELECT * FROM consumers WHERE id=:id")
+    @Query("SELECT * FROM consumers WHERE consumerId=:id")
     List<Consumer> getConsumer(int id);
 
     @Query("SELECT COUNT(*) FROM consumers")

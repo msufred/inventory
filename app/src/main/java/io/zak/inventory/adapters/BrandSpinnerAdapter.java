@@ -42,7 +42,7 @@ public class BrandSpinnerAdapter extends ArrayAdapter<Brand> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(brandList.get(position).name);
+        textView.setText(brandList.get(position).brandName);
         return view;
     }
 }

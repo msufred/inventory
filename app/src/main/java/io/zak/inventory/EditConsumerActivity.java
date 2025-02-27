@@ -3,7 +3,6 @@ package io.zak.inventory;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -125,10 +124,10 @@ public class EditConsumerActivity extends AppCompatActivity {
 
     private void displayInfo(Consumer consumer) {
         if (consumer != null) {
-            etName.setText(consumer.name);
-            etAddress.setText(consumer.address);
-            etContact.setText(consumer.contactNo);
-            etEmail.setText(consumer.email);
+            etName.setText(consumer.consumerName);
+            etAddress.setText(consumer.consumerAddress);
+            etContact.setText(consumer.consumerContactNo);
+            etEmail.setText(consumer.consumerEmail);
         }
     }
 
@@ -138,17 +137,17 @@ public class EditConsumerActivity extends AppCompatActivity {
 
         boolean isBlank = etName.getText().toString().isBlank();
         if (isBlank) {
-            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
         }
 
         return !isBlank;
     }
 
     private void saveAndClose() {
-        mConsumer.name = Utils.normalize(etName.getText().toString());
-        mConsumer.contactNo = Utils.normalize(etContact.getText().toString());
-        mConsumer.email = Utils.normalize(etEmail.getText().toString());
-        mConsumer.address = Utils.normalize(etAddress.getText().toString());
+        mConsumer.consumerName = Utils.normalize(etName.getText().toString());
+        mConsumer.consumerContactNo = Utils.normalize(etContact.getText().toString());
+        mConsumer.consumerEmail = Utils.normalize(etEmail.getText().toString());
+        mConsumer.consumerAddress = Utils.normalize(etAddress.getText().toString());
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {

@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -27,7 +28,7 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private Button btnAddItem;
     private TextView tvItemCount, tvTotalAmount;
-    private Button btnLoadToTruck;
+    private Button btnLoadToVehicle;
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -40,6 +41,26 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_delivery_order_items);
         getWidgets();
         setListeners();
+    }
+
+    private void getWidgets() {
+        tvVehicleName = findViewById(R.id.tv_vehicle_name);
+        tvPlateNo = findViewById(R.id.tv_plate_no);
+        tvEmployeeName = findViewById(R.id.tv_employee_name);
+        recyclerView = findViewById(R.id.recycler_view);
+        btnAddItem = findViewById(R.id.btn_add_item);
+        tvItemCount = findViewById(R.id.tv_item_count);
+        tvTotalAmount = findViewById(R.id.tv_total_amount);
+        btnLoadToVehicle = findViewById(R.id.btn_load_to_vehicle);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // TODO
+
+        dialogBuilder = new AlertDialog.Builder(this);
+    }
+
+    private void setListeners() {
+
     }
 
     @Override
@@ -76,15 +97,15 @@ public class DeliveryOrderItemsActivity extends AppCompatActivity {
             }
             mDeliveryDetails = orders.get(0);
             displayInfo(mDeliveryDetails);
-            fetchOrderItems(mDeliveryDetails.deliveryOrder.id);
+            fetchOrderItems(mDeliveryDetails.deliveryOrder.deliveryOrderId);
         }));
     }
 
     private void displayInfo(DeliveryDetails deliveryDetails) {
         if (deliveryDetails != null) {
-            tvVehicleName.setText(deliveryDetails.vehicleName);
-            tvPlateNo.setText(deliveryDetails.plateNo);
-            tvEmployeeName.setText(deliveryDetails.deliveryOrder.employeeName);
+            tvVehicleName.setText(deliveryDetails.vehicle.vehicleName);
+            tvPlateNo.setText(deliveryDetails.vehicle.plateNo);
+            tvEmployeeName.setText(deliveryDetails.employee.employeeName);
         }
     }
 

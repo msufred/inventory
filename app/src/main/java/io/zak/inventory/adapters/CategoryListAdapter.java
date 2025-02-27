@@ -57,7 +57,7 @@ public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapte
 
         @Override
         public boolean areItemsTheSame(Category item1, Category item2) {
-            return item1.id == item2.id;
+            return item1.categoryId == item2.categoryId;
         }
 
         @Override
@@ -93,7 +93,7 @@ public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Category category = sortedList.get(position);
-        if (category != null) holder.name.setText(category.category);
+        if (category != null) holder.name.setText(category.categoryName);
     }
 
     @Override

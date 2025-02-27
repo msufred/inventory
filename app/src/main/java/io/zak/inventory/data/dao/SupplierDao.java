@@ -28,7 +28,7 @@ public interface SupplierDao {
     @Query("SELECT * FROM suppliers")
     List<Supplier> getAll();
 
-    @Query("SELECT * FROM suppliers WHERE id=:id")
+    @Query("SELECT * FROM suppliers WHERE supplierId=:id")
     List<Supplier> getSupplier(int id);
 
     @Query("SELECT COUNT(*) FROM suppliers")

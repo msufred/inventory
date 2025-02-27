@@ -26,7 +26,7 @@ public interface WarehouseStockDao {
     @Query("SELECT * FROM warehouse_stocks")
     List<WarehouseStock> getAll();
 
-    @Query("SELECT * FROM warehouse_stocks WHERE id=:id")
+    @Query("SELECT * FROM warehouse_stocks WHERE warehouseStockId=:id")
     List<WarehouseStock> getWarehouseStock(int id);
 
     @Query("SELECT COUNT(*) FROM warehouse_stocks")
@@ -37,8 +37,8 @@ public interface WarehouseStockDao {
 //            "WHERE warehouseId=:id")
 //    List<WarehouseStockDetails> getWarehouseStocks(int id);
 
-    @Query("SELECT warehouse_stocks.*, products.name, products.price FROM warehouse_stocks " +
-            "INNER JOIN products ON products.id=warehouse_stocks.productId " +
-            "WHERE warehouseId=:id")
+    @Query("SELECT warehouse_stocks.*, products.* FROM warehouse_stocks " +
+            "INNER JOIN products ON products.productId=warehouse_stocks.fkProductId " +
+            "WHERE fkWarehouseId=:id")
     List<WarehouseStockDetails> getWarehouseStocks(int id);
 }

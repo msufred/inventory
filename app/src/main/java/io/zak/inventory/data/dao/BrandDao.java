@@ -30,10 +30,10 @@ public interface BrandDao {
     @Query("SELECT * FROM brands")
     List<Brand> getAll();
 
-    @Query("SELECT * FROM brands WHERE id=:id")
+    @Query("SELECT * FROM brands WHERE brandId=:id")
     List<Brand> getBrand(int id);
 
-    @Query("SELECT * FROM brands WHERE name=:name")
+    @Query("SELECT * FROM brands WHERE brandName=:name")
     List<Brand> getBrand(String name);
 
     @Query("SELECT COUNT(*) FROM brands")

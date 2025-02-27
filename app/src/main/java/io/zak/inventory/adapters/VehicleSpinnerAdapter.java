@@ -42,7 +42,7 @@ public class VehicleSpinnerAdapter extends ArrayAdapter<Vehicle> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(vehicleList.get(position).name);
+        textView.setText(vehicleList.get(position).vehicleName);
         return view;
     }
 }

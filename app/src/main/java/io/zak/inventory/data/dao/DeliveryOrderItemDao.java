@@ -26,16 +26,16 @@ public interface DeliveryOrderItemDao {
     @Query("SELECT * FROM delivery_order_items")
     List<DeliveryOrderItem> getAll();
 
-    @Query("SELECT * FROM delivery_order_items WHERE id=:id")
+    @Query("SELECT * FROM delivery_order_items WHERE deliveryOrderItemId=:id")
     List<DeliveryOrderItem> getDeliveryOrderItem(int id);
 
     @Query("SELECT COUNT(*) FROM delivery_order_items")
     int getSize();
 
-    @Query("SELECT delivery_order_items.*, products.name, products.price " +
+    @Query("SELECT delivery_order_items.*, products.* " +
             "FROM delivery_order_items " +
             "INNER JOIN products " +
-            "ON products.id=delivery_order_items.productId " +
-            "WHERE delivery_order_items.deliveryOrderId = :deliveryOrderId")
+            "ON products.productId=delivery_order_items.fkProductId " +
+            "WHERE delivery_order_items.fkDeliveryOrderId = :deliveryOrderId")
     List<DeliveryItemDetails> getDeliveryItemDetails(int deliveryOrderId);
 }

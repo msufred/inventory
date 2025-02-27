@@ -42,7 +42,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
     private List<Employee> employeeList; // Employee list reference
 
     // for search filter
-    private final Comparator<Employee> comparator = Comparator.comparing(employee -> employee.name);
+    private final Comparator<Employee> comparator = Comparator.comparing(employee -> employee.employeeName);
 
     private CompositeDisposable disposables;
 
@@ -101,14 +101,14 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
             Log.d(TAG, "Fetching Employee entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).employees().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             employeeList = list;
             adapter.replaceAll(list);
             tvNoEmployees.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
@@ -116,11 +116,11 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
     public void onItemClick(int position) {
         if (adapter != null) {
             Employee employee = adapter.getItem(position);
-            Log.d(TAG, "Employee selected (ID: " + employee.id + ")");
+            Log.d(TAG, "Employee selected (ID: " + employee.employeeId + ")");
+
             Intent intent = new Intent(this, ViewEmployeeActivity.class);
-            intent.putExtra("employee_id", employee.id);
+            intent.putExtra("employee_id", employee.employeeId);
             startActivity(intent);
-            finish();
         }
     }
 
@@ -134,7 +134,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
         String str = query.toLowerCase();
         final List<Employee> list = new ArrayList<>();
         for (Employee employee : ref) {
-            if (employee.name.toLowerCase().contains(str)) {
+            if (employee.employeeName.toLowerCase().contains(str)) {
                 list.add(employee);
             }
         }

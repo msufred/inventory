@@ -43,7 +43,7 @@ public class EmployeeSpinnerAdapter extends ArrayAdapter<Employee> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(employeeList.get(position).name);
+        textView.setText(employeeList.get(position).employeeName);
         return view;
     }
 }

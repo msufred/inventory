@@ -5,15 +5,15 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "warehouse_stocks", foreignKeys = {
-        @ForeignKey(entity = Warehouse.class, parentColumns = "id", childColumns = "warehouseId", onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = Product.class, parentColumns = "id", childColumns = "productId", onDelete = ForeignKey.CASCADE)
+        @ForeignKey(entity = Warehouse.class, parentColumns = "warehouseId", childColumns = "fkWarehouseId", onDelete = ForeignKey.CASCADE),
+        @ForeignKey(entity = Product.class, parentColumns = "productId", childColumns = "fkProductId", onDelete = ForeignKey.CASCADE)
 })
 public class WarehouseStock {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public int warehouseId;
-    public int productId;
+    public int warehouseStockId;
+    public int fkWarehouseId;
+    public int fkProductId;
     public int quantity; // actual quantity
     public int takenOut; // quantity ordered/delivered
     public long dateAcquired;

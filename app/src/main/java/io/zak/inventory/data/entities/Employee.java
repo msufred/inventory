@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey;
 public class Employee {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
-    public String name;
+    public int employeeId;
+    public String employeeName;
     public String position;
     public String licenseNo; // if position is Driver
-    public String contactNo;
-    public String address;
-    public String status;
+    public String employeeContactNo;
+    public String employeeAddress;
+    public String employeeStatus;
 }

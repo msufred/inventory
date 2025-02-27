@@ -9,7 +9,6 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.Product;
-import io.zak.inventory.data.relations.ProductWithDetails;
 
 @Dao
 public interface ProductDao {
@@ -26,19 +25,12 @@ public interface ProductDao {
     @Query("SELECT * FROM products")
     List<Product> getAll();
 
-    @Query("SELECT * FROM products WHERE id=:id")
+    @Query("SELECT * FROM products WHERE productId=:id")
     List<Product> getProduct(int id);
 
     @Query("SELECT COUNT(*) FROM products")
     int getSize();
 
-    // Custom Queries
-    @Query("SELECT products.*, brands.name, categories.category " +
-            "FROM products " +
-            "INNER JOIN brands ON products.brandId=brands.id " +
-            "INNER JOIN categories ON products.categoryId=categories.category")
-    List<ProductWithDetails> getProductsWithDetails();
-
-    @Query("SELECT * FROM products WHERE supplierId=:supplierId")
+    @Query("SELECT * FROM products WHERE fkSupplierId=:supplierId")
     List<Product> getProductsFromSupplier(int supplierId);
 }

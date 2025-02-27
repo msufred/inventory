@@ -25,7 +25,7 @@ public interface OrderDao {
     @Query("SELECT * FROM orders")
     List<Order> getAll();
 
-    @Query("SELECT * FROM orders WHERE id=:id")
+    @Query("SELECT * FROM orders WHERE orderId=:id")
     List<Order> getOrder(int id);
 
     @Query("SELECT COUNT(*) FROM orders")

@@ -60,7 +60,7 @@ public class EmployeeListAdapter extends RecyclerView.Adapter<EmployeeListAdapte
 
         @Override
         public boolean areItemsTheSame(Employee item1, Employee item2) {
-            return item1.id == item2.id;
+            return item1.employeeId == item2.employeeId;
         }
 
         @Override
@@ -97,9 +97,9 @@ public class EmployeeListAdapter extends RecyclerView.Adapter<EmployeeListAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Employee employee = sortedList.get(position);
         if (employee != null) {
-            holder.name.setText(employee.name);
+            holder.name.setText(employee.employeeName);
             holder.position.setText(employee.position);
-            holder.status.setText(employee.status);
+            holder.status.setText(employee.employeeStatus);
         }
     }
 

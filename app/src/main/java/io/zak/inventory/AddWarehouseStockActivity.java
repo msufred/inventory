@@ -101,7 +101,7 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (supplierList != null && !supplierList.isEmpty()) {
                     mSupplier = supplierList.get(position);
-                    loadProducts(mSupplier.id);
+                    loadProducts(mSupplier.supplierId);
                 }
             }
 
@@ -224,8 +224,8 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
         }
 
         WarehouseStock stock = new WarehouseStock();
-        stock.warehouseId = warehouseId;
-        stock.productId = mProduct.id;
+        stock.fkWarehouseId = warehouseId;
+        stock.fkProductId = mProduct.productId;
         String str = etQuantity.getText().toString().trim();
         int qty = str.isBlank() ? 1 : Integer.parseInt(str);
         if (qty < 1) qty = 1;
@@ -239,12 +239,12 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
             Log.d(TAG, "Saving WarehouseStock entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks().insert(stock);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID " + id + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
 
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while saving WarehouseStock entry: " + err)

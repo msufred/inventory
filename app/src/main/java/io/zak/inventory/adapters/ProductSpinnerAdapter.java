@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 
+import io.zak.inventory.Utils;
 import io.zak.inventory.data.entities.Product;
 
 public class ProductSpinnerAdapter extends ArrayAdapter<Product> {
@@ -43,7 +44,7 @@ public class ProductSpinnerAdapter extends ArrayAdapter<Product> {
         }
 
         Product product = productList.get(position);
-        String text = String.format("%s - %s", product.name, String.format(Locale.getDefault(), "%.2f", product.price));
+        String text = String.format("%s - Php %s", product.productName, Utils.toStringMoneyFormat(product.price));
         TextView textView = view.findViewById(android.R.id.text1);
         textView.setText(text);
         return view;

@@ -35,6 +35,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
     private RecyclerView recyclerView;
     private TextView tvNoSuppliers;
     private Button btnBack, btnAdd;
+    private RelativeLayout progressGroup;
 
     // RecyclerView adapter
     private SupplierListAdapter adapter;
@@ -43,7 +44,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
     private List<Supplier> supplierList;
 
     // Comparator used for search filter; passed to SupplierListAdapter
-    private final Comparator<Supplier> comparator = Comparator.comparing(supplier -> supplier.name);
+    private final Comparator<Supplier> comparator = Comparator.comparing(supplier -> supplier.supplierName);
 
     private CompositeDisposable disposables;
 
@@ -61,6 +62,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         tvNoSuppliers = findViewById(R.id.tv_no_suppliers);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SupplierListAdapter(comparator, this);
@@ -96,16 +98,19 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Supplier entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Fetched " + list.size() + " items: " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             supplierList = list;
             adapter.replaceAll(list);
             tvNoSuppliers.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
@@ -114,7 +119,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         if (adapter != null) {
             Supplier supplier = adapter.getItem(position);
             if (supplier != null) {
-                Log.d(TAG, "Supplier selected: " + supplier.name);
+                Log.d(TAG, "Supplier selected: " + supplier.supplierName);
                 // TODO
             }
         }
@@ -130,7 +135,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         String str = query.toLowerCase();
         List<Supplier> list = new ArrayList<>();
         for (Supplier supplier : suppliers) {
-            if (supplier.name.toLowerCase().contains(str)) {
+            if (supplier.supplierName.toLowerCase().contains(str)) {
                 list.add(supplier);
             }
         }

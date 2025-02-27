@@ -42,7 +42,7 @@ public class CategorySpinnerAdapter extends ArrayAdapter<Category> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(categoryList.get(position).category);
+        textView.setText(categoryList.get(position).categoryName);
         return view;
     }
 }

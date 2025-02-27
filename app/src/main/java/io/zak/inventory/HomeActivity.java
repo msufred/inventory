@@ -3,7 +3,6 @@ package io.zak.inventory;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,9 +21,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "Home";
 
-    // Widgets
-    // private TextView tvUsername;
-    private FrameLayout frameLayout;
     private BottomNavigationView bottomNavigationView;
 
     // Fragments
@@ -53,8 +49,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void getWidgets() {
-        // tvUsername = findViewById(R.id.text_user);
-        frameLayout = findViewById(R.id.frame_layout);
+        // Widgets
         bottomNavigationView = findViewById(R.id.bottom_nav);
     }
 

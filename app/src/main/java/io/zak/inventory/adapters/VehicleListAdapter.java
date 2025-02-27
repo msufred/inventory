@@ -58,7 +58,7 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
 
         @Override
         public boolean areItemsTheSame(Vehicle item1, Vehicle item2) {
-            return item1.id == item2.id;
+            return item1.vehicleId == item2.vehicleId;
         }
 
         @Override
@@ -95,10 +95,10 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Vehicle vehicle = sortedList.get(position);
         if (vehicle != null) {
-            holder.name.setText(vehicle.name);
-            holder.type.setText(vehicle.type);
+            holder.name.setText(vehicle.vehicleName);
+            holder.type.setText(vehicle.vehicleType);
             if (!vehicle.plateNo.isBlank()) holder.plateNo.setText(vehicle.plateNo);
-            holder.status.setText(vehicle.status);
+            holder.status.setText(vehicle.vehicleStatus);
         }
     }
 

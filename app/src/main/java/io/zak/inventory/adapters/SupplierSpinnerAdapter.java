@@ -43,7 +43,7 @@ public class SupplierSpinnerAdapter extends ArrayAdapter<Supplier> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(supplierList.get(position).name);
+        textView.setText(supplierList.get(position).supplierName);
         return view;
     }
 }

@@ -229,28 +229,28 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         Product product = new Product();
-        product.name = Utils.normalize(etName.getText().toString());
-        product.supplierId = mSelectedSupplier.id;
-        product.brandId = mSelectedBrand.id;
-        product.categoryId = mSelectedCategory.id;
+        product.productName = Utils.normalize(etName.getText().toString());
+        product.fkSupplierId = mSelectedSupplier.supplierId;
+        product.fkBrandId = mSelectedBrand.brandId;
+        product.fkCategoryId = mSelectedCategory.categoryId;
         product.price = Double.parseDouble(etPrice.getText().toString().trim());
         String str = etCritLevel.getText().toString().trim();
         int level = str.isBlank() ? 1 : Integer.parseInt(str);
         if (level < 1) level = 1;
         product.criticalLevel = level;
-        product.description = Utils.normalize(etDescription.getText().toString());
+        product.productDescription = Utils.normalize(etDescription.getText().toString());
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Saving Product entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().insert(product);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with ID:" + id + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
-            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
 
             // dialog
             dialogBuilder.setTitle("Database Error")

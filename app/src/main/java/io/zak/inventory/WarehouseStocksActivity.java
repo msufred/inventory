@@ -41,10 +41,11 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
     private RecyclerView recyclerView;
     private ImageButton btnClose, btnEdit;
     private Button btnAddStock;
+    private RelativeLayout progressGroup;
 
     private WarehouseStockListAdapter adapter;
     private List<WarehouseStockDetails> stockDetailsList;
-    private final Comparator<WarehouseStockDetails> comparator = Comparator.comparing(stockDetails -> stockDetails.productName);
+    private final Comparator<WarehouseStockDetails> comparator = Comparator.comparing(stockDetails -> stockDetails.product.productName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -69,6 +70,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         btnClose = findViewById(R.id.btn_close);
         btnEdit = findViewById(R.id.btn_edit);
         btnAddStock = findViewById(R.id.btn_add_stock);
+        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new WarehouseStockListAdapter(comparator, this);
@@ -95,13 +97,13 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
 
         btnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(this, EditWarehouseActivity.class);
-            intent.putExtra("warehouse_id", mWarehouse.id);
+            intent.putExtra("warehouse_id", mWarehouse.warehouseId);
             startActivity(intent);
         });
 
         btnAddStock.setOnClickListener(v -> {
             Intent intent = new Intent(this, AddWarehouseStockActivity.class);
-            intent.putExtra("warehouse_id", mWarehouse.id);
+            intent.putExtra("warehouse_id", mWarehouse.warehouseId);
             startActivity(intent);
         });
     }
@@ -123,6 +125,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             dialogBuilder.create().show();
         }
 
+        progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         disposables.add(Single.fromCallable(() -> {
             // get warehouse entry
@@ -137,6 +140,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             });
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Returned with list size " + list.size() + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
 
             // populate list
             stockDetailsList = list;
@@ -144,7 +148,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             tvNoStocks.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
 
             // set warehouse name
-            tvName.setText(mWarehouse.name);
+            tvName.setText(mWarehouse.warehouseName);
 
             // compute and display stocks
             tvStocksCount.setText(String.valueOf(list.size()));
@@ -155,6 +159,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
             tvStocksAmount.setText(Utils.toStringMoneyFormat(amount));
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
 
             // dialog
             dialogBuilder.setTitle("Database Error")
@@ -172,7 +177,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         if (adapter != null) {
             WarehouseStockDetails stockDetails = adapter.getItem(position);
             if (stockDetails != null) {
-                Log.d(TAG, "Selected " + stockDetails.productName);
+                Log.d(TAG, "Selected " + stockDetails.product.productName);
                 // TODO
             }
         }
@@ -188,7 +193,7 @@ public class WarehouseStocksActivity extends AppCompatActivity implements Wareho
         String str = query.toLowerCase();
         List<WarehouseStockDetails> list = new ArrayList<>();
         for (WarehouseStockDetails details : detailsList) {
-            if (details.productName.toLowerCase().contains(str)) {
+            if (details.product.productName.toLowerCase().contains(str)) {
                 list.add(details);
             }
         }

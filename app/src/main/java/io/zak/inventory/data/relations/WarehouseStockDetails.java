@@ -10,9 +10,6 @@ public class WarehouseStockDetails {
     @Embedded
     public WarehouseStock warehouseStock;
 
-    @ColumnInfo(name = "name")
-    public String productName;
-
-    @ColumnInfo(name = "price")
-    public double productPrice;
+    @Embedded
+    public Product product;
 }
