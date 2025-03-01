@@ -43,29 +43,32 @@
         <EditText
             android:id="@+id/et_username"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/text_input_target"
             android:hint="@string/username"
             android:autofillHints="username"
             android:inputType="textPersonName"
+            android:textEditSuggestionItemLayout="@dimen/text_input"
             android:background="@drawable/bg_textfield"/>
 
         <EditText
             android:id="@+id/et_password"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/text_input_target"
             android:hint="@string/password"
             android:autofillHints="none"
             android:inputType="textPassword"
+            android:textEditSuggestionItemLayout="@dimen/text_input"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_textfield"/>
 
         <EditText
             android:id="@+id/et_password_confirm"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/text_input_target"
             android:hint="@string/confirm_password"
             android:autofillHints="none"
             android:inputType="textPassword"
+            android:textEditSuggestionItemLayout="@dimen/text_input"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_textfield"/>
 
@@ -76,13 +79,14 @@
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:text="@string/register"
-        android:textSize="18sp"
+        android:textSize="@dimen/button_text"
         android:textColor="@color/purple_500"
         android:backgroundTintMode="add"
         android:backgroundTint="@color/white"
         app:layout_constraintTop_toBottomOf="@id/fields"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:cornerRadius="@dimen/button_corner"
         android:layout_marginTop="32dp"/>
 
     <Button
@@ -91,7 +95,7 @@
         android:layout_height="wrap_content"
         android:text="@string/login_account"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="@dimen/button_text"
         android:background="@android:color/transparent"
         app:layout_constraintTop_toBottomOf="@id/btn_register"
         app:layout_constraintStart_toStartOf="parent"

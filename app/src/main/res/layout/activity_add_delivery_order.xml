@@ -17,32 +17,33 @@
         android:id="@+id/title_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="8dp">
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:gravity="center"
-            android:text="@string/add_employee"
+            android:text="@string/add_delivery"
             android:textSize="@dimen/page_title"
             android:textStyle="bold"
-            android:textColor="@color/white"  />
+            android:textColor="@color/white"/>
 
         <ImageButton
             android:id="@+id/btn_back"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:padding="0dp"
             android:src="@drawable/ic_arrow_left"
             app:tint="@color/white"
+            android:layout_alignStart="@id/title"
             android:contentDescription="@string/button"
             android:background="@drawable/bg_ripple_round" />
 
     </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
@@ -60,19 +61,19 @@
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp" >
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/employee_details"
+                android:text="@string/delivery_details"
                 android:textSize="@dimen/page_title"
                 android:textStyle="bold"
                 android:textColor="#111"
                 android:drawablePadding="16dp"
-                app:drawableStartCompat="@drawable/ic_user"
-                app:drawableTint="#111"/>
+                app:drawableStartCompat="@drawable/ic_package"
+                app:drawableTint="#111" />
 
             <ImageButton
                 android:id="@+id/btn_delete"
@@ -88,8 +89,7 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="11dp">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -98,118 +98,86 @@
                 android:padding="16dp" >
 
                 <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/name"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/et_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="name"
-                    android:hint="@string/employee_name"
-                    android:inputType="text"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:layout_width="90dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/position"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"
-                    android:labelFor="@id/et_contact"/>
-
-                <EditText
-                    android:id="@+id/et_position"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="text"
-                    android:hint="@string/designation_position"
-                    android:inputType="text"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp" />
-
-                <TextView
-                    android:layout_width="90dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/contact"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"
-                    android:labelFor="@id/et_contact"/>
-
-                <EditText
-                    android:id="@+id/et_contact"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="phone"
-                    android:hint="@string/phone_or_mobile"
-                    android:inputType="text"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:layout_width="90dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/address"
+                    android:text="@string/tracking_no"
                     android:textStyle="bold"
                     android:layout_marginTop="16dp"/>
 
                 <EditText
-                    android:id="@+id/et_address"
+                    android:id="@+id/et_tracking_no"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/text_input_target"
                     android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="postalAddress"
-                    android:hint="@string/current_address"
+                    android:autofillHints="name"
+                    android:hint="@string/tracking_no"
                     android:inputType="text"
                     android:textSize="@dimen/text_input"
                     android:layout_marginTop="8dp"/>
 
                 <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/status"
+                    android:text="@string/vehicle"
                     android:textStyle="bold"
                     android:layout_marginTop="16dp"/>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/text_input_target"
-                    android:padding="0dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_textfield_grey">
+                    android:background="@drawable/bg_round_rect"
+                    android:layout_marginTop="8dp">
 
                     <Spinner
-                        android:id="@+id/status_spinner"
+                        android:id="@+id/vehicle_spinner"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/empty_vehicle_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/no_vehicles"
+                        android:textSize="@dimen/text_input"
+                        android:gravity="center_vertical"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"/>
 
                 </RelativeLayout>
 
                 <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/license"
+                    android:text="@string/employees"
                     android:textStyle="bold"
                     android:layout_marginTop="16dp"/>
 
-                <EditText
-                    android:id="@+id/et_license"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="phone"
-                    android:hint="@string/license_no"
-                    android:inputType="text"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_round_rect">
+
+                    <Spinner
+                        android:id="@+id/employee_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/empty_employees_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/no_employees"
+                        android:textSize="@dimen/text_input"
+                        android:gravity="center_vertical"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"/>
+
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -233,23 +201,23 @@
             android:id="@+id/btn_cancel"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="@dimen/button_height"
+            android:layout_height="50dp"
             android:text="@string/cancel"
-            android:textSize="@dimen/button_text"
             android:textColor="#111"
-            android:background="@color/transparent"
+            android:textSize="@dimen/button_text"
+            android:backgroundTint="@color/transparent"
             app:cornerRadius="@dimen/button_corner"/>
 
         <Button
             android:id="@+id/btn_save"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="@dimen/button_height"
+            android:layout_height="50dp"
             android:text="@string/save"
             android:textSize="@dimen/button_text"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/purple_500"
-            app:cornerRadius="@dimen/button_corner"/>
+            app:cornerRadius="@dimen/button_corner" />
 
     </LinearLayout>
 

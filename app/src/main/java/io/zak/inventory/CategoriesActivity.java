@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -36,6 +38,9 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
     private Button btnBack, btnAdd;
+    private ImageButton btnBack;
+    private Button btnAdd;
+    private RelativeLayout progressGroup;
 
     private CategoryListAdapter adapter;
     private List<Category> categoryList;

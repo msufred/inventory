@@ -13,4 +13,8 @@
     <color name="accent">#D0A300</color>
 
     <color name="transparent">#00000000</color>
+
+    <color name="page_title">#FFFFFF</color>
+    <color name="form_title">#000000</color>
+    <color name="caption">#80000000</color>
 </resources>

@@ -9,20 +9,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp"
         android:background="@drawable/bg_gradient_main">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/brands"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/white" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" >
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_arrow_left"
+                android:background="@drawable/bg_ripple_round"
+                app:tint="@color/white"
+                android:contentDescription="@string/button"/>
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/brands"
+                android:textSize="@dimen/page_title"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginStart="16dp"/>
+
+        </LinearLayout>
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view"
@@ -30,9 +46,12 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_searchfield"
             android:padding="0dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
             app:iconifiedByDefault="false"
-            app:queryHint="@string/search" />
+            app:queryHint="@string/search"
+            app:queryBackground="@color/transparent" />
 
     </LinearLayout>
 
@@ -57,35 +76,25 @@
 
     </RelativeLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="8dp"
-        android:background="@color/white">
-
-        <Button
-            android:id="@+id/btn_back"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:text="@string/home"
-            android:textSize="18sp"
-            app:icon="@drawable/ic_home"
-            android:backgroundTint="@color/purple_500"/>
+        android:background="@drawable/bg_top_border">
 
         <Button
             android:id="@+id/btn_add"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:textSize="18sp"
+            android:layout_width="match_parent"
+            android:textSize="@dimen/button_text"
             android:layout_marginStart="8dp"
             android:layout_height="50dp"
             android:text="@string/add_brand"
-            app:icon="@drawable/ic_award"
-            android:backgroundTint="@color/purple_500"/>
+            app:icon="@drawable/ic_plus_circle"
+            app:iconSize="20dp"
+            android:backgroundTint="@color/purple_500"
+            app:cornerRadius="@dimen/button_corner"/>
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/progress_group"

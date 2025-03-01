@@ -4,7 +4,10 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:gravity="center_vertical"
     android:clickable="true"
     android:focusable="true"
@@ -14,10 +17,13 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="10dp"
         android:src="@drawable/ic_truck_speed"
-        android:contentDescription="@string/vector"/>
+        app:tint="@color/purple_500"
+        android:contentDescription="@string/vector"
+        android:background="@drawable/bg_circle"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -38,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:text="@string/vehicle"
-                android:textSize="18sp"
+                android:textSize="@dimen/list_item_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -46,8 +52,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:textColor="#555"
-                android:textSize="14sp"
+                android:textColor="@color/caption"
+                android:textSize="@dimen/caption"
                 android:textStyle="italic"
                 android:layout_marginStart="16dp"
                 android:text="@string/date_sample" />
@@ -61,7 +67,7 @@
             android:ellipsize="end"
             android:text="@string/employee"
             android:textColor="#555"
-            android:textSize="14sp"/>
+            android:textSize="@dimen/caption"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -76,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/accent"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="@dimen/caption"
                 android:text="@string/zero_amount" />
 
             <TextView
@@ -84,7 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:textSize="14sp"
+                android:textSize="@dimen/caption"
                 android:textStyle="bold"
                 android:layout_marginStart="16dp"
                 android:text="@string/status" />

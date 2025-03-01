@@ -4,7 +4,10 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:gravity="center_vertical"
     android:clickable="true"
     android:focusable="true"
@@ -33,7 +36,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/warehouses"
-            android:textSize="18sp"
+            android:textSize="@dimen/list_item_text"
             android:textStyle="bold" />
 
         <TextView
@@ -41,7 +44,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:textColor="#333"
+            android:textColor="@color/caption"
+            android:textSize="@dimen/caption"
             android:text="@string/no_address" />
 
         <TextView
@@ -49,7 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:textColor="#333"
+            android:textColor="@color/caption"
+            android:textSize="@dimen/caption"
             android:text="@string/no_contact_no" />
 
     </LinearLayout>

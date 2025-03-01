@@ -13,6 +13,7 @@ public class Order {
 
     @PrimaryKey(autoGenerate = true)
     public int orderId;
+    public String orNo; // official receipt no
     public int fkVehicleId;   // from assigned vehicle
     public int fkEmployeeId;  // by assigned employee/driver
     public int fkConsumerId;

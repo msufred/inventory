@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -34,7 +35,8 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoEmployees;
-    private Button btnBack, btnAdd;
+    private ImageButton btnBack;
+    private Button btnAdd;
     private RelativeLayout progressGroup;
 
     // for RecyclerView

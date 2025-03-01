@@ -41,7 +41,7 @@ public class DeliveryItemListAdapter extends RecyclerView.Adapter<DeliveryItemLi
 
     private final Comparator<DeliveryItemDetails> comparator;
 
-    private final SortedList<DeliveryItemDetails> sortedList = new SortedList<>(DeliveryItemDetails.class, new SortedList.Callback<DeliveryItemDetails>() {
+    private final SortedList<DeliveryItemDetails> sortedList = new SortedList<>(DeliveryItemDetails.class, new SortedList.Callback<>() {
         @Override
         public int compare(DeliveryItemDetails o1, DeliveryItemDetails o2) {
             return comparator.compare(o1, o2);
