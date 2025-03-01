@@ -122,7 +122,9 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
             Consumer consumer = adapter.getItem(position);
             if (consumer != null) {
                 Log.d(TAG, "Consumer selected: " + consumer.consumerName);
-                // TODO
+                Intent intent = new Intent(this, ViewConsumerActivity.class);
+                intent.putExtra("consumer_id", consumer.consumerId);
+                startActivity(intent);
             }
         }
     }

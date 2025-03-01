@@ -8,6 +8,7 @@ import androidx.room.Update;
 
 import java.util.List;
 
+import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 
 @Dao
@@ -36,4 +37,7 @@ public interface CategoryDao {
 
     @Query("SELECT COUNT(*) FROM categories")
     int getSize();
+
+    @Update
+    int update(Category category);
 }
