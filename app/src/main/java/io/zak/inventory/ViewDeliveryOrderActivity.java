@@ -105,7 +105,8 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         btnBack.setOnClickListener(v -> goBack());
 
         btnAddItem.setOnClickListener(v -> {
-            if (addDialog != null) addDialog.show();
+            if (addDialog == null) createAddItemDialog();
+            addDialog.show();
         });
 
         btnLoadToVehicle.setOnClickListener(v -> {
@@ -156,8 +157,6 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
             }
             mDeliveryDetails = orders.get(0);
             displayInfo(mDeliveryDetails);
-
-            if (addDialog == null) createAddItemDialog();
 
             fetchOrderItems(mDeliveryDetails.deliveryOrder.deliveryOrderId);
         }, err -> {

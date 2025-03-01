@@ -9,36 +9,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="8dp"
         android:background="@drawable/bg_gradient_main">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_truck_speed"
-                app:tint="@color/white"
-                android:contentDescription="@string/vector"/>
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/deliveries"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/white"/>
-
-        </LinearLayout>
+            android:gravity="center"
+            android:text="@string/deliveries"
+            android:textSize="@dimen/page_title"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view"
@@ -46,9 +31,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_searchfield"
             android:padding="0dp"
-            android:layout_marginTop="8dp"
             app:iconifiedByDefault="false"
-            app:queryHint="@string/search" />
+            app:queryHint="@string/search"
+            app:queryBackground="@color/transparent"
+            android:layout_marginTop="8dp"/>
 
     </LinearLayout>
 
@@ -98,13 +84,14 @@
 
         <Button
             android:id="@+id/btn_add"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textSize="18sp"
             android:layout_marginStart="8dp"
             android:text="@string/add_delivery"
-            app:icon="@drawable/ic_truck_speed"
-            app:iconSize="32dp"
+            app:icon="@drawable/ic_plus_circle"
+            app:iconSize="20dp"
+            app:cornerRadius="@dimen/button_corner"
             android:backgroundTint="@color/purple_500"/>
 
     </RelativeLayout>

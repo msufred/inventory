@@ -59,8 +59,6 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
     private AlertDialog.Builder dialogBuilder;
     private DatePickerDialog datePickerDialog;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,7 +87,7 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
             Calendar calendar = Calendar.getInstance();
             calendar.set(year, month, dayOfMonth);
             mDateAcquired = calendar.getTime();
-            etDate.setText(dateFormat.format(mDateAcquired));
+            etDate.setText(Utils.dateFormat.format(mDateAcquired));
         });
 
         progressGroup = findViewById(R.id.progress_group);
@@ -151,6 +149,10 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
             supplierList = suppliers;
             supplierSpinner.setAdapter(new SupplierSpinnerAdapter(this, supplierList));
             emptySupplierSpinner.setVisibility(suppliers.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+            // set default date to today
+            mDateAcquired = new Date();
+            etDate.setText(Utils.dateFormat.format(mDateAcquired));
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
@@ -204,7 +206,7 @@ public class AddWarehouseStockActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        return mProduct != null;
+        return mProduct != null && mDateAcquired != null;
     }
 
     private void saveAndClose() {

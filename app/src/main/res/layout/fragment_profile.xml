@@ -17,14 +17,13 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/ic_edit_2"
-        android:background="@color/zxing_transparent"
         app:tint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:contentDescription="@string/button"/>
+        android:contentDescription="@string/button"
+        android:background="@drawable/bg_ripple_round"/>
 
     <TextView
         android:id="@+id/title"
@@ -61,8 +60,7 @@
         app:layout_constraintBottom_toBottomOf="@id/profile"
         android:contentDescription="@string/button"
         app:tint="#666"
-        android:background="#00000000"
-        android:foreground="?android:attr/selectableItemBackground"/>
+        android:background="@drawable/bg_ripple_round"/>
 
     <TextView
         android:id="@+id/tv_username"
@@ -114,10 +112,11 @@
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:text="@string/logout"
-        android:textSize="16sp"
+        android:textSize="@dimen/button_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:cornerRadius="@dimen/button_corner"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"

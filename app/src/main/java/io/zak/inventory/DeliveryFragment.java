@@ -44,25 +44,26 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private static final String TAG = "Deliveries";
 
     // Widgets
-    private SearchView searchView;
-    private RecyclerView recyclerView;
-    private TextView tvNoDeliveries;
+    private SearchView searchView;              // use to search delivery by vehicle name
+    private RecyclerView recyclerView;          // contains delivery list
+    private TextView tvNoDeliveries;            // visible if delivery list is empty
     private Button btnAdd;
-    private RelativeLayout progressGroup;
+    private RelativeLayout progressGroup;       // progress indicator group
 
-    private CompositeDisposable disposables;
-    private AlertDialog.Builder dialogBuilder;
+    private CompositeDisposable disposables;    // holds Disposable objects (reactive programming)
+    private AlertDialog.Builder dialogBuilder;  // creates AlertDialog (error, add, etc)
 
-    private DeliveryListAdapter adapter;
-    private List<DeliveryDetails> deliveryList;
+    private DeliveryListAdapter adapter;        // recyclerView list adapter
+    private List<DeliveryDetails> deliveryList; // reference list of deliveries
 
     // for Add Delivery dialog
-    private List<Vehicle> vehicleList;
-    private List<Employee> employeeList;
-    private AlertDialog addDialog;
-    private Vehicle mVehicle;
-    private Employee mEmployee;
+    private List<Vehicle> vehicleList;          // list of all vehicles
+    private List<Employee> employeeList;        // list of all employees
+    private AlertDialog addDialog;              // used to add delivery item
+    private Vehicle mVehicle;                   // current selected vehicle (add dialog)
+    private Employee mEmployee;                 // current selected employee (add dialog)
 
+    // used for list adapter's sorted list (see DeliveryListAdapter class)
     private final Comparator<DeliveryDetails> comparator = Comparator.comparing(deliveryDetails -> deliveryDetails.vehicle.vehicleName);
 
     @Nullable
@@ -86,6 +87,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         adapter = new DeliveryListAdapter(comparator, this);
         recyclerView.setAdapter(adapter);
 
+        // initialize dialog builder
         dialogBuilder = new AlertDialog.Builder(requireActivity());
     }
 

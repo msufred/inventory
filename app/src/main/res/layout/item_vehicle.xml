@@ -4,7 +4,10 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:gravity="center_vertical"
     android:clickable="true"
     android:focusable="true"
@@ -33,7 +36,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/name"
-            android:textSize="18sp"
+            android:textSize="@dimen/list_item_text"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -46,7 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:textColor="#333"
+                android:textColor="@color/caption"
+                android:textSize="@dimen/caption"
                 android:text="@string/type" />
 
             <TextView
@@ -54,8 +58,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:textColor="#888"
+                android:textColor="@color/caption"
                 android:textStyle="italic"
+                android:textSize="@dimen/caption"
                 android:layout_marginStart="8dp"
                 android:text="@string/no_plate_no" />
 
@@ -66,7 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:textColor="#333"
+            android:textColor="@color/caption"
+            android:textSize="@dimen/caption"
             android:text="@string/status" />
 
     </LinearLayout>

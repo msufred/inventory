@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -36,7 +37,8 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoBrands;
-    private Button btnBack, btnAdd;
+    private ImageButton btnBack;
+    private Button btnAdd;
     private RelativeLayout progressGroup;
 
     // for RecyclerView

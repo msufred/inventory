@@ -18,5 +18,5 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:text="@string/category"
-        android:textSize="16sp" />
+        android:textSize="@dimen/list_item_text" />
 </LinearLayout>

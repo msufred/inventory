@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -34,7 +35,8 @@ public class ConsumersActivity extends AppCompatActivity implements ConsumerList
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoConsumers;
-    private Button btnBack, btnAdd;
+    private ImageView btnBack;
+    private Button btnAdd;
     private RelativeLayout progressGroup;
 
     // RecyclerView adapter

@@ -179,4 +179,7 @@
     <string name="selling_price">Selling Price</string>
     <string name="receipt">Receipt</string>
 
+    <!-- Notes -->
+    <string name="note_quantity">Note: Quantity is set to 1 if no number is entered.</string>
+
 </resources>

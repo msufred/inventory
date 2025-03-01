@@ -4,7 +4,10 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:gravity="center_vertical"
     android:clickable="true"
     android:focusable="true"
@@ -35,7 +38,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:text="@string/product"
-            android:textSize="18sp"
+            android:textSize="@dimen/list_item_text"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -47,6 +50,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/caption"
                 android:text="@string/price" />
 
             <TextView
@@ -55,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/accent"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="@dimen/caption"
                 android:layout_marginStart="8dp"
                 android:text="@string/zero_amount" />
 
@@ -63,6 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/x"
+                android:textSize="@dimen/caption"
                 android:layout_marginStart="8dp" />
 
             <TextView
@@ -71,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/accent"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="@dimen/caption"
                 android:layout_marginStart="8dp"
                 android:text="@string/zero" />
 
@@ -86,6 +91,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/caption"
                 android:text="@string/total_amount" />
 
             <TextView
@@ -94,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/accent"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="@dimen/caption"
                 android:layout_marginStart="8dp"
                 android:text="@string/zero_amount" />
 
