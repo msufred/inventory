@@ -11,10 +11,13 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -96,6 +99,10 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new DeliveryItemListAdapter(comparator, this);
         recyclerView.setAdapter(adapter);
+
+        // Set up ItemTouchHelper for swipe-to-delete
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback());
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         dialogBuilder = new AlertDialog.Builder(this);
     }
@@ -350,11 +357,23 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
             Log.d(TAG, "Returned with id=" + id);
             addDialog.dismiss();
 
+            // Update the item with the generated ID
+            item.deliveryOrderItemId = id.intValue();
+
             DeliveryItemDetails details = new DeliveryItemDetails();
             details.deliveryOrderItem = item;
             details.product = mStockDetails.product;
+
+            // Add to the list
             deliveryItemList.add(details);
+
+            // Sort the list according to the comparator
+            deliveryItemList.sort(comparator);
+
+            // Update the adapter and notify data changed
             adapter.replaceAll(deliveryItemList);
+            adapter.notifyDataSetChanged();
+
             calculateTotal(deliveryItemList);
         }, err -> {
             showProgress(false);
@@ -380,6 +399,65 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         return database;
     }
 
+    private class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
+        public SwipeToDeleteCallback() {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+            DeliveryItemDetails item = adapter.getItem(position);
+            if (item != null) {
+                showDeleteConfirmationDialog(item, position);
+            }
+        }
+    }
+
+    private void showDeleteConfirmationDialog(DeliveryItemDetails item, int position) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Item")
+                .setMessage("Are you sure you want to delete this item?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteDeliveryOrderItem(item))
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Restore the item in the RecyclerView
+                    adapter.notifyItemChanged(position);
+                })
+                .show();
+    }
+
+    private void deleteDeliveryOrderItem(DeliveryItemDetails item) {
+        showProgress(true);
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Deleting DeliveryOrderItem entry");
+            return getDatabase().deliveryOrderItems().delete(item.deliveryOrderItem);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(deletedRows -> {
+            showProgress(false);
+            Log.d(TAG, "Deleted rows: " + deletedRows);
+            if (deletedRows > 0) {
+                deliveryItemList.remove(item);
+                adapter.replaceAll(deliveryItemList);
+                calculateTotal(deliveryItemList);
+                Toast.makeText(this, "Item deleted successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show();
+                // Restore the item in the RecyclerView
+                adapter.notifyDataSetChanged();
+            }
+        }, err -> {
+            showProgress(false);
+            Log.e(TAG, "Database Error: " + err);
+            Toast.makeText(this, "Error deleting item: " + err.getMessage(), Toast.LENGTH_LONG).show();
+            // Restore the item in the RecyclerView
+            adapter.notifyDataSetChanged();
+        }));
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -387,3 +465,4 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         disposables.dispose();
     }
 }
+

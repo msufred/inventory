@@ -37,9 +37,9 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
-    private Button btnBack, btnAdd;
+    private Button  btnAdd;
     private ImageButton btnBack;
-    private Button btnAdd;
+
     private RelativeLayout progressGroup;
 
     private CategoryListAdapter adapter;

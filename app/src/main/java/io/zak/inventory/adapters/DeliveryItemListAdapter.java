@@ -121,4 +121,5 @@ public class DeliveryItemListAdapter extends RecyclerView.Adapter<DeliveryItemLi
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();
     }
+
 }

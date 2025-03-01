@@ -1,28 +1,34 @@
 package io.zak.inventory;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -30,13 +36,8 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.DeliveryListAdapter;
-import io.zak.inventory.adapters.EmployeeSpinnerAdapter;
-import io.zak.inventory.adapters.VehicleSpinnerAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
-import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.entities.Employee;
-import io.zak.inventory.data.entities.Vehicle;
 import io.zak.inventory.data.relations.DeliveryDetails;
 
 public class DeliveryFragment extends Fragment implements DeliveryListAdapter.OnItemClickListener {
@@ -44,20 +45,18 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private static final String TAG = "Deliveries";
 
     // Widgets
-    private SearchView searchView;              // use to search delivery by vehicle name
-    private RecyclerView recyclerView;          // contains delivery list
-    private TextView tvNoDeliveries;            // visible if delivery list is empty
+    private SearchView searchView;
+    private RecyclerView recyclerView;
+    private TextView tvNoDeliveries;
     private Button btnAdd;
-    private RelativeLayout progressGroup;       // progress indicator group
+    private RelativeLayout progressGroup;
 
-    private CompositeDisposable disposables;    // holds Disposable objects (reactive programming)
-    private AlertDialog.Builder dialogBuilder;  // creates AlertDialog (error, add, etc)
+    private CompositeDisposable disposables;
+    private AlertDialog.Builder dialogBuilder;
 
-    private DeliveryListAdapter adapter;        // recyclerView list adapter
-    private List<DeliveryDetails> deliveryList; // reference list of deliveries
+    private DeliveryListAdapter adapter;
+    private List<DeliveryDetails> deliveryList;
 
-    // used for list adapter's sorted list (see DeliveryListAdapter class)
-    // we will sort Delivery items by date
     private final Comparator<DeliveryDetails> comparator =
             Comparator.comparing(deliveryDetails -> deliveryDetails.deliveryOrder.deliveryDate);
 
@@ -77,12 +76,14 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         btnAdd = view.findViewById(R.id.btn_add);
         progressGroup = view.findViewById(R.id.progress_group);
 
-        // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new DeliveryListAdapter(comparator, this);
         recyclerView.setAdapter(adapter);
 
-        // initialize dialog builder
+        // Set up ItemTouchHelper for swipe-to-delete
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback());
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
         dialogBuilder = new AlertDialog.Builder(requireActivity());
     }
 
@@ -154,7 +155,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         String str = query.toLowerCase();
         List<DeliveryDetails> list = new ArrayList<>();
         for (DeliveryDetails deliveryDetails : deliveryDetailsList) {
-            if (deliveryDetails.vehicle.vehicleName.contains(str)) {
+            if (deliveryDetails.vehicle.vehicleName.toLowerCase().contains(str)) {
                 list.add(deliveryDetails);
             }
         }
@@ -167,8 +168,103 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         startActivity(intent);
     }
 
+    private class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
+        private final Paint paint;
+        private final Drawable deleteIcon;
+        private final int iconMargin;
+        private final int iconSize;
+        private final float swipeThreshold = 0.3f;
+
+        public SwipeToDeleteCallback() {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            paint = new Paint();
+            deleteIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_trash);
+            if (deleteIcon != null) {
+                DrawableCompat.setTint(deleteIcon, Color.WHITE);
+            }
+            iconMargin = (int) requireContext().getResources().getDimension(R.dimen.fab_margin);
+            iconSize = (int) requireContext().getResources().getDimension(R.dimen.icon_size);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+            DeliveryDetails item = adapter.getItem(position);
+            if (item != null) {
+                deleteDeliveryOrder(item);
+            }
+        }
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            View itemView = viewHolder.itemView;
+            float height = (float) itemView.getBottom() - (float) itemView.getTop();
+
+            // Draw red background
+            paint.setColor(Color.RED);
+            RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+            c.drawRect(background, paint);
+
+            // Draw delete icon
+            if (deleteIcon != null) {
+                int deleteIconTop = itemView.getTop() + (int) ((height - iconSize) / 2);
+                int deleteIconMargin = (int) ((height - iconSize) / 2);
+                int deleteIconLeft = itemView.getRight() - deleteIconMargin - iconSize;
+                int deleteIconRight = itemView.getRight() - deleteIconMargin;
+                int deleteIconBottom = deleteIconTop + iconSize;
+
+                deleteIcon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                deleteIcon.draw(c);
+            }
+
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+        }
+
+        @Override
+        public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
+            return swipeThreshold;
+        }
+    }
+
+    private void deleteDeliveryOrder(DeliveryDetails item) {
+        progressGroup.setVisibility(View.VISIBLE);
+        AppDatabase database = AppDatabaseImpl.getDatabase(getActivity());
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Deleting DeliveryOrder entry");
+            return database.deliveryOrders().delete(item.deliveryOrder);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(deletedRows -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.d(TAG, "Deleted rows: " + deletedRows);
+            if (deletedRows > 0) {
+                deliveryList.remove(item);
+                adapter.replaceAll(deliveryList);
+                tvNoDeliveries.setVisibility(deliveryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                Toast.makeText(getContext(), "Delivery deleted successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Failed to delete delivery", Toast.LENGTH_SHORT).show();
+                // Restore the item in the RecyclerView
+                adapter.notifyDataSetChanged();
+            }
+        }, err -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.e(TAG, "Database Error: " + err);
+            Toast.makeText(getContext(), "Error deleting delivery: " + err.getMessage(), Toast.LENGTH_LONG).show();
+            // Restore the item in the RecyclerView
+            adapter.notifyDataSetChanged();
+        }));
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (disposables != null) {
+            disposables.dispose();
+        }
     }
 }
+

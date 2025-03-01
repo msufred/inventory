@@ -38,9 +38,9 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoBrands;
-    private Button btnBack, btnAdd;
+    private Button  btnAdd;
     private ImageButton btnBack;
-    private Button btnAdd;
+
     private RelativeLayout progressGroup;
 
     // for RecyclerView

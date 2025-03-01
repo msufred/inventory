@@ -19,9 +19,9 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:text="@string/deliveries"
-            android:textSize="@dimen/page_title"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/white" />
 
