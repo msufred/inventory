@@ -41,23 +41,23 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     private static final String TAG = "DeliveryOrderItems";
 
     // Widgets
-    private ImageButton btnBack;
-    private TextView tvVehicleName, tvPlateNo, tvEmployeeName;
+    private TextView tvTrackingNo, tvItemCount, tvTotalAmount;
+    private ImageButton btnBack, btnInfo;
     private RecyclerView recyclerView;
     private Button btnAddItem;
-    private TextView tvItemCount, tvTotalAmount;
     private Button btnLoadToVehicle;
     private RelativeLayout progressGroup;
 
     // Add Dialog Widgets
     private Spinner warehouseSpinner, productSpinner;
-    private TextView tvRemainingStocks;
     private TextView noProducts;
     private EditText etQuantity;
 
     // for RecyclerView
     private DeliveryItemListAdapter adapter;
     private List<DeliveryItemDetails> deliveryItemList;
+
+    // sort items by product name
     private final Comparator<DeliveryItemDetails> comparator = Comparator.comparing(deliveryItemDetails -> deliveryItemDetails.product.productName);
 
     // for Add Dialog
@@ -83,14 +83,13 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     }
 
     private void getWidgets() {
-        btnBack = findViewById(R.id.btn_back);
-        tvVehicleName = findViewById(R.id.tv_vehicle_name);
-        tvPlateNo = findViewById(R.id.tv_plate_no);
-        tvEmployeeName = findViewById(R.id.tv_employee_name);
-        recyclerView = findViewById(R.id.recycler_view);
-        btnAddItem = findViewById(R.id.btn_add_item);
+        tvTrackingNo = findViewById(R.id.tv_tracking_no);
         tvItemCount = findViewById(R.id.tv_item_count);
         tvTotalAmount = findViewById(R.id.tv_total_amount);
+        btnBack = findViewById(R.id.btn_back);
+        btnInfo = findViewById(R.id.btn_info);
+        recyclerView = findViewById(R.id.recycler_view);
+        btnAddItem = findViewById(R.id.btn_add_item);
         btnLoadToVehicle = findViewById(R.id.btn_load_to_vehicle);
         progressGroup = findViewById(R.id.progress_group);
 
@@ -103,6 +102,10 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
 
     private void setListeners() {
         btnBack.setOnClickListener(v -> goBack());
+
+        btnInfo.setOnClickListener(v -> {
+            // TODO show delivery information (vehicle, employee, etc)
+        });
 
         btnAddItem.setOnClickListener(v -> {
             if (addDialog == null) createAddItemDialog();
@@ -174,9 +177,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
 
     private void displayInfo(DeliveryDetails deliveryDetails) {
         if (deliveryDetails != null) {
-            tvVehicleName.setText(deliveryDetails.vehicle.vehicleName);
-            tvPlateNo.setText(deliveryDetails.vehicle.plateNo);
-            tvEmployeeName.setText(deliveryDetails.employee.employeeName);
+            // TODO show delivery tracking no
         }
     }
 
