@@ -13,6 +13,7 @@ public class DeliveryOrder {
 
     @PrimaryKey(autoGenerate = true)
     public int deliveryOrderId;
+    public String trackingNo;
     public int fkVehicleId; // assigned vehicle
     public int fkEmployeeId; // assigned driver
     public double totalAmount;
