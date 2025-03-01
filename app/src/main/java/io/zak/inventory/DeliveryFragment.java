@@ -56,15 +56,10 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private DeliveryListAdapter adapter;        // recyclerView list adapter
     private List<DeliveryDetails> deliveryList; // reference list of deliveries
 
-    // for Add Delivery dialog
-    private List<Vehicle> vehicleList;          // list of all vehicles
-    private List<Employee> employeeList;        // list of all employees
-    private AlertDialog addDialog;              // used to add delivery item
-    private Vehicle mVehicle;                   // current selected vehicle (add dialog)
-    private Employee mEmployee;                 // current selected employee (add dialog)
-
     // used for list adapter's sorted list (see DeliveryListAdapter class)
-    private final Comparator<DeliveryDetails> comparator = Comparator.comparing(deliveryDetails -> deliveryDetails.vehicle.vehicleName);
+    // we will sort Delivery items by date
+    private final Comparator<DeliveryDetails> comparator =
+            Comparator.comparing(deliveryDetails -> deliveryDetails.deliveryOrder.deliveryDate);
 
     @Nullable
     @Override
@@ -105,10 +100,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
             }
         });
 
-        btnAdd.setOnClickListener(v -> {
-            if (addDialog == null) createDialog();
-            addDialog.show();
-        });
+        btnAdd.setOnClickListener(v -> startActivity(new Intent(getActivity(), AddDeliveryOrderActivity.class)));
     }
 
     @Override
@@ -123,22 +115,8 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getActivity());
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching Vehicle entries: " + Thread.currentThread());
-            return database.vehicles().getAll();
-        }).flatMap(vehicles -> {
-            Log.d(TAG, "Returned with list size=" + vehicles.size());
-            vehicleList = vehicles;
-            return Single.fromCallable(() -> {
-               Log.d(TAG, "Fetching Employee entries: " + Thread.currentThread());
-               return database.employees().getAll();
-            });
-        }).flatMap(employees -> {
-            Log.d(TAG, "Returned with list size=" + employees.size());
-            employeeList = employees;
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching DeliveryOrder entries: " + Thread.currentThread());
-                return database.deliveryOrders().getDeliveryOrdersWithDetails();
-            });
+            Log.d(TAG, "Fetching DeliveryOrder entries: " + Thread.currentThread());
+            return database.deliveryOrders().getDeliveryOrdersWithDetails();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + list.size() + " " + Thread.currentThread());
@@ -183,87 +161,6 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         return list;
     }
 
-    private void createDialog() {
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View dialogView = inflater.inflate(R.layout.dialog_add_delivery, null);
-
-        Spinner vehicleSpinner = dialogView.findViewById(R.id.vehicle_spinner);
-        vehicleSpinner.setAdapter(new VehicleSpinnerAdapter(getActivity(), vehicleList));
-        vehicleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (vehicleList != null) mVehicle = vehicleList.get(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // empty
-            }
-        });
-
-        TextView emptyVehicle = dialogView.findViewById(R.id.empty_vehicle_spinner);
-        emptyVehicle.setVisibility(vehicleList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-
-        Spinner employeeSpinner = dialogView.findViewById(R.id.employee_spinner);
-        employeeSpinner.setAdapter(new EmployeeSpinnerAdapter(getActivity(), employeeList));
-        employeeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (employeeList != null) mEmployee = employeeList.get(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // empty
-            }
-        });
-
-        TextView emptyEmployee = dialogView.findViewById(R.id.empty_employee_spinner);
-        emptyEmployee.setVisibility(employeeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-
-        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-        btnCancel.setOnClickListener(v -> addDialog.dismiss());
-
-        Button btnSave = dialogView.findViewById(R.id.btn_save);
-        btnSave.setOnClickListener(v -> {
-            if (mEmployee != null && mVehicle != null) {
-                addDelivery(mVehicle, mEmployee);
-            }
-            addDialog.dismiss();
-        });
-
-        dialogBuilder.setView(dialogView);
-        addDialog = dialogBuilder.create();
-    }
-
-    private void addDelivery(Vehicle vehicle, Employee employee) {
-        Date now = new Date();
-        DeliveryOrder deliveryOrder = new DeliveryOrder();
-        deliveryOrder.fkVehicleId = vehicle.vehicleId;
-        deliveryOrder.fkEmployeeId = employee.employeeId;
-        deliveryOrder.deliveryDate = now.getTime();
-        deliveryOrder.totalAmount = 0.0;
-        deliveryOrder.deliveryOrderStatus = "Processing";
-
-        progressGroup.setVisibility(View.VISIBLE);
-        disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Adding new DeliveryOrder entry: " + Thread.currentThread());
-            return AppDatabaseImpl.getDatabase(getActivity()).deliveryOrders().insert(deliveryOrder);
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
-            Log.d(TAG, "Returned with id=" + id + " " + Thread.currentThread());
-
-            viewDeliveryItems(id.intValue());
-        }, err -> {
-            progressGroup.setVisibility(View.GONE);
-            Log.e(TAG, "Database Error: " + err);
-            dialogBuilder.setTitle("Database Error")
-                    .setMessage("Error while adding DeliveryOrder entry: " + err)
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            dialogBuilder.create().show();
-        }));
-    }
-
     private void viewDeliveryItems(int id) {
         Intent intent = new Intent(getActivity(), ViewDeliveryOrderActivity.class);
         intent.putExtra("delivery_id", id);
@@ -273,6 +170,5 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     @Override
     public void onDestroy() {
         super.onDestroy();
-        addDialog = null;
     }
 }
