@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "orders", foreignKeys = {
         @ForeignKey(entity = Vehicle.class, parentColumns = "vehicleId", childColumns = "fkVehicleId", onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = Employee.class, parentColumns = "employeeId", childColumns = "fkEmployeeId"),
-        @ForeignKey(entity = Consumer.class, parentColumns = "consumerId", childColumns = "fkConsumerId")
+        @ForeignKey(entity = Employee.class, parentColumns = "employeeId", childColumns = "fkEmployeeId")
 })
 public class Order {
 
@@ -16,7 +15,10 @@ public class Order {
     public String orNo; // official receipt no
     public int fkVehicleId;   // from assigned vehicle
     public int fkEmployeeId;  // by assigned employee/driver
-    public int fkConsumerId;
+    public String consumerName;
+    public String consumerAddress;
+    public String consumerContact;
     public long dateOrdered;
     public double totalAmount;
+    public String orderStatus; // processing, completed
 }

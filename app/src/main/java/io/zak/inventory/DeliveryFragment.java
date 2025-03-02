@@ -185,8 +185,4 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         startActivity(intent);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }
