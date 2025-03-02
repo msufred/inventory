@@ -246,7 +246,12 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
         orderItem.fkDeliveryOrderId = mDeliveryOrder.deliveryOrderId;
         orderItem.fkWarehouseStockId = mWarehouseStockDetail.warehouseStock.warehouseStockId;
         orderItem.fkProductId = mWarehouseStockDetail.warehouseStock.fkProductId;
-        orderItem.quantity = mQuantity;
+
+        String str = etQuantity.getText().toString().trim();
+        int qty = str.isBlank() || str.equalsIgnoreCase("0") ? 1 : Integer.parseInt(str);
+        if (qty > mCurrentRemainingStocks) qty = mCurrentRemainingStocks;
+
+        orderItem.quantity = qty;
         orderItem.subtotal = mQuantity * mWarehouseStockDetail.product.price;
 
         progressGroup.setVisibility(View.VISIBLE);
