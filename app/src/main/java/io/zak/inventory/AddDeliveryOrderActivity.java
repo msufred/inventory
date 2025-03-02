@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 
@@ -56,6 +57,7 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
     private Employee mEmployee; // selected employee
 
     private CompositeDisposable disposables;
+    private AlertDialog.Builder dialogBuilder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +79,7 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         progressGroup = findViewById(R.id.progress_group);
 
         errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
+        dialogBuilder = new AlertDialog.Builder(this);
     }
 
     private void setListeners() {
@@ -109,6 +112,16 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> goBack());
         btnCancel.setOnClickListener(v -> goBack());
         btnSave.setOnClickListener(v -> {
+            if (mVehicle == null || mEmployee == null) {
+                showInfoDialog("Invalid Action", "No selected Vehicle and/or Employee.");
+                return;
+            }
+
+            if (mVehicle.vehicleStatus.equalsIgnoreCase("On Delivery")) {
+                showInfoDialog("Invalid Action", "Vehicle status is \"On Delivery\". Select another vehicle and try again.");
+                return;
+            }
+
             if (validated()) saveAndClose();
         });
     }
@@ -165,10 +178,6 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
             return false;
         }
 
-        if (mVehicle == null || mEmployee == null) {
-            return false;
-        }
-
         // check if tracking no exists
         for (DeliveryOrder order : deliveryOrders) {
             if (order.trackingNo.equalsIgnoreCase(trackingNo)) {
@@ -207,6 +216,11 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
     private void goBack() {
         getOnBackPressedDispatcher().onBackPressed();
         finish();
+    }
+
+    private void showInfoDialog(String title, String message) {
+        dialogBuilder.setTitle(title).setMessage(message).setPositiveButton("OK", (d, w) -> d.dismiss());
+        dialogBuilder.create().show();
     }
 
     @Override
