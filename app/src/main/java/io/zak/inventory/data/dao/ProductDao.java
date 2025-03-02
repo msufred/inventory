@@ -9,6 +9,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.Product;
+import io.zak.inventory.data.relations.ProductDetails;
 
 @Dao
 public interface ProductDao {
@@ -33,4 +34,12 @@ public interface ProductDao {
 
     @Query("SELECT * FROM products WHERE fkSupplierId=:supplierId")
     List<Product> getProductsFromSupplier(int supplierId);
+
+    @Query("SELECT products.*, brands.*, categories.*, suppliers.* " +
+            "FROM products " +
+            "INNER JOIN brands ON products.fkBrandId = brands.brandId " +
+            "INNER JOIN categories ON products.fkCategoryId = categories.categoryId " +
+            "INNER JOIN suppliers ON products.fkSupplierId = suppliers.supplierId " +
+            "WHERE productId = :productId")
+    List<ProductDetails> getProductWithDetails(int productId);
 }
