@@ -209,8 +209,13 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     public void onItemClick(int position) {
         if (adapter != null) {
             DeliveryItemDetails mSelectedDeliveryItem = adapter.getItem(position);
-            if (mSelectedDeliveryItem != null) {
+            if (mSelectedDeliveryItem == null) return;
+            if (mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("Processing")) {
                 Intent intent = new Intent(this, EditDeliveryOrderItemActivity.class);
+                intent.putExtra("delivery_order_item_id", mSelectedDeliveryItem.deliveryOrderItem.deliveryOrderItemId);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, ViewDeliveryOrderItemActivity.class);
                 intent.putExtra("delivery_order_item_id", mSelectedDeliveryItem.deliveryOrderItem.deliveryOrderItemId);
                 startActivity(intent);
             }
