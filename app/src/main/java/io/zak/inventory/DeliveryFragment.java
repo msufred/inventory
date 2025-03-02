@@ -100,7 +100,16 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
             }
         });
 
-        btnAdd.setOnClickListener(v -> startActivity(new Intent(getActivity(), AddDeliveryOrderActivity.class)));
+        btnAdd.setOnClickListener(v -> {
+            if (!hasPendingDelivery()) {
+                startActivity(new Intent(getActivity(), AddDeliveryOrderActivity.class));
+            } else {
+                dialogBuilder.setTitle("Invalid Action")
+                        .setMessage("Please complete \"Processing\" deliveries first and try again.")
+                        .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                dialogBuilder.create().show();
+            }
+        });
     }
 
     @Override
@@ -132,6 +141,15 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
             dialogBuilder.create().show();
         }));
+    }
+
+    public boolean hasPendingDelivery() {
+        for (DeliveryDetails deliveryDetails : deliveryList) {
+            if (deliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("processing")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
