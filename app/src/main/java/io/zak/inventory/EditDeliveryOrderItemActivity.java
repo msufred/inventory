@@ -25,7 +25,7 @@ import io.zak.inventory.data.relations.DeliveryItemDetails;
 
 public class EditDeliveryOrderItemActivity extends AppCompatActivity {
 
-    private static final String TAG = "AddDeliveryOrderItem";
+    private static final String TAG = "EditDeliveryOrderItem";
 
     // Widgets
     private TextView tvRemainingStocks, tvProductName;
@@ -194,6 +194,9 @@ public class EditDeliveryOrderItemActivity extends AppCompatActivity {
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Deleting DeliveryOrderItem");
             return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrderItems().delete(deliveryOrderItem);
+        }).flatMap(rowCount -> {
+            mWarehouseStock.takenOut = mWarehouseStock.takenOut - deliveryOrderItem.quantity;
+            return Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks().update(mWarehouseStock));
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "DeliveryOrderItem deleted.");
