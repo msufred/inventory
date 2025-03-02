@@ -46,14 +46,15 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
-    private List<Warehouse> warehouseList;                          // fetched in onResume
-    private List<WarehouseStockDetails> warehouseStockDetailsList;  // fetched after selecting Warehouse from warehouseSpinner
-    private Warehouse mWarehouse;                                   // selected Warehouse (from warehouseSpinner)
-    private WarehouseStockDetails mWarehouseStockDetail;            // selected WarehouseStockDetail (from productsSpinner)
-    private int mCurrentRemainingStocks;                            // depends on mWarehouseStockDetail
-    private int mQuantity;                                          // set quantity to add to the DeliveryOrder
+    private List<Warehouse> warehouseList; // fetched in onResume
+    private List<WarehouseStockDetails> warehouseStockDetailsList; // fetched after selecting Warehouse from
+                                                                   // warehouseSpinner
+    private Warehouse mWarehouse; // selected Warehouse (from warehouseSpinner)
+    private WarehouseStockDetails mWarehouseStockDetail; // selected WarehouseStockDetail (from productsSpinner)
+    private int mCurrentRemainingStocks; // depends on mWarehouseStockDetail
+    private int mQuantity; // set quantity to add to the DeliveryOrder
 
-    private DeliveryOrder mDeliveryOrder;                           // this DeliveryOrderItem is added to
+    private DeliveryOrder mDeliveryOrder; // this DeliveryOrderItem is added to
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,7 +102,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (warehouseStockDetailsList != null) {
                     mWarehouseStockDetail = warehouseStockDetailsList.get(position);
-                    // NOTE: remaining stocks is calculated by subtracting the takenOut from quantity
+                    // NOTE: remaining stocks is calculated by subtracting the takenOut from
+                    // quantity
                     WarehouseStock warehouseStock = mWarehouseStockDetail.warehouseStock;
                     mCurrentRemainingStocks = warehouseStock.quantity - warehouseStock.takenOut;
                     tvRemainingStocks.setText(String.valueOf(mCurrentRemainingStocks));
@@ -133,7 +135,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (disposables == null) disposables = new CompositeDisposable();
+        if (disposables == null)
+            disposables = new CompositeDisposable();
 
         // First, check if DeliveryOrder ID is passed via Intent
         int id = getIntent().getIntExtra("delivery_order_id", -1);
@@ -152,7 +155,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
         // Get Database
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
 
-        // At this point, DeliveryOrder ID is valid. Fetch the actual DeliveryOrder entry and
+        // At this point, DeliveryOrder ID is valid. Fetch the actual DeliveryOrder
+        // entry and
         // the list of all Warehouse.
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
@@ -160,14 +164,16 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
             Log.d(TAG, "Fetching DeliveryOrder entry");
             return database.deliveryOrders().getDeliveryOrder(id);
         }).flatMap(deliveryOrders -> {
-            // Still in the background thread. Set the DeliveryOrder and return the list of Warehouse entries.
+            // Still in the background thread. Set the DeliveryOrder and return the list of
+            // Warehouse entries.
             Log.d(TAG, "Returned with list size=" + deliveryOrders.size());
             mDeliveryOrder = deliveryOrders.get(0); // list size is ALWAYS 1
 
             Log.d(TAG, "Fetching all Warehouse entries");
             return Single.fromCallable(() -> database.warehouses().getAll());
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(warehouses -> {
-            // Application Thread (set in observeOn(AndroidSchedulers.mainThread() of this chain)
+            // Application Thread (set in observeOn(AndroidSchedulers.mainThread() of this
+            // chain)
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + warehouses.size());
 
@@ -190,8 +196,10 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when a Warehouse is selected from the warehouseSpinner. Retrieve all WarehouseStockDetails
+     * Called when a Warehouse is selected from the warehouseSpinner. Retrieve all
+     * WarehouseStockDetails
      * stored in that Warehouse.
+     * 
      * @param warehouse Warehouse
      */
     private void loadWarehouseStockDetails(Warehouse warehouse) {
@@ -199,7 +207,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
             progressGroup.setVisibility(View.VISIBLE);
             disposables.add(Single.fromCallable(() -> {
                 Log.d(TAG, "Fetching all WarehouseStockDetails");
-                return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks().getWarehouseStocks(warehouse.warehouseId);
+                return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouseStocks()
+                        .getWarehouseStocks(warehouse.warehouseId);
             }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(stockDetails -> {
                 Log.d(TAG, "Returned with list size=" + stockDetails.size());
                 progressGroup.setVisibility(View.GONE);
@@ -226,7 +235,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
         String str = etQuantity.getText().toString().trim();
         mQuantity = str.isBlank() ? 1 : Integer.parseInt(str);
         mQuantity += 1; // add 1
-        if (mQuantity > mCurrentRemainingStocks) mQuantity = mCurrentRemainingStocks;
+        if (mQuantity > mCurrentRemainingStocks)
+            mQuantity = mCurrentRemainingStocks;
         etQuantity.setText(String.valueOf(mQuantity));
     }
 
@@ -234,7 +244,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
         String str = etQuantity.getText().toString().trim();
         mQuantity = str.isBlank() ? 1 : Integer.parseInt(str);
         mQuantity -= 1; // subtract 1
-        if (mQuantity < 1) mQuantity = 1;
+        if (mQuantity < 1)
+            mQuantity = 1;
         etQuantity.setText(String.valueOf(mQuantity));
     }
 
@@ -249,7 +260,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
 
         String str = etQuantity.getText().toString().trim();
         int qty = str.isBlank() || str.equalsIgnoreCase("0") ? 1 : Integer.parseInt(str);
-        if (qty > mCurrentRemainingStocks) qty = mCurrentRemainingStocks;
+        if (qty > mCurrentRemainingStocks)
+            qty = mCurrentRemainingStocks;
 
         orderItem.quantity = qty;
         orderItem.subtotal = qty * mWarehouseStockDetail.product.price;
@@ -265,7 +277,8 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
             progressGroup.setVisibility(View.GONE);
             // if already exist, prompt user
             if (!deliveryOrderItems.isEmpty()) {
-                dialogBuilder.setTitle("Invalid Action").setMessage("The selected product is already in the delivery item list.")
+                dialogBuilder.setTitle("Invalid Action")
+                        .setMessage("The selected product is already in the delivery item list.")
                         .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
                 dialogBuilder.create().show();
             } else {

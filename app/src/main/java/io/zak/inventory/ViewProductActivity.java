@@ -26,6 +26,7 @@ import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 import io.zak.inventory.data.entities.Product;
 import io.zak.inventory.data.entities.Supplier;
+import io.zak.inventory.data.relations.ProductDetails;
 
 public class ViewProductActivity extends AppCompatActivity {
 
@@ -33,6 +34,7 @@ public class ViewProductActivity extends AppCompatActivity {
 
     // Widgets
     private ImageButton btnClose, btnEdit, btnSelectProfile;
+    private ImageView qrCodeView;
     private TextView tvName, tvSupplier, tvBrand, tvCategory, tvPrice, tvDescription, tvCritLevel;
     private ImageView profile;
     private RelativeLayout progressGroup;
@@ -40,10 +42,7 @@ public class ViewProductActivity extends AppCompatActivity {
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
-    private Product mProduct;
-    private Supplier mSupplier;
-    private Brand mBrand;
-    private Category mCategory;
+    private ProductDetails productDetails;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +56,7 @@ public class ViewProductActivity extends AppCompatActivity {
         btnClose = findViewById(R.id.btn_close);
         btnEdit = findViewById(R.id.btn_edit);
         btnSelectProfile = findViewById(R.id.btn_select_profile);
+        qrCodeView = findViewById(R.id.iv_qrcode);
         tvName = findViewById(R.id.tv_name);
         tvSupplier = findViewById(R.id.tv_supplier);
         tvBrand = findViewById(R.id.tv_brand);
@@ -72,9 +72,9 @@ public class ViewProductActivity extends AppCompatActivity {
     private void setListeners() {
         btnClose.setOnClickListener(v -> goBack());
         btnEdit.setOnClickListener(v -> {
-            if (mProduct != null) {
+            if (productDetails != null) {
                 Intent intent = new Intent(this, EditProductActivity.class);
-                intent.putExtra("product_id", mProduct.productId);
+                intent.putExtra("product_id", productDetails.product.productId);
                 startActivity(intent);
                 finish();
             }
@@ -102,41 +102,17 @@ public class ViewProductActivity extends AppCompatActivity {
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
 
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching product with id=" + id + " " + Thread.currentThread());
-            return database.products().getProduct(id);
-        }).flatMap(products -> {
-            mProduct = products.get(0);
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching supplier with id=" + mProduct.fkSupplierId + " " + Thread.currentThread());
-                return database.suppliers().getSupplier(mProduct.fkSupplierId);
-            });
-        }).flatMap(suppliers -> {
-            if (!suppliers.isEmpty()) {
-                mSupplier = suppliers.get(0);
-            }
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching brand with id=" + mProduct.fkBrandId + " " + Thread.currentThread());
-                return database.brands().getBrand(mProduct.fkBrandId);
-            });
-        }).flatMap(brands -> {
-            if (!brands.isEmpty()) {
-                mBrand = brands.get(0);
-            }
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching category with id=" + mProduct.fkCategoryId + " " + Thread.currentThread());
-                return database.categories().getCategory(mProduct.fkCategoryId);
-            });
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(categories -> {
+            Log.d(TAG, "Fetching product with details.");
+            return database.products().getProductWithDetails(id);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
-            if (!categories.isEmpty()) {
-                mCategory = categories.get(0);
-            }
-            displayInfo();
+            Log.d(TAG, "Returned with list size=" + list.size());
+            productDetails = list.get(0);
+            displayInfo(productDetails);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
-            Log.e(TAG, "Database Error: " + err);
-            dialogBuilder.setTitle("Database Error")
-                    .setMessage("Error while fetching Product entry: " + err)
+            Log.e(TAG, "Database error: " + err);
+            dialogBuilder.setTitle("Database Error").setMessage("Error while retrieving Product entry: " + err)
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
@@ -145,30 +121,39 @@ public class ViewProductActivity extends AppCompatActivity {
         }));
     }
 
-    private void displayInfo() {
-        if (mProduct != null) {
-            tvName.setText(mProduct.productName);
+    private void displayInfo(ProductDetails productDetails) {
+        if (productDetails != null) {
+            tvName.setText(productDetails.product.productName);
+            tvBrand.setText(productDetails.brand.brandName);
+            tvCategory.setText(productDetails.category.categoryName);
+            tvPrice.setText(Utils.toStringMoneyFormat(productDetails.product.price));
+            tvSupplier.setText(productDetails.supplier.supplierName);
+            if (productDetails.product.productDescription != null && !productDetails.product.productDescription.isBlank()) {
+                tvDescription.setText(productDetails.product.productDescription);
+            }
 
-            // Format price with currency symbol
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("en", "PH"));
-            tvPrice.setText(currencyFormat.format(mProduct.price));
+            Product product = productDetails.product;
 
+            // QR Code
+            String str = String.format(Locale.getDefault(),
+                    "id=%d;" +
+                    "name=%s;" +
+                    "brand=%d;" +
+                    "category=%d;" +
+                    "supplier=%d;" +
+                    "crit=%d;" +
+                    "price=%.2f;" +
+                    "desc=%s",
+                    product.productId,
+                    product.productName,
+                    product.fkBrandId,
+                    product.fkCategoryId,
+                    product.fkSupplierId,
+                    product.criticalLevel,
+                    product.price,
+                    product.productDescription);
 
-
-            // Set description (handle null or empty)
-            String description = mProduct.productDescription;
-            tvDescription.setText(description != null && !description.isEmpty() ?
-                    description : getString(R.string.no_description));
-
-            // Set supplier, brand, and category names
-            tvSupplier.setText(mSupplier != null ? mSupplier.supplierName :
-                    getString(R.string.no_suppliers));
-
-            tvBrand.setText(mBrand != null ? mBrand.brandName :
-                    getString(R.string.no_brands));
-
-            tvCategory.setText(mCategory != null ? mCategory.categoryName :
-                    getString(R.string.no_categories));
+            qrCodeView.setImageBitmap(Utils.generateQrCode(str, 200, 200));
         }
     }
 
