@@ -75,25 +75,34 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:padding="8dp"
         android:gravity="center_horizontal"
         android:background="@drawable/bg_top_border">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/caption"
+            android:textStyle="italic"
+            android:text="@string/note_delivery_add"
+            android:gravity="center"/>
 
         <Button
             android:id="@+id/btn_add"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textSize="18sp"
-            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:text="@string/add_delivery"
             app:icon="@drawable/ic_plus_circle"
             app:iconSize="20dp"
             app:cornerRadius="@dimen/button_corner"
             android:backgroundTint="@color/purple_500"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>
