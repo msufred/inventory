@@ -287,10 +287,6 @@ public class AddDeliveryOrderItemActivity extends AppCompatActivity {
             return database.deliveryOrderItems().insert(orderItem);
         }).flatMap(id -> {
             Log.d(TAG, "Returned with id=" + id.intValue());
-            Log.d(TAG, "Updating DeliveryOrder's total amount.");
-            mDeliveryOrder.totalAmount = mDeliveryOrder.totalAmount + orderItem.subtotal;
-            return Single.fromCallable(() -> database.deliveryOrders().update(mDeliveryOrder));
-        }).flatMap(id -> {
             Log.d(TAG, "Updating WarehouseStock takenOut value");
             WarehouseStock warehouseStock = mWarehouseStockDetail.warehouseStock;
             warehouseStock.takenOut = warehouseStock.takenOut + mQuantity;
