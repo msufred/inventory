@@ -84,7 +84,7 @@ public class EmployeesActivity extends AppCompatActivity implements EmployeeList
         });
 
         btnBack.setOnClickListener(v -> {
-            startActivity(new Intent(this, HomeActivity.class));
+            getOnBackPressedDispatcher().onBackPressed();
             finish();
         });
 
