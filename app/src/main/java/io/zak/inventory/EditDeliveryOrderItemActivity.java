@@ -121,7 +121,7 @@ public class EditDeliveryOrderItemActivity extends AppCompatActivity {
             // display info
             tvProductName.setText(mDeliveryItemDetails.product.productName);
             mQuantity = mDeliveryItemDetails.deliveryOrderItem.quantity;
-            mCurrentRemainingStocks = mWarehouseStock.quantity - mWarehouseStock.takenOut;
+            mCurrentRemainingStocks = mWarehouseStock.quantity;
             etQuantity.setText(String.valueOf(mQuantity));
             tvRemainingStocks.setText(String.valueOf(mCurrentRemainingStocks));
         }, err -> {

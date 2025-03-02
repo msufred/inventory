@@ -26,7 +26,7 @@ public class ViewEmployeeActivity extends AppCompatActivity {
 
     // Widgets
     private ImageButton btnClose, btnEdit, btnSelectProfile;
-    private TextView tvName, tvPosition, tvStatus;
+    private TextView tvName, tvPosition, tvStatus, tvContactNo, tvAddress;
     private ImageView profile;
     private RelativeLayout progressGroup;
 
@@ -52,6 +52,8 @@ public class ViewEmployeeActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tv_status);
         profile = findViewById(R.id.profile);
         progressGroup = findViewById(R.id.progress_group);
+        tvContactNo = findViewById(R.id.tv_contact_no);
+        tvAddress = findViewById(R.id.tv_address);
 
         dialogBuilder = new AlertDialog.Builder(this);
     }
@@ -112,6 +114,8 @@ public class ViewEmployeeActivity extends AppCompatActivity {
             tvName.setText(employee.employeeName);
             tvPosition.setText(employee.position);
             tvStatus.setText(employee.employeeStatus);
+            tvAddress.setText(employee.employeeAddress);
+            tvContactNo.setText(employee.employeeContactNo);
         }
     }
 
