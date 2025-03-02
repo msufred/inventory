@@ -30,6 +30,7 @@ import io.zak.inventory.data.entities.Vehicle;
 public class VehiclesActivity extends AppCompatActivity implements VehicleListAdapter.OnItemClickListener {
 
     private static final String TAG = "Vehicles";
+    private static final int EDIT_VEHICLE_REQUEST = 1001;
 
     // Widgets
     private SearchView searchView;
@@ -94,6 +95,10 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        loadVehicles();
+    }
+
+    private void loadVehicles() {
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Vehicle entries: " + Thread.currentThread());
@@ -115,8 +120,25 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
         if (adapter != null) {
             Vehicle vehicle = adapter.getItem(position);
             if (vehicle != null) {
-                Log.d(TAG, "Vehicle: " + vehicle.vehicleName);
-                // TODO
+                Intent intent = new Intent(this, EditVehicleActivity.class);
+                intent.putExtra("vehicleId", vehicle.vehicleId);
+                startActivityForResult(intent, EDIT_VEHICLE_REQUEST);
+                Log.d(TAG, "Vehicle selected: " + vehicle.vehicleName + " with ID: " + vehicle.vehicleId);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_VEHICLE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                loadVehicles();
+
+                if (data != null) {
+                    int vehicleId = data.getIntExtra("vehicleId", -1);
+                    Log.d(TAG, "Returned from editing vehicle with ID: " + vehicleId);
+                }
             }
         }
     }
@@ -142,6 +164,8 @@ public class VehiclesActivity extends AppCompatActivity implements VehicleListAd
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Destroying resources.");
-        disposables.dispose();
+        if (disposables != null) {
+            disposables.dispose();
+        }
     }
 }

@@ -112,7 +112,11 @@ public class ViewConsumerActivity extends AppCompatActivity {
         if (consumer != null) {
             tvName.setText(consumer.consumerName);
             tvContactNo.setText(consumer.consumerContactNo);
-            tvEmail.setText(consumer.consumerEmail);
+            if(consumer.consumerEmail == null){
+                tvEmail.setText(R.string.no_email);
+            } else{
+                tvEmail.setText(consumer.consumerEmail);
+            }
             tvAddress.setText(consumer.consumerAddress);
 
         }

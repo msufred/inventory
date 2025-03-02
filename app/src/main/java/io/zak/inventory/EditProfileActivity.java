@@ -130,22 +130,40 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        // clear drawables
-        etUsername.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-        etPassword.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-        etPasswordConfirm.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        boolean isValid = true;
 
-        String username = etUsername.getText().toString();
-        String password = etPassword.getText().toString();
-        String passwordConfirm = etPasswordConfirm.getText().toString();
+        if (etName.getText().toString().trim().isEmpty()) {
+            etName.setError("Required");
+            isValid = false;
+        }else if (!etName.getText().toString().matches("^[^0-9]+$")) {
+            etName.setError("Invalid Name");
+            isValid = false;
+        }
+        if (etPosition.getText().toString().trim().isEmpty()) {
+            etPosition.setError("Required");
+            isValid = false;
+        }
+        if (etContact.getText().toString().trim().isEmpty()) {
+            etContact.setError("Required");
+            isValid = false;
+        }
+        if (etAddress.getText().toString().trim().isEmpty()) {
+            etAddress.setError("Required");
+            isValid = false;
+        }
+        if (etUsername.getText().toString().trim().isEmpty()) {
+            etUsername.setError("Required");
+            isValid = false;
+        }
+        if (etPassword.getText().toString().trim().isEmpty()) {
+            etPassword.setError("Required");
+            isValid = false;
+        }if (etPasswordConfirm.getText().toString().trim().isEmpty()) {
+            etPasswordConfirm.setError("Required");
+            isValid = false;
+        }
 
-        if (username.isBlank()) etUsername.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
-        if (password.isBlank()) etPassword.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
-        if (passwordConfirm.isBlank()) etPasswordConfirm.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
-
-        return !username.isBlank() && !password.isBlank() && !passwordConfirm.isBlank() &&
-                (passwordConfirm.contentEquals(password));
-
+        return isValid;
     }
 
     private void saveAndClose() {

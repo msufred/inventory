@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/consumer_name"
-                android:textSize="18sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"/>
@@ -103,24 +103,33 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/contact_no"
-                android:textColor="#80000000"
-                android:layout_gravity="center_horizontal"/>
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_necktie"
+                app:drawableTint="@color/purple_500"/>
 
             <TextView
                 android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/email_address"
-                android:textColor="#80000000"
-                android:layout_gravity="center_horizontal"/>
+                android:text="@string/no_email"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_envelope"
+                app:drawableTint="@color/purple_500"/>
 
             <TextView
                 android:id="@+id/tv_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/address"
-                android:textColor="#80000000"
-                android:layout_gravity="center_horizontal"/>
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_pin"
+                app:drawableTint="@color/purple_500"/>
 
         </LinearLayout>
 

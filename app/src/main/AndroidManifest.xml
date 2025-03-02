@@ -29,6 +29,7 @@
         <activity android:name=".RegisterActivity" android:parentActivityName=".MainActivity" />
         <activity android:name=".HomeActivity" />
 
+
         <!-- User Related Activities -->
         <activity android:name=".EditProfileActivity" android:parentActivityName=".HomeActivity" />
 
@@ -48,6 +49,7 @@
         <!-- Vehicle Related Activities -->
         <activity android:name=".VehiclesActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddVehicleActivity" android:parentActivityName=".VehiclesActivity" />
+        <activity android:name=".EditVehicleActivity" android:parentActivityName=".VehiclesActivity" />
 
         <!-- Brands Related Activities -->
         <activity android:name=".BrandsActivity" android:parentActivityName=".HomeActivity" />

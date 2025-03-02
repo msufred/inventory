@@ -32,7 +32,8 @@ import io.zak.inventory.data.entities.Vehicle;
 import io.zak.inventory.data.relations.DeliveryDetails;
 import io.zak.inventory.data.relations.DeliveryItemDetails;
 
-public class ViewDeliveryOrderActivity extends AppCompatActivity implements DeliveryItemListAdapter.OnItemClickListener {
+public class ViewDeliveryOrderActivity extends AppCompatActivity
+        implements DeliveryItemListAdapter.OnItemClickListener {
 
     private static final String TAG = "DeliveryOrderItems";
 
@@ -41,20 +42,21 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     private ImageButton btnBack, btnEdit;
     private RecyclerView recyclerView;
     private Button btnAddItem;
-    private Button btnLoadToVehicle;            // renamed to Checkout
+    private Button btnLoadToVehicle; // renamed to Checkout
     private RelativeLayout progressGroup;
 
-    private RelativeLayout hiddenButtonGroup;   // show only if status = On Delivery
+    private RelativeLayout hiddenButtonGroup; // show only if status = On Delivery
     private Button btnCompleteDelivery;
 
-    private LinearLayout buttonGroup;           // hide if status = On Delivery or Delivered
+    private LinearLayout buttonGroup; // hide if status = On Delivery or Delivered
 
     // for RecyclerView
     private DeliveryItemListAdapter adapter;
     private List<DeliveryItemDetails> deliveryItemList;
 
     // sort items by product name
-    private final Comparator<DeliveryItemDetails> comparator = Comparator.comparing(deliveryItemDetails -> deliveryItemDetails.product.productName);
+    private final Comparator<DeliveryItemDetails> comparator = Comparator
+            .comparing(deliveryItemDetails -> deliveryItemDetails.product.productName);
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -118,9 +120,11 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
                 dialogBuilder.create().show();
                 return;
             }
-            // NOTE: If status is set to "On Delivery" or "Delivered", user can't add more products.
+            // NOTE: If status is set to "On Delivery" or "Delivered", user can't add more
+            // products.
             dialogBuilder.setTitle("Checkout Delivery")
-                    .setMessage("Are you sure you want to checkout this delivery? You can't add more products once checked out.")
+                    .setMessage(
+                            "Are you sure you want to checkout this delivery? You can't add more products once checked out.")
                     .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                     .setPositiveButton("Confirm", (dialog, which) -> {
                         dialog.dismiss();
@@ -130,7 +134,8 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         });
 
         btnCompleteDelivery.setOnClickListener(v -> {
-            if (mDeliveryDetails != null && mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("On Delivery")) {
+            if (mDeliveryDetails != null
+                    && mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("On Delivery")) {
                 completeDelivery();
             }
         });
@@ -139,7 +144,8 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     @Override
     protected void onResume() {
         super.onResume();
-        if (disposables == null) disposables = new CompositeDisposable();
+        if (disposables == null)
+            disposables = new CompositeDisposable();
 
         // Check ID
         int id = getIntent().getIntExtra("delivery_id", -1);
@@ -252,7 +258,8 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     public void onItemClick(int position) {
         if (adapter != null) {
             DeliveryItemDetails mSelectedDeliveryItem = adapter.getItem(position);
-            if (mSelectedDeliveryItem == null) return;
+            if (mSelectedDeliveryItem == null)
+                return;
             if (mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("Processing")) {
                 Intent intent = new Intent(this, EditDeliveryOrderItemActivity.class);
                 intent.putExtra("delivery_order_item_id", mSelectedDeliveryItem.deliveryOrderItem.deliveryOrderItemId);
@@ -299,7 +306,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
                 goBack();
             }, err -> {
                 progressGroup.setVisibility(View.GONE);
-                Log.e(TAG, "Database Error: " +  err);
+                Log.e(TAG, "Database Error: " + err);
                 dialogBuilder.setTitle("Database Error")
                         .setMessage("Error while updating Delivery Order: " + err)
                         .setPositiveButton("OK", (dialog, which) -> {
