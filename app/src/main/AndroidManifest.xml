@@ -71,6 +71,7 @@
         <!-- Delivery Related Activities -->
         <activity android:name=".ViewDeliveryOrderActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddDeliveryOrderActivity" android:parentActivityName=".HomeActivity" />
+        <activity android:name=".EditDeliveryOrderActivity" android:parentActivityName=".ViewDeliveryOrderActivity" />
         <activity android:name=".AddDeliveryOrderItemActivity" android:parentActivityName=".ViewDeliveryOrderActivity" />
         <activity android:name=".EditDeliveryOrderItemActivity" android:parentActivityName=".ViewDeliveryOrderActivity" />
 
