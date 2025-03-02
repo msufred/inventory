@@ -31,8 +31,6 @@ public class AddSupplierActivity extends AppCompatActivity {
     private Button btnCancel, btnSave;
     private RelativeLayout progressGroup;
 
-    private Drawable errorDrawable;
-
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
@@ -54,7 +52,6 @@ public class AddSupplierActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btn_save);
         progressGroup = findViewById(R.id.progress_group);
 
-        errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
 
         dialogBuilder = new AlertDialog.Builder(this);
     }
@@ -79,15 +76,24 @@ public class AddSupplierActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        // clear drawables
-        etName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        boolean isValid = true;
 
-        boolean isBlank = etName.getText().toString().isBlank();
-        if (isBlank) {
-            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+        if (etName.getText().toString().trim().isEmpty()) {
+            etName.setError("Required");
+            isValid = false;
+        }else if (!etName.getText().toString().matches("^[^0-9]+$")) {
+            etName.setError("Invalid Name");
+            isValid = false;
         }
-
-        return !isBlank;
+        if (etContact.getText().toString().trim().isEmpty()) {
+            etContact.setError("Required");
+            isValid = false;
+        }
+        if (etAddress.getText().toString().trim().isEmpty()) {
+            etAddress.setError("Required");
+            isValid = false;
+        }
+        return isValid;
     }
 
     private void saveAndClose() {
