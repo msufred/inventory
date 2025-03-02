@@ -147,6 +147,7 @@
     <string name="vehicle_load">Vehicle Load</string>
     <string name="load_to_vehicle">Load to Vehicle</string>
     <string name="checkout">Checkout</string>
+    <string name="complete_delivery">Complete Delivery</string>
     <string name="delivered">Delivered</string>
 
     <!-- figures/numbers -->
