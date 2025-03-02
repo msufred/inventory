@@ -7,6 +7,7 @@
     <string name="vector">vector</string>
     <string name="fab">fab</string>
     <string name="button">button</string>
+    <string name="qrcode">QR Code</string>
 
     <!-- Fields -->
     <string name="username">Username</string>
@@ -146,6 +147,7 @@
     <string name="vehicle_load">Vehicle Load</string>
     <string name="load_to_vehicle">Load to Vehicle</string>
     <string name="checkout">Checkout</string>
+    <string name="complete_delivery">Complete Delivery</string>
     <string name="delivered">Delivered</string>
 
     <!-- figures/numbers -->

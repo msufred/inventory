@@ -22,6 +22,9 @@ public interface VehicleDao {
     @Update
     void updateAll(Vehicle...vehicles);
 
+    @Update
+    int update(Vehicle vehicle);
+
     @Delete
     void delete(Vehicle vehicle);
 

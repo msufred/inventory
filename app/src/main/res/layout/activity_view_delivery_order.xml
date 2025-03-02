@@ -146,6 +146,26 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/hidden_button_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@drawable/bg_top_border"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_complete_delivery"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/complete_delivery"
+                android:backgroundTint="@color/purple_500"
+                app:cornerRadius="@dimen/button_corner"
+                app:icon="@drawable/ic_truck_speed_2"
+                app:iconSize="28dp"/>
+
+        </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/button_group"
             android:layout_width="match_parent"
