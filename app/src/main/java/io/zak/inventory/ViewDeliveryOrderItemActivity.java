@@ -1,7 +1,6 @@
 package io.zak.inventory;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
@@ -12,18 +11,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-
 import java.util.Locale;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.relations.DeliveryItemDetails;
 
@@ -33,7 +26,6 @@ public class ViewDeliveryOrderItemActivity extends AppCompatActivity {
 
     private ImageView qrCode;
     private TextView tvName, tvPrice, tvQuantity, tvTotalAmount;
-    private ImageButton btnBack;
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
@@ -50,9 +42,8 @@ public class ViewDeliveryOrderItemActivity extends AppCompatActivity {
         tvPrice = findViewById(R.id.tv_price);
         tvQuantity = findViewById(R.id.tv_quantity);
         tvTotalAmount = findViewById(R.id.tv_total_amount);
-        btnBack = findViewById(R.id.btn_back);
 
-        // set listeners
+        ImageButton btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> goBack());
 
         disposables = new CompositeDisposable();
@@ -119,26 +110,7 @@ public class ViewDeliveryOrderItemActivity extends AppCompatActivity {
                 details.deliveryOrderItem.quantity,
                 details.deliveryOrderItem.subtotal);
 
-        Bitmap bitmap = null;
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        try {
-            BitMatrix matrix = qrCodeWriter.encode(str, BarcodeFormat.QR_CODE, 300, 300);
-
-            int w = matrix.getWidth();
-            int h = matrix.getHeight();
-            int[] pixels = new int[w * h];
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    pixels[y * w + x] = matrix.get(x, y) ? Color.BLACK : Color.WHITE;
-                }
-            }
-
-            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
-        } catch (WriterException e) {
-            Log.e(TAG, "Failed to write QR Code: " + e);
-        }
-        return bitmap;
+        return Utils.generateQrCode(str, 300, 300);
     }
 
     private void goBack() {
