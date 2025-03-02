@@ -66,13 +66,14 @@
         <activity android:name=".ConsumersActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddConsumerActivity" android:parentActivityName=".ConsumersActivity" />
         <activity android:name=".ViewConsumerActivity" android:parentActivityName=".ConsumersActivity" />
-        <!-- TODO: ViewConsumerActivity -->
-        <!-- TODO: EditConsumerActivity's parent must be ViewConsumerActivity -->
         <activity android:name=".EditConsumerActivity" android:parentActivityName=".ViewConsumerActivity" />
 
         <!-- Delivery Related Activities -->
         <activity android:name=".ViewDeliveryOrderActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddDeliveryOrderActivity" android:parentActivityName=".HomeActivity" />
+        <activity android:name=".AddDeliveryOrderItemActivity" android:parentActivityName=".ViewDeliveryOrderActivity" />
+        <activity android:name=".EditDeliveryOrderItemActivity" android:parentActivityName=".ViewDeliveryOrderActivity" />
+
     </application>
 
 </manifest>
