@@ -26,6 +26,7 @@
         <activity android:name=".RegisterActivity" android:parentActivityName=".MainActivity" />
         <activity android:name=".HomeActivity" />
 
+
         <!-- User Related Activities -->
         <activity android:name=".EditProfileActivity" android:parentActivityName=".HomeActivity" />
 
