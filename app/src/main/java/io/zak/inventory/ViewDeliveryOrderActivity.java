@@ -213,6 +213,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
                 Intent intent = new Intent(this, EditDeliveryOrderItemActivity.class);
                 intent.putExtra("delivery_order_item_id", mSelectedDeliveryItem.deliveryOrderItem.deliveryOrderItemId);
                 startActivity(intent);
+
             }
         }
     }
