@@ -150,6 +150,14 @@
     <string name="complete_delivery">Complete Delivery</string>
     <string name="delivered">Delivered</string>
 
+    <!-- order related -->
+    <string name="order_details">Order Details</string>
+    <string name="add_order">Add Order</string>
+    <string name="scan_order">Scan Order</string>
+    <string name="or_no">OR No.</string>
+    <string name="no_orders">No Orders</string>
+    <string name="date_ordered">Date Ordered</string>
+
     <!-- figures/numbers -->
     <string name="zero">0</string>
     <string name="zero_amount">Php 0.00</string>
