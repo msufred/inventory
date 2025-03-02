@@ -1,7 +1,6 @@
 package io.zak.inventory;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,18 +13,17 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.data.AppDatabaseImpl;
-import io.zak.inventory.data.entities.Consumer;
+import io.zak.inventory.data.entities.Supplier;
 
-public class EditConsumerActivity extends AppCompatActivity {
+public class EditSupplierActivity extends AppCompatActivity {
 
-    private static final String TAG = "EditConsumer";
+    private static final String TAG = "EditSupplier";
 
     // Widgets
     private EditText etName, etContact, etEmail, etAddress;
@@ -36,19 +34,19 @@ public class EditConsumerActivity extends AppCompatActivity {
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
-    private Consumer mConsumer;
+    private Supplier mSupplier;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_consumer);
+        setContentView(R.layout.activity_add_supplier);
         getWidgets();
         setListeners();
     }
 
     private void getWidgets() {
         TextView tvTitle = findViewById(R.id.title);
-        tvTitle.setText(R.string.edit_consumer);
+        tvTitle.setText(R.string.edit_supplier);
         etName = findViewById(R.id.et_name);
         etContact = findViewById(R.id.et_contact);
         etEmail = findViewById(R.id.et_email);
@@ -70,14 +68,14 @@ public class EditConsumerActivity extends AppCompatActivity {
             if (validated()) saveAndClose();
         });
         btnDelete.setOnClickListener(v -> {
-            if (mConsumer != null) {
+            if (mSupplier != null) {
                 dialogBuilder.setTitle("Confirm Delete")
-                        .setMessage("This will delete all data related to this Consumer entry. " +
+                        .setMessage("This will delete all data related to this Supplier entry. " +
                                 "Are you sure you want to delete this entry?")
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                         .setPositiveButton("Confirm", (dialog, which) -> {
                             dialog.dismiss();
-                            deleteConsumer();
+                            deleteSupplier();
                         });
                 dialogBuilder.create().show();
             }
@@ -89,11 +87,11 @@ public class EditConsumerActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        // check consumer id
-        int id = getIntent().getIntExtra("consumer_id", -1);
+        // check supplier id
+        int id = getIntent().getIntExtra("supplier_id", -1);
         if (id == -1) {
             dialogBuilder.setTitle("Invalid Action")
-                    .setMessage("Invalid Consumer ID: " + id)
+                    .setMessage("Invalid Supplier ID: " + id)
                     .setPositiveButton("Dismiss", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
@@ -104,15 +102,15 @@ public class EditConsumerActivity extends AppCompatActivity {
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().getConsumer(id);
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(consumers -> {
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().getSupplier(id);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(suppliers -> {
             progressGroup.setVisibility(View.GONE);
-            mConsumer = consumers.get(0);
-            displayInfo(mConsumer);
+            mSupplier = suppliers.get(0);
+            displayInfo(mSupplier);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             dialogBuilder.setTitle("Database Error")
-                    .setMessage("Error while fetching Consumer entry: " + err)
+                    .setMessage("Error while fetching Supplier entry: " + err)
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
@@ -121,12 +119,12 @@ public class EditConsumerActivity extends AppCompatActivity {
         }));
     }
 
-    private void displayInfo(Consumer consumer) {
-        if (consumer != null) {
-            etName.setText(consumer.consumerName);
-            etAddress.setText(consumer.consumerAddress);
-            etContact.setText(consumer.consumerContactNo);
-            etEmail.setText(consumer.consumerEmail);
+    private void displayInfo(Supplier supplier) {
+        if (supplier != null) {
+            etName.setText(supplier.supplierName);
+            etAddress.setText(supplier.supplierAddress);
+            etContact.setText(supplier.supplierContactNo);
+            etEmail.setText(supplier.supplierEmail);
         }
     }
 
@@ -152,21 +150,21 @@ public class EditConsumerActivity extends AppCompatActivity {
     }
 
     private void saveAndClose() {
-        mConsumer.consumerName = Utils.normalize(etName.getText().toString());
-        mConsumer.consumerContactNo = Utils.normalize(etContact.getText().toString());
-        mConsumer.consumerEmail = Utils.normalize(etEmail.getText().toString());
-        mConsumer.consumerAddress = Utils.normalize(etAddress.getText().toString());
+        mSupplier.supplierName = Utils.normalize(etName.getText().toString());
+        mSupplier.supplierContactNo = Utils.normalize(etContact.getText().toString());
+        mSupplier.supplierEmail = Utils.normalize(etEmail.getText().toString());
+        mSupplier.supplierAddress = Utils.normalize(etAddress.getText().toString());
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().update(mConsumer);
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().update(mSupplier);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             dialogBuilder.setTitle("Database Error")
-                    .setMessage("Error while updating Consumer entry: " + err)
+                    .setMessage("Error while updating Supplier entry: " + err)
                     .setPositiveButton("OK", (dialog, which) -> {
                         dialog.dismiss();
                         goBack();
@@ -175,22 +173,22 @@ public class EditConsumerActivity extends AppCompatActivity {
         }));
     }
 
-    private void deleteConsumer() {
-        if (mConsumer != null) {
+    private void deleteSupplier() {
+        if (mSupplier != null) {
             progressGroup.setVisibility(View.VISIBLE);
             disposables.add(Single.fromCallable(() -> {
-                return AppDatabaseImpl.getDatabase(getApplicationContext()).consumers().delete(mConsumer);
+                return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().delete(mSupplier);
             }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
                 progressGroup.setVisibility(View.GONE);
                 if (rowCount > 0) {
-                    Toast.makeText(this, "Deleted Consumer entry.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Deleted Supplier entry.", Toast.LENGTH_SHORT).show();
                 }
-                startActivity(new Intent(this, ConsumersActivity.class));
+                startActivity(new Intent(this, SuppliersActivity.class));
                 finish();
             }, err -> {
                 progressGroup.setVisibility(View.GONE);
                 dialogBuilder.setTitle("Database Error")
-                        .setMessage("Error while deleting Consumer entry: " + err)
+                        .setMessage("Error while deleting Supplier entry: " + err)
                         .setPositiveButton("OK", (dialog, which) -> {
                             dialog.dismiss();
                             goBack();

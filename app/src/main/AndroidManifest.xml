@@ -64,6 +64,8 @@
         <!-- Suppliers Related Activities -->
         <activity android:name=".SuppliersActivity" android:parentActivityName=".HomeActivity" />
         <activity android:name=".AddSupplierActivity" android:parentActivityName=".SuppliersActivity" />
+        <activity android:name=".ViewSupplierActivity" android:parentActivityName=".SuppliersActivity" />
+        <activity android:name=".EditSupplierActivity" android:parentActivityName=".ViewSupplierActivity" />
 
         <!-- Consumer Related Activities -->
         <activity android:name=".ConsumersActivity" android:parentActivityName=".HomeActivity" />

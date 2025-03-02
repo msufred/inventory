@@ -26,7 +26,7 @@ public interface BrandDao {
     void updateAll(Brand...brands);
 
     @Delete
-    void delete(Brand brand);
+    int delete(Brand brand);
 
     @Query("SELECT * FROM brands")
     List<Brand> getAll();
