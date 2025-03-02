@@ -137,6 +137,7 @@
     <!-- delivery related -->
     <string name="tracking_no">Tracking No.</string>
     <string name="add_delivery">Add Delivery</string>
+    <string name="edit_delivery">Edit Delivery</string>
     <string name="add_delivery_item">Add Delivery Item</string>
     <string name="edit_delivery_item">Edit Delivery Item</string>
     <string name="no_deliveries">No Deliveries</string>
