@@ -2,6 +2,14 @@ package io.zak.inventory;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.util.Log;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -84,7 +92,30 @@ public class Utils {
         }
     }
 
-    public boolean isTheSameDate(Date date1, Date date2) {
+    public static Bitmap generateQrCode(String str, int width, int height) {
+        Bitmap bitmap = null;
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        try {
+            BitMatrix matrix = qrCodeWriter.encode(str, BarcodeFormat.QR_CODE, width, height);
+
+            int w = matrix.getWidth();
+            int h = matrix.getHeight();
+            int[] pixels = new int[w * h];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    pixels[y * w + x] = matrix.get(x, y) ? Color.BLACK : Color.WHITE;
+                }
+            }
+
+            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
+        } catch (WriterException e) {
+            Log.e("Utils", "Failed to write QR Code: " + e);
+        }
+        return bitmap;
+    }
+
+    public static boolean isTheSameDate(Date date1, Date date2) {
         Calendar cal1 = Calendar.getInstance();
         cal1.setTime(date1);
 
