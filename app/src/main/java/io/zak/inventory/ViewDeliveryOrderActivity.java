@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -24,6 +26,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.DeliveryItemListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
+import io.zak.inventory.data.entities.DeliveryOrder;
 import io.zak.inventory.data.relations.DeliveryDetails;
 import io.zak.inventory.data.relations.DeliveryItemDetails;
 
@@ -33,11 +36,12 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
 
     // Widgets
     private TextView tvTrackingNo, tvItemCount, tvTotalAmount;
-    private ImageButton btnBack, btnInfo;
+    private ImageButton btnBack, btnEdit;
     private RecyclerView recyclerView;
     private Button btnAddItem;
     private Button btnLoadToVehicle; // renamed to Checkout
     private RelativeLayout progressGroup;
+    private LinearLayout buttonGroup;
 
     // for RecyclerView
     private DeliveryItemListAdapter adapter;
@@ -64,11 +68,12 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
         tvItemCount = findViewById(R.id.tv_item_count);
         tvTotalAmount = findViewById(R.id.tv_total_amount);
         btnBack = findViewById(R.id.btn_back);
-        btnInfo = findViewById(R.id.btn_info);
+        btnEdit = findViewById(R.id.btn_edit);
         recyclerView = findViewById(R.id.recycler_view);
         btnAddItem = findViewById(R.id.btn_add_item);
         btnLoadToVehicle = findViewById(R.id.btn_load_to_vehicle);
         progressGroup = findViewById(R.id.progress_group);
+        buttonGroup = findViewById(R.id.button_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -81,8 +86,12 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
     private void setListeners() {
         btnBack.setOnClickListener(v -> goBack());
 
-        btnInfo.setOnClickListener(v -> {
-            // TODO show delivery information (vehicle, employee, etc)
+        btnEdit.setOnClickListener(v -> {
+            if (mDeliveryDetails != null) {
+                Intent intent = new Intent(this, EditDeliveryOrderActivity.class);
+                intent.putExtra("delivery_order_id", mDeliveryDetails.deliveryOrder.deliveryOrderId);
+                startActivity(intent);
+            }
         });
 
         btnAddItem.setOnClickListener(v -> {
@@ -149,6 +158,12 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
 
             // get all items of this delivery order
             fetchOrderItems(mDeliveryDetails.deliveryOrder.deliveryOrderId);
+
+            String status = mDeliveryDetails.deliveryOrder.deliveryOrderStatus;
+            if (status.equalsIgnoreCase("Delivered")) {
+                buttonGroup.setVisibility(View.GONE);
+                btnEdit.setVisibility(View.GONE);
+            }
         }, err -> {
             showProgress(false);
             Log.e(TAG, "Database Error: " + err);
@@ -204,7 +219,30 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity implements Deli
 
     private void checkoutDelivery() {
         if (mDeliveryDetails != null) {
-            mDeliveryDetails.deliveryOrder.deliveryOrderStatus = "On Delivery";
+            DeliveryOrder deliveryOrder = mDeliveryDetails.deliveryOrder;
+            deliveryOrder.deliveryOrderStatus = "Delivered";
+
+            progressGroup.setVisibility(View.VISIBLE);
+            disposables.add(Single.fromCallable(() -> {
+                Log.d(TAG, "Updating delivery order.");
+                return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().update(deliveryOrder);
+            }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
+                progressGroup.setVisibility(View.GONE);
+                if (rowCount > 0) {
+                    Toast.makeText(this, "Delivery Order updated.", Toast.LENGTH_SHORT).show();
+                }
+                goBack();
+            }, err -> {
+                progressGroup.setVisibility(View.GONE);
+                Log.e(TAG, "Database Error: " +  err);
+                dialogBuilder.setTitle("Database Error")
+                        .setMessage("Error while updating Delivery Order: " + err)
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            dialog.dismiss();
+                            goBack();
+                        });
+                dialogBuilder.create().show();
+            }));
         }
     }
 
