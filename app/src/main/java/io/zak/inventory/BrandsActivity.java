@@ -38,9 +38,8 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoBrands;
-    private Button btnBack, btnAdd;
-    private ImageButton btnBack;
     private Button btnAdd;
+    private ImageButton btnBack;
     private RelativeLayout progressGroup;
 
     // for RecyclerView
@@ -70,6 +69,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         tvNoBrands = findViewById(R.id.tv_no_brands);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -107,16 +107,19 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
+            // Log.d(TAG, "Fetching Brand entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
-            Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
+            // Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
+            progressGroup.setVisibility(View.GONE);
             brandList = list;
             adapter.replaceAll(list);
             tvNoBrands.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
-            Log.e(TAG, "Database Error: " + err);
+            // Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
 
             // error dialog
             dialogBuilder.setTitle("Database Error")
@@ -131,7 +134,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         if (adapter != null) {
             Brand brand = adapter.getItem(position);
             if (brand != null) {
-                Log.d(TAG, "Brand selected: " + brand.brandName);
+                // Log.d(TAG, "Brand selected: " + brand.brandName);
                 showAddDialog(brand); // Pass the selected brand for editing
             }
         }
@@ -162,7 +165,7 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialogView = inflater.inflate(R.layout.dialog_add_brand, null);
 
-        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) TextView tvTitle = dialogView.findViewById(R.id.title);
+        TextView tvTitle = dialogView.findViewById(R.id.title);
         EditText etName = dialogView.findViewById(R.id.et_brand_name);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnSave = dialogView.findViewById(R.id.btn_save);

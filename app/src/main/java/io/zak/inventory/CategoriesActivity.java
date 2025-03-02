@@ -37,9 +37,8 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
-    private Button btnBack, btnAdd;
-    private ImageButton btnBack;
     private Button btnAdd;
+    private ImageButton btnBack;
     private RelativeLayout progressGroup;
 
     private CategoryListAdapter adapter;
@@ -63,6 +62,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         tvNoCategories = findViewById(R.id.tv_no_categories);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        progressGroup = findViewById(R.id.progress_group);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CategoryListAdapter(comparator, this);
@@ -102,15 +102,18 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Category entries: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
+            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
             categoryList = list;
             adapter.replaceAll(list);
             tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
             dialogBuilder.setTitle("Database Error")
                     .setMessage("Error while fetching Category entries: " + err)
