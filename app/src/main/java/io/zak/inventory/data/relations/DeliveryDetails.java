@@ -18,9 +18,4 @@ public class DeliveryDetails {
     @Embedded
     public Employee employee;
 
-//    @ColumnInfo(name = "name")
-//    public String vehicleName;
-//
-//    @ColumnInfo(name = "plateNo")
-//    public String plateNo;
 }
