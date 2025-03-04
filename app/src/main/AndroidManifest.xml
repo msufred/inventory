@@ -85,6 +85,7 @@
 
         <!-- Order Related Activity -->
         <activity android:name=".PortraitCaptureActivity" android:screenOrientation="fullSensor" />
+        <activity android:name=".ViewOrderActivity" android:parentActivityName=".HomeActivity" />
 
     </application>
 
