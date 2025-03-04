@@ -9,6 +9,7 @@ import androidx.room.Update;
 import java.util.List;
 
 import io.zak.inventory.data.entities.OrderItem;
+import io.zak.inventory.data.relations.OrderItemDetails;
 
 @Dao
 public interface OrderItemDao {
@@ -33,4 +34,9 @@ public interface OrderItemDao {
 
     @Query("SELECT COUNT(*) FROM order_items")
     int getSize();
+
+    @Query("SELECT order_items.*, products.* " +
+            "FROM order_items " +
+            "INNER JOIN products ON order_items.fkProductId = products.productId")
+    List<OrderItemDetails> orderItemsWithDetails();
 }
