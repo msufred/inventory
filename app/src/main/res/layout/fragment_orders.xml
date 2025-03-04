@@ -89,7 +89,7 @@
             android:layout_height="50dp"
             android:textSize="18sp"
             android:text="@string/scan_order"
-            app:icon="@drawable/ic_camera"
+            app:icon="@drawable/ic_scan"
             app:iconSize="20dp"
             app:cornerRadius="@dimen/button_corner"
             android:backgroundTint="@color/purple_500"/>

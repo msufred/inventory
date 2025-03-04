@@ -159,6 +159,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:text="@string/complete_delivery"
+                android:textSize="@dimen/button_text"
                 android:backgroundTint="@color/purple_500"
                 app:cornerRadius="@dimen/button_corner"
                 app:icon="@drawable/ic_truck_speed_2"

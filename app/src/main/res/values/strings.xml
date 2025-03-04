@@ -157,6 +157,7 @@
     <string name="order_details">Order Details</string>
     <string name="add_order">Add Order</string>
     <string name="scan_order">Scan Order</string>
+    <string name="view_order">View Order</string>
     <string name="or_no">OR No.</string>
     <string name="no_orders">No Orders</string>
     <string name="date_ordered">Date Ordered</string>
