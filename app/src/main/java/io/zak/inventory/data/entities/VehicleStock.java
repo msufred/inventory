@@ -19,7 +19,7 @@ public class VehicleStock {
     public int quantity;
     public int orderedQuantity;
     public int criticalLevel;
-    public double sellingPrice; // selling price
+    public double sellingPrice;
     public double totalAmount;
     public long dateOrdered;
 }
