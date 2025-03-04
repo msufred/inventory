@@ -60,6 +60,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
     private long dateOrdered;
     private double totalAmount;
 
+    // sort orders by date
     private final Comparator<OrderDetails> comparator = Comparator.comparing(orderDetails -> orderDetails.order.dateOrdered);
 
     private final ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
@@ -69,6 +70,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
             processScanResult(result.getContents());
         }
     });
+
     private ScanOptions scanOptions;
 
     private CompositeDisposable disposables;
@@ -120,8 +122,14 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         btnCancel.setOnClickListener(v -> resultDailog.dismiss());
         btnSave.setOnClickListener(v -> {
             if (validated()) {
-                resultDailog.dismiss();
-                saveResult();
+                if (hasDuplicate(orNo)) {
+                    resultDailog.dismiss();
+                    dialogBuilder.setTitle("Invalid").setMessage("Duplicate Order").setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                    dialogBuilder.create().show();
+                } else {
+                    resultDailog.dismiss();
+                    saveResult();
+                }
             } else {
                 dialogBuilder.setTitle("Invalid Action").setMessage("Incomplete Data/Invalid QR Code")
                         .setPositiveButton("Dismiss", (dialog, which) -> dialog.dismiss());
@@ -296,5 +304,12 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
                     });
             dialogBuilder.create().show();
         }));
+    }
+
+    private boolean hasDuplicate(String orNo) {
+        for (OrderDetails details : orderDetailsList) {
+            if (details.order.orNo.equalsIgnoreCase(orNo)) return true;
+        }
+        return false;
     }
 }
