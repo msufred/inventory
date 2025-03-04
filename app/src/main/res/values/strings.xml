@@ -123,6 +123,7 @@
     <string name="product_name">Product Name</string>
     <string name="product_price">Product Price</string>
     <string name="no_products">No Products</string>
+    <string name="product_id">Product ID</string>
 
     <!-- supplier related -->
     <string name="add_supplier">Add Supplier</string>
@@ -156,11 +157,15 @@
     <!-- order related -->
     <string name="order_details">Order Details</string>
     <string name="add_order">Add Order</string>
+    <string name="add_item">Add Item</string>
     <string name="scan_order">Scan Order</string>
     <string name="view_order">View Order</string>
     <string name="or_no">OR No.</string>
     <string name="no_orders">No Orders</string>
     <string name="date_ordered">Date Ordered</string>
+    <string name="item_id">Item ID</string>
+    <string name="order_id">Order ID</string>
+    <string name="order_item_details">Order Item Details</string>
 
     <!-- figures/numbers -->
     <string name="zero">0</string>
@@ -209,5 +214,6 @@
     <string name="note_quantity">Note: Quantity is set to 1 if no number is entered.</string>
     <string name="note_delivery">Important: Once checked out, you can\'t add more items.</string>
     <string name="note_delivery_add">Important: Please complete \"Processing\" deliveries first before adding new delivery entry.</string>
+    <string name="note_order">Important: Confirm Order to update inventory stocks. Once confirmed, you can't add more order items.</string>
 
 </resources>
