@@ -145,6 +145,7 @@ public class EditWarehouseActivity extends AppCompatActivity {
         mWarehouse.warehouseAddress = Utils.normalize(etAddress.getText().toString());
         mWarehouse.warehouseContactNo = Utils.normalize(etContact.getText().toString());
 
+
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Updating Warehouse entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).warehouses().update(mWarehouse);
