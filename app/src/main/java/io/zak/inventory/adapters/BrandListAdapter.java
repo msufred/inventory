@@ -39,7 +39,7 @@ public class BrandListAdapter extends RecyclerView.Adapter<BrandListAdapter.View
 
     private final Comparator<Brand> comparator;
 
-    private final SortedList<Brand> sortedList = new SortedList<>(Brand.class, new SortedList.Callback<Brand>() {
+    private final SortedList<Brand> sortedList = new SortedList<>(Brand.class, new SortedList.Callback<>() {
         @Override
         public int compare(Brand o1, Brand o2) {
             return comparator.compare(o1, o2);

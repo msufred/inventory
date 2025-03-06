@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.zak.inventory.R;
-import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 
 public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapter.ViewHolder> {

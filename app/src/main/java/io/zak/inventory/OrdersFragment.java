@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
@@ -49,12 +48,13 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
     // Dialog Widgets
     private TextView tvOrNo, tvVehicle, tvEmployee, tvConsumer, tvAddress, tvContact, tvDate, tvAmount;
     private Button btnCancel, btnSave;
-    private AlertDialog resultDailog;
+    private AlertDialog resultDialog;
 
     private OrderListAdapter adapter;
     private List<OrderDetails> orderDetailsList;
 
     // Scan Result Variables
+    private int orderId;
     private String orNo, consumerName, consumerAddress, consumerContact;
     private int vehicleId, employeeId;
     private long dateOrdered;
@@ -63,13 +63,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
     // sort orders by date
     private final Comparator<OrderDetails> comparator = Comparator.comparing(orderDetails -> orderDetails.order.dateOrdered);
 
-    private final ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
-        if (result.getContents() == null) {
-            Toast.makeText(getActivity(), "Cancelled", Toast.LENGTH_SHORT).show();
-        } else {
-            processScanResult(result.getContents());
-        }
-    });
+    private ActivityResultLauncher<ScanOptions> qrCodeLauncher;
 
     private ScanOptions scanOptions;
 
@@ -82,6 +76,19 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
         getWidgets(view);
         setListeners();
+
+        // register qrCodeLauncher
+        qrCodeLauncher  = registerForActivityResult(new ScanContract(), result -> {
+            if (result.getContents() != null) {
+                processScanResult(result.getContents());
+            } else {
+                dialogBuilder.setTitle("Error")
+                        .setMessage("Invalid QR Code.")
+                        .setPositiveButton("Dismiss", (dialog, which) -> dialog.dismiss());
+                dialogBuilder.create().show();
+            }
+        });
+
         return view;
     }
 
@@ -119,15 +126,15 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         btnScan.setOnClickListener(v -> scanQrCode());
 
         // scan result dialog
-        btnCancel.setOnClickListener(v -> resultDailog.dismiss());
+        btnCancel.setOnClickListener(v -> resultDialog.dismiss());
         btnSave.setOnClickListener(v -> {
             if (validated()) {
-                if (hasDuplicate(orNo)) {
-                    resultDailog.dismiss();
+                if (hasDuplicate(orderId)) {
+                    resultDialog.dismiss();
                     dialogBuilder.setTitle("Invalid").setMessage("Duplicate Order").setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
                     dialogBuilder.create().show();
                 } else {
-                    resultDailog.dismiss();
+                    resultDialog.dismiss();
                     saveResult();
                 }
             } else {
@@ -208,6 +215,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
                 String value = arr[1];
 
                 switch (key) {
+                    case "order": orderId = Integer.parseInt(value); break;
                     case "orno": orNo = value; break;
                     case "vehicle": vehicleId = Integer.parseInt(value.trim()); break;
                     case "employee": employeeId = Integer.parseInt(value.trim()); break;
@@ -230,7 +238,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
             tvDate.setText(Utils.dateFormat.format(new Date(dateOrdered)));
             tvAmount.setText(Utils.toStringMoneyFormat(totalAmount));
 
-            resultDailog.show();
+            resultDialog.show();
         }
     }
 
@@ -259,10 +267,11 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         btnSave = view.findViewById(R.id.btn_save);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        resultDailog = builder.setView(view).create();
+        resultDialog = builder.setView(view).create();
     }
 
     private void resetScanResultValues() {
+        orderId = -1;
         orNo = consumerName = consumerAddress = consumerContact = "";
         vehicleId = employeeId = -1;
         dateOrdered = 0;
@@ -270,12 +279,13 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
     }
 
     private boolean validated() {
-        return !orNo.isBlank() && vehicleId != -1 && employeeId != -1 && !consumerName.isBlank()
+        return orderId != -1 && !orNo.isBlank() && vehicleId != -1 && employeeId != -1 && !consumerName.isBlank()
                 && dateOrdered != 0;
     }
 
     private void saveResult() {
         Order order = new Order();
+        order.orderId = orderId;
         order.orNo = orNo;
         order.fkVehicleId = vehicleId;
         order.fkEmployeeId = employeeId;
@@ -306,9 +316,9 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         }));
     }
 
-    private boolean hasDuplicate(String orNo) {
+    private boolean hasDuplicate(int id) {
         for (OrderDetails details : orderDetailsList) {
-            if (details.order.orNo.equalsIgnoreCase(orNo)) return true;
+            if (details.order.orderId == id) return true;
         }
         return false;
     }
