@@ -4,10 +4,11 @@
 
     <!-- Content Descriptions -->
     <string name="app_logo">App Logo</string>
-    <string name="vector">vector</string>
-    <string name="fab">fab</string>
-    <string name="button">button</string>
+    <string name="vector">Vector</string>
+    <string name="fab">FAB</string>
+    <string name="button">ImageButton</string>
     <string name="qrcode">QR Code</string>
+    <string name="recyclerView">RecyclerView</string>
 
     <!-- Fields -->
     <string name="username">Username</string>
@@ -214,6 +215,6 @@
     <string name="note_quantity">Note: Quantity is set to 1 if no number is entered.</string>
     <string name="note_delivery">Important: Once checked out, you can\'t add more items.</string>
     <string name="note_delivery_add">Important: Please complete \"Processing\" deliveries first before adding new delivery entry.</string>
-    <string name="note_order">Important: Confirm Order to update inventory stocks. Once confirmed, you can't add more order items.</string>
+    <string name="note_order">Important: Confirm Order to update inventory stocks. Once confirmed, you can\'t add more order items.</string>
 
 </resources>
