@@ -81,7 +81,6 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/zero"
-                            android:gravity="center"
                             android:textSize="@dimen/form_text"
                             android:textStyle="bold"
                             android:textColor="@color/white"
@@ -109,7 +108,6 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/zero_amount"
-                            android:gravity="center"
                             android:textSize="@dimen/form_text"
                             android:textStyle="bold"
                             android:textColor="@color/white"
@@ -120,6 +118,19 @@
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/search_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_searchfield"
+                android:padding="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:iconifiedByDefault="false"
+                app:queryHint="@string/search"
+                app:queryBackground="@color/transparent" />
 
         </LinearLayout>
 
@@ -133,7 +144,8 @@
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white"/>
+                android:background="@color/white"
+                android:contentDescription="@string/recyclerView"/>
 
             <TextView
                 android:id="@+id/empty_order_items"
