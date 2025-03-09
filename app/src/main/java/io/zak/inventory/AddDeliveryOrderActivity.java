@@ -169,19 +169,20 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        // clear drawables
-        etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 
         String trackingNo = etTrackingNo.getText().toString();
         if (trackingNo.isBlank()) {
-            etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+            etTrackingNo.setError("Required");
+            return false;
+        }else if (!trackingNo.matches("^\\d+$")) {
+            etTrackingNo.setError("Invalid Tracking Number");
             return false;
         }
 
         // check if tracking no exists
         for (DeliveryOrder order : deliveryOrders) {
             if (order.trackingNo.equalsIgnoreCase(trackingNo)) {
-                etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+                etTrackingNo.setError("Tracking Number already exists");
                 return false;
             }
         }

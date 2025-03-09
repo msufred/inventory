@@ -97,6 +97,9 @@ public class AddEmployeeActivity extends AppCompatActivity {
         if (etContact.getText().toString().trim().isEmpty()) {
             etContact.setError("Required");
             isValid = false;
+        }else if (!etContact.getText().toString().matches("^[\\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$")){
+            etContact.setError("Invalid Contact Number");
+            isValid = false;
         }
         if (etAddress.getText().toString().trim().isEmpty()) {
             etAddress.setError("Required");

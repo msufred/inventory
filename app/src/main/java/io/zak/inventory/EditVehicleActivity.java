@@ -174,11 +174,20 @@ public class EditVehicleActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
+        boolean isValid = true;
+
         if (etName.getText().toString().trim().isEmpty()) {
             etName.setError("Required");
-            return false;
+            isValid = false;
+        }else if (!etName.getText().toString().matches("^[^0-9]+$")) {
+            etName.setError("Invalid Name");
+            isValid = false;
         }
-        return true;
+        if (etPlateno.getText().toString().trim().isEmpty()) {
+            etPlateno.setError("Required");
+            isValid = false;
+        }
+        return isValid;
     }
 
     private void saveAndClose() {

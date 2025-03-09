@@ -94,19 +94,20 @@ public class AddVehicleActivity extends AppCompatActivity {
     }
 
     private boolean validated() {
-        // clear drawables
-        etName.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-        etPlateNo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        boolean isValid = true;
 
-        // validate
-        if (etName.getText().toString().isBlank()) {
-            etName.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+        if (etName.getText().toString().trim().isEmpty()) {
+            etName.setError("Required");
+            isValid = false;
+        }else if (!etName.getText().toString().matches("^[^0-9]+$")) {
+            etName.setError("Invalid Name");
+            isValid = false;
         }
-        if (etPlateNo.getText().toString().isBlank()) {
-            etPlateNo.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+        if (etPlateNo.getText().toString().trim().isEmpty()) {
+            etPlateNo.setError("Required");
+            isValid = false;
         }
-
-        return !etName.getText().toString().isBlank() && !etPlateNo.getText().toString().isBlank();
+        return isValid;
     }
 
     private void saveAndClose() {
