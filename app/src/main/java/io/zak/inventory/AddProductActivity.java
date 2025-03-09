@@ -210,9 +210,9 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void saveAndClose() {
-        if (mSelectedBrand == null && mSelectedCategory == null) {
+        if (mSelectedBrand == null | mSelectedCategory == null | mSelectedSupplier == null) {
             dialogBuilder.setTitle("Invalid Action")
-                    .setMessage("No selected Brand and/or Category")
+                    .setMessage("No selected Supplier, Brand, and/or Category.")
                     .setPositiveButton("OK", ((dialog, which) -> dialog.dismiss()));
             dialogBuilder.create().show();
             return;

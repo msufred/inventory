@@ -1,6 +1,5 @@
 package io.zak.inventory;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,22 +29,30 @@ import io.zak.inventory.adapters.CategoryListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Category;
 
-public class CategoriesActivity extends AppCompatActivity implements CategoryListAdapter.OnItemClickListener {
+public class CategoriesActivity extends AppCompatActivity implements CategoryListAdapter.OnItemClickListener, CategoryListAdapter.OnItemLongClickListener {
 
     private static final String TAG = "Categories";
 
+    // Widgets
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
     private Button btnAdd;
     private ImageButton btnBack;
     private RelativeLayout progressGroup;
+    private Button btnDelete;
+    private TextView titleTextView;
 
+    // for RecyclerView
     private CategoryListAdapter adapter;
+
+    // list reference for search filter
     private List<Category> categoryList;
+
+    // comparator for search filter
     private final Comparator<Category> comparator = Comparator.comparing(category -> category.categoryName);
+
     private CompositeDisposable disposables;
-    private AlertDialog.Builder dialogBuilder;
     private AlertDialog addDialog;
 
     @Override
@@ -54,6 +61,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         setContentView(R.layout.activity_categories);
         getWidgets();
         setListeners();
+        loadData();
     }
 
     private void getWidgets() {
@@ -62,13 +70,17 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         tvNoCategories = findViewById(R.id.tv_no_categories);
         btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
+        btnDelete = findViewById(R.id.btn_delete);
         progressGroup = findViewById(R.id.progress_group);
+        titleTextView = findViewById(R.id.title);
 
+        // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CategoryListAdapter(comparator, this);
+        adapter = new CategoryListAdapter(comparator, this, this);
         recyclerView.setAdapter(adapter);
 
-        dialogBuilder = new AlertDialog.Builder(this);
+        // Initially hide delete button
+        btnDelete.setVisibility(View.GONE);
     }
 
     private void setListeners() {
@@ -86,20 +98,19 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         });
 
         btnBack.setOnClickListener(v -> {
-            getOnBackPressedDispatcher().onBackPressed();
-            finish();
+            if (adapter.isInSelectionMode()) {
+                exitSelectionMode();
+            } else {
+                finish();
+            }
         });
 
         btnAdd.setOnClickListener(v -> showAddDialog());
+
+        btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
     }
 
-    private void showAddDialog() {
-        showAddDialog(null);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+    private void loadData() {
         if (disposables == null) disposables = new CompositeDisposable();
 
         progressGroup.setVisibility(View.VISIBLE);
@@ -115,22 +126,107 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
-            dialogBuilder.setTitle("Database Error")
+
+            // Create a new AlertDialog.Builder each time
+            new AlertDialog.Builder(this)
+                    .setTitle("Database Error")
                     .setMessage("Error while fetching Category entries: " + err)
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            dialogBuilder.create().show();
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
+        }));
+    }
+
+    private void showDeleteConfirmationDialog() {
+        int count = adapter.getSelectedItemCount();
+        // Create a new AlertDialog.Builder each time
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Selected Items")
+                .setMessage("Are you sure you want to delete " + count + " selected item(s)?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    deleteSelectedItems();
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void deleteSelectedItems() {
+        List<Category> selectedCategories = adapter.getSelectedCategories();
+
+        disposables.add(Single.fromCallable(() -> {
+            int deletedCount = 0;
+            for (Category category : selectedCategories) {
+                deletedCount += AppDatabaseImpl.getDatabase(getApplicationContext()).categories().delete(category);
+            }
+            return deletedCount;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            Log.d(TAG, "Deleted " + count + " categories");
+
+            // Remove deleted items from the list
+            categoryList.removeAll(selectedCategories);
+            adapter.replaceAll(categoryList);
+
+            // Exit selection mode
+            exitSelectionMode();
+
+            // Show empty view if needed
+            tvNoCategories.setVisibility(categoryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+        }, err -> {
+            Log.e(TAG, "Database Error during deletion: " + err);
+
+            // Create a new AlertDialog.Builder each time
+            new AlertDialog.Builder(this)
+                    .setTitle("Invalid Action")
+                    .setMessage("Selected Category/ies are associated with some products. Please delete or edit them first.")
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
         }));
     }
 
     @Override
     public void onItemClick(int position) {
         if (adapter != null) {
-            Category category = adapter.getItem(position);
-            if (category != null) {
-                Log.d(TAG, "Category selected: " + category.categoryName);
-                showAddDialog(category);
+            if (adapter.isInSelectionMode()) {
+                adapter.toggleSelection(position);
+                updateSelectionUI();
+            } else {
+                Category category = adapter.getItem(position);
+                if (category != null) {
+                    Log.d(TAG, "Category selected: " + category.categoryName);
+                    showAddDialog(category);
+                }
             }
         }
+    }
+
+    @Override
+    public boolean onItemLongClick(int position) {
+        if (!adapter.isInSelectionMode()) {
+            adapter.enterSelectionMode();
+            adapter.toggleSelection(position);
+            updateSelectionUI();
+            return true;
+        }
+        return false;
+    }
+
+    private void updateSelectionUI() {
+        if (adapter.isInSelectionMode()) {
+            btnAdd.setVisibility(View.GONE);
+            btnDelete.setVisibility(View.VISIBLE);
+            int count = adapter.getSelectedItemCount();
+            titleTextView.setText(count + " selected");
+        } else {
+            btnAdd.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(View.GONE);
+            titleTextView.setText(R.string.categories);
+        }
+    }
+
+    private void exitSelectionMode() {
+        adapter.exitSelectionMode();
+        updateSelectionUI();
     }
 
     private void onSearch(String query) {
@@ -150,13 +246,16 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         return list;
     }
 
-
+    private void showAddDialog() {
+        showAddDialog(null);
+    }
 
     private void showAddDialog(Category categoryToEdit) {
+        // Create a new LayoutInflater instance each time
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialogView = inflater.inflate(R.layout.dialog_add_category, null);
 
-        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) TextView tvTitle = dialogView.findViewById(R.id.et_title);
+        TextView tvTitle = dialogView.findViewById(R.id.et_title);
         EditText etName = dialogView.findViewById(R.id.et_category_name);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnSave = dialogView.findViewById(R.id.btn_save);
@@ -166,8 +265,10 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             etName.setText(categoryToEdit.categoryName);
         }
 
-        dialogBuilder.setView(dialogView);
-        addDialog = dialogBuilder.create();
+        // Create a new AlertDialog.Builder each time
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        addDialog = builder.create();
 
         btnCancel.setOnClickListener(v -> addDialog.dismiss());
         btnSave.setOnClickListener(v -> {
@@ -197,10 +298,12 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             adapter.addItem(category);
             if (tvNoCategories.getVisibility() == View.VISIBLE) tvNoCategories.setVisibility(View.INVISIBLE);
         }, err -> {
-            dialogBuilder.setTitle("Database Error")
+            // Create a new AlertDialog.Builder each time
+            new AlertDialog.Builder(this)
+                    .setTitle("Database Error")
                     .setMessage("Error while saving Category entry: " + err)
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            dialogBuilder.create().show();
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
         }));
     }
 
@@ -214,16 +317,21 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowsAffected -> {
             adapter.updateItem(category);
         }, err -> {
-            dialogBuilder.setTitle("Database Error")
+            // Create a new AlertDialog.Builder each time
+            new AlertDialog.Builder(this)
+                    .setTitle("Database Error")
                     .setMessage("Error while updating Category entry: " + err)
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            dialogBuilder.create().show();
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
         }));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disposables.dispose();
+        if (disposables != null) {
+            disposables.dispose();
+        }
     }
 }
+

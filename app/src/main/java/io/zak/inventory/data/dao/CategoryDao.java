@@ -24,7 +24,7 @@ public interface CategoryDao {
     void updateAll(Category...categories);
 
     @Delete
-    void delete(Category category);
+    int delete(Category category);
 
     @Query("SELECT * FROM categories")
     List<Category> getAll();
