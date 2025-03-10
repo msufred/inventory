@@ -1,5 +1,6 @@
 package io.zak.inventory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -81,11 +82,6 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         qrCodeLauncher  = registerForActivityResult(new ScanContract(), result -> {
             if (result.getContents() != null) {
                 processScanResult(result.getContents());
-            } else {
-                dialogBuilder.setTitle("Error")
-                        .setMessage("Invalid QR Code.")
-                        .setPositiveButton("Dismiss", (dialog, which) -> dialog.dismiss());
-                dialogBuilder.create().show();
             }
         });
 
@@ -177,7 +173,12 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
 
     @Override
     public void onItemClick(int position) {
-
+        OrderDetails orderDetails = adapter.getItem(position);
+        if (orderDetails != null) {
+            Intent intent = new Intent(getActivity(), ViewOrderActivity.class);
+            intent.putExtra("order_id", orderDetails.order.orderId);
+            startActivity(intent);
+        }
     }
 
     private void onSearch(String query) {
