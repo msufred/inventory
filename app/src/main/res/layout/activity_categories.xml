@@ -71,9 +71,9 @@
             android:id="@+id/tv_no_categories"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
+            android:text="@string/no_categories"
             android:textColor="#90000000"
-            android:text="@string/no_categories" />
+            android:gravity="center" />
 
     </RelativeLayout>
 
@@ -95,6 +95,19 @@
             android:backgroundTint="@color/purple_500"
             app:cornerRadius="@dimen/button_corner"/>
 
+        <Button
+            android:id="@+id/btn_delete"
+            android:layout_width="match_parent"
+            android:textSize="@dimen/button_text"
+            android:layout_marginStart="8dp"
+            android:layout_height="50dp"
+            android:text="@string/delete_category"
+            app:icon="@drawable/ic_trash"
+            app:iconSize="20dp"
+            android:backgroundTint="#F44336"
+            app:cornerRadius="@dimen/button_corner"
+            android:visibility="gone"/>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -114,3 +127,4 @@
     </RelativeLayout>
 
 </LinearLayout>
+

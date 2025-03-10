@@ -12,11 +12,22 @@
     android:background="@drawable/bg_bottom_border"
     android:id="@+id/layout">
 
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        android:clickable="false"
+        android:focusable="false" />
+
     <TextView
         android:id="@+id/tv_name"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:text="@string/brand_name"
         android:textSize="@dimen/list_item_text" />
 </LinearLayout>
+
