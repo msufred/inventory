@@ -30,13 +30,23 @@
 
             <TextView
                 android:id="@+id/title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
                 android:text="@string/products"
                 android:textSize="@dimen/page_title"
                 android:textStyle="bold"
-                android:textColor="@color/white"
-                android:layout_marginStart="16dp"/>
+                android:textColor="@color/white"/>
+
+            <ImageButton
+                android:id="@+id/btn_sync"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_refresh_cw"
+                android:background="@drawable/bg_ripple_round"
+                app:tint="@color/white"
+                android:contentDescription="@string/button"/>
 
         </LinearLayout>
 

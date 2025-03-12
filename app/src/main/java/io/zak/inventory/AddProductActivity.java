@@ -10,10 +10,14 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -30,6 +34,7 @@ import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 import io.zak.inventory.data.entities.Product;
 import io.zak.inventory.data.entities.Supplier;
+import io.zak.inventory.firebase.ProductEntry;
 
 public class AddProductActivity extends AppCompatActivity {
 
@@ -54,6 +59,8 @@ public class AddProductActivity extends AppCompatActivity {
     private Supplier mSelectedSupplier;
     private Brand mSelectedBrand;
     private Category mSelectedCategory;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -139,6 +146,7 @@ public class AddProductActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         progressGroup.setVisibility(View.VISIBLE);
         AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
@@ -236,8 +244,31 @@ public class AddProductActivity extends AppCompatActivity {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().insert(product);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Returned with ID:" + id + " " + Thread.currentThread());
-            progressGroup.setVisibility(View.GONE);
-            goBack();
+
+            // save to online database
+            ProductEntry entry = new ProductEntry();
+            entry.id = id.intValue();
+            entry.name = product.productName;
+            entry.brandId = product.fkBrandId;
+            entry.categoryId = product.fkCategoryId;
+            entry.supplierId = product.fkSupplierId;
+            entry.criticalLevel = product.criticalLevel;
+            entry.price = product.price;
+            entry.description = product.productDescription;
+
+            mDatabase.child("products")
+                    .child(String.valueOf(id.intValue()))
+                    .setValue(entry)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Added New Product Entry", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Failed to add new Product entry.", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "failure adding product", task.getException());
+                        }
+                        goBack();
+                    });
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
             progressGroup.setVisibility(View.GONE);

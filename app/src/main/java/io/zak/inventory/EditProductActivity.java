@@ -19,6 +19,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -34,6 +37,7 @@ import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.data.entities.Category;
 import io.zak.inventory.data.entities.Product;
 import io.zak.inventory.data.entities.Supplier;
+import io.zak.inventory.firebase.ProductEntry;
 
 public class EditProductActivity extends AppCompatActivity {
 
@@ -58,6 +62,7 @@ public class EditProductActivity extends AppCompatActivity {
     private List<Brand> brandList;
     private List<Category> categoryList;
 
+    private DatabaseReference mDatabase;
     private Product mProduct;
 
     @Override
@@ -170,6 +175,7 @@ public class EditProductActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         int id = getIntent().getIntExtra("product_id", -1);
         if (id == -1) {
@@ -322,12 +328,32 @@ public class EditProductActivity extends AppCompatActivity {
             Log.d(TAG, "Updating Product entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().update(mProduct);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Row affected=" + rowCount + ": " + Thread.currentThread());
-            if (rowCount > 0) {
-                Toast.makeText(this, "Updated Product entry.", Toast.LENGTH_SHORT).show();
-            }
-            goBack();
+
+            // save to online database
+            ProductEntry entry = new ProductEntry();
+            entry.id = mProduct.productId;
+            entry.name = mProduct.productName;
+            entry.brandId = mProduct.fkBrandId;
+            entry.categoryId = mProduct.fkCategoryId;
+            entry.supplierId = mProduct.fkSupplierId;
+            entry.criticalLevel = mProduct.criticalLevel;
+            entry.price = mProduct.price;
+            entry.description = mProduct.productDescription;
+
+            mDatabase.child("products")
+                    .child(String.valueOf(mProduct.productId))
+                    .setValue(entry)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Product Entry Updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Failed to update Product entry.", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "failure updating product", task.getException());
+                        }
+                        goBack();
+                    });
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
@@ -349,12 +375,22 @@ public class EditProductActivity extends AppCompatActivity {
             Log.d(TAG, "Deleting Product entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).products().delete(mProduct);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with row count=" + rowCount + " " + Thread.currentThread());
-            if (rowCount > 0) {
-                Toast.makeText(this, "Deleted Product entry.", Toast.LENGTH_SHORT).show();
-            }
-            goToProductList();
+
+            // delete from online database
+            mDatabase.child("products")
+                    .child(String.valueOf(mProduct.productId))
+                    .setValue(null)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Deleted Product entry.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Failed to delete Product entry.", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "failure deleting product", task.getException());
+                        }
+                        goToProductList();
+                    });
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);

@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -15,6 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +31,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.ProductListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Product;
+import io.zak.inventory.data.relations.ProductDetails;
+import io.zak.inventory.firebase.ProductEntry;
 
 public class ProductsActivity extends AppCompatActivity implements ProductListAdapter.OnItemClickListener {
 
@@ -36,7 +42,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoProducts;
-    private ImageButton btnBack;
+    private ImageButton btnBack, btnSync;
     private Button btnAdd;
     private RelativeLayout progressGroup;
 
@@ -52,6 +58,8 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
+    private DatabaseReference mDatabase;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +73,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
         recyclerView = findViewById(R.id.recycler_view);
         tvNoProducts = findViewById(R.id.tv_no_products);
         btnBack = findViewById(R.id.btn_back);
+        btnSync = findViewById(R.id.btn_sync);
         btnAdd = findViewById(R.id.btn_add);
         progressGroup = findViewById(R.id.progress_group);
 
@@ -95,6 +104,8 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
             finish();
         });
 
+        btnSync.setOnClickListener(v -> syncData());
+
         btnAdd.setOnClickListener(v -> startActivity(new Intent(this, AddProductActivity.class)));
     }
 
@@ -102,6 +113,7 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
@@ -153,6 +165,29 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
             }
         }
         return list;
+    }
+
+    private void syncData() {
+        progressGroup.setVisibility(View.VISIBLE);
+        // first, delete all data from online database
+        mDatabase.child("products").setValue(null);
+        // add non-deleted entries to online database
+        for (Product product : productList) {
+            ProductEntry entry = new ProductEntry();
+            entry.id = product.productId;
+            entry.name = product.productName;
+            entry.brandId = product.fkBrandId;
+            entry.categoryId = product.fkCategoryId;
+            entry.supplierId = product.fkSupplierId;
+            entry.criticalLevel = product.criticalLevel;
+            entry.price = product.price;
+            entry.description = product.productDescription;
+            mDatabase.child("products")
+                    .child(String.valueOf(entry.id))
+                    .setValue(entry);
+        }
+        Toast.makeText(this, "Products Data Synced", Toast.LENGTH_SHORT).show();
+        progressGroup.setVisibility(View.GONE);
     }
 
     @Override
