@@ -8,12 +8,17 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +31,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.SupplierListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Supplier;
+import io.zak.inventory.firebase.SupplierEntry;
 
 public class SuppliersActivity extends AppCompatActivity implements SupplierListAdapter.OnItemClickListener {
 
@@ -35,7 +41,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoSuppliers;
-    private ImageButton btnBack;
+    private ImageButton btnBack, btnSync;
     private Button btnAdd;
     private RelativeLayout progressGroup;
 
@@ -50,12 +56,16 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
 
     private CompositeDisposable disposables;
 
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_suppliers);
         getWidgets();
         setListeners();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private void getWidgets() {
@@ -63,6 +73,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         recyclerView = findViewById(R.id.recycler_view);
         tvNoSuppliers = findViewById(R.id.tv_no_suppliers);
         btnBack = findViewById(R.id.btn_back);
+        btnSync = findViewById(R.id.btn_sync);
         btnAdd = findViewById(R.id.btn_add);
         progressGroup = findViewById(R.id.progress_group);
 
@@ -90,6 +101,8 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
             finish();
         });
 
+        btnSync.setOnClickListener(v -> syncData());
+
         btnAdd.setOnClickListener(v -> {
             startActivity(new Intent(this, AddSupplierActivity.class));
         });
@@ -99,6 +112,7 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
@@ -144,6 +158,29 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
             }
         }
         return list;
+    }
+
+    /**
+     * Sync data to online database (Firebase). Prioritize local storage.
+     * TODO Fetch all entries from Firebase, check if item is deleted from Room database.
+     * Delete entry from Firebase if necessary.
+     */
+    private void syncData() {
+        progressGroup.setVisibility(View.VISIBLE);
+        for (Supplier supplier : supplierList) {
+            SupplierEntry entry = new SupplierEntry(
+                    supplier.supplierId,
+                    supplier.supplierName,
+                    supplier.supplierAddress,
+                    supplier.supplierEmail,
+                    supplier.supplierContactNo
+            );
+            mDatabase.child("suppliers")
+                    .child(String.valueOf(supplier.supplierId))
+                    .setValue(entry);
+        }
+        Toast.makeText(this, "Suppliers Data Synced", Toast.LENGTH_SHORT).show();
+        progressGroup.setVisibility(View.GONE);
     }
 
     @Override
