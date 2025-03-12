@@ -8,11 +8,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -20,6 +24,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Supplier;
+import io.zak.inventory.firebase.SupplierEntry;
 
 public class AddSupplierActivity extends AppCompatActivity {
 
@@ -33,6 +38,8 @@ public class AddSupplierActivity extends AppCompatActivity {
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +75,7 @@ public class AddSupplierActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     private void goBack() {
@@ -116,8 +124,27 @@ public class AddSupplierActivity extends AppCompatActivity {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).suppliers().insert(supplier);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Returned with ID: " + id + " " + Thread.currentThread());
-            progressGroup.setVisibility(View.GONE);
-            goBack();
+
+            // save to online database
+            SupplierEntry entry = new SupplierEntry(
+                    id.intValue(),
+                    supplier.supplierName,
+                    supplier.supplierAddress,
+                    supplier.supplierEmail,
+                    supplier.supplierContactNo
+            );
+            mDatabase.child("suppliers")
+                    .child(String.valueOf(id.intValue()))
+                    .setValue(entry).addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Added new Supplier entry.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Failed to add new Supplier", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "failure adding supplier", task.getException());
+                        }
+                        goBack();
+                    });
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
             progressGroup.setVisibility(View.GONE);
