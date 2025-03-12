@@ -1,114 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/bg_gradient_main">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp" >
+            android:orientation="vertical"
+            android:background="@drawable/bg_gradient_main">
 
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_arrow_left"
-                android:background="@drawable/bg_ripple_round"
-                app:tint="@color/white"
-                android:contentDescription="@string/button"/>
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/categories"
-                android:textSize="@dimen/page_title"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:layout_marginStart="16dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" >
+
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_arrow_left"
+                    android:background="@drawable/bg_ripple_round"
+                    app:tint="@color/white"
+                    android:contentDescription="@string/button"/>
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:text="@string/categories"
+                    android:textSize="@dimen/page_title"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
+
+                <ImageButton
+                    android:id="@+id/btn_sync"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_refresh_cw"
+                    android:background="@drawable/bg_ripple_round"
+                    app:tint="@color/white"
+                    android:contentDescription="@string/button"/>
+
+            </LinearLayout>
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/search_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_searchfield"
+                android:padding="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:iconifiedByDefault="false"
+                app:queryHint="@string/search"
+                app:queryBackground="@color/transparent" />
 
         </LinearLayout>
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/search_view"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:contentDescription="@string/recyclerView"/>
+
+            <TextView
+                android:id="@+id/tv_no_categories"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/no_categories"
+                android:textColor="#90000000"
+                android:gravity="center" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_searchfield"
-            android:padding="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            app:iconifiedByDefault="false"
-            app:queryHint="@string/search"
-            app:queryBackground="@color/transparent" />
+            android:padding="8dp"
+            android:background="@drawable/bg_top_border">
+
+            <Button
+                android:id="@+id/btn_add"
+                android:layout_width="match_parent"
+                android:textSize="@dimen/button_text"
+                android:layout_marginStart="8dp"
+                android:layout_height="50dp"
+                android:text="@string/add_category"
+                app:icon="@drawable/ic_plus_circle"
+                app:iconSize="20dp"
+                android:backgroundTint="@color/purple_500"
+                app:cornerRadius="@dimen/button_corner"/>
+
+            <Button
+                android:id="@+id/btn_delete"
+                android:layout_width="match_parent"
+                android:textSize="@dimen/button_text"
+                android:layout_marginStart="8dp"
+                android:layout_height="50dp"
+                android:text="@string/delete_category"
+                app:icon="@drawable/ic_trash"
+                app:iconSize="20dp"
+                android:backgroundTint="#F44336"
+                app:cornerRadius="@dimen/button_corner"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
     </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:contentDescription="@string/recyclerView"/>
-
-        <TextView
-            android:id="@+id/tv_no_categories"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/no_categories"
-            android:textColor="#90000000"
-            android:gravity="center" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:background="@drawable/bg_top_border">
-
-        <Button
-            android:id="@+id/btn_add"
-            android:layout_width="match_parent"
-            android:textSize="@dimen/button_text"
-            android:layout_marginStart="8dp"
-            android:layout_height="50dp"
-            android:text="@string/add_category"
-            app:icon="@drawable/ic_plus_circle"
-            app:iconSize="20dp"
-            android:backgroundTint="@color/purple_500"
-            app:cornerRadius="@dimen/button_corner"/>
-
-        <Button
-            android:id="@+id/btn_delete"
-            android:layout_width="match_parent"
-            android:textSize="@dimen/button_text"
-            android:layout_marginStart="8dp"
-            android:layout_height="50dp"
-            android:text="@string/delete_category"
-            app:icon="@drawable/ic_trash"
-            app:iconSize="20dp"
-            android:backgroundTint="#F44336"
-            app:cornerRadius="@dimen/button_corner"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/progress_group"
@@ -126,5 +142,5 @@
 
     </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>
 

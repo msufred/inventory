@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -16,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,20 +32,21 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.CategoryListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Category;
+import io.zak.inventory.firebase.CategoryEntry;
 
 public class CategoriesActivity extends AppCompatActivity implements CategoryListAdapter.OnItemClickListener, CategoryListAdapter.OnItemLongClickListener {
 
     private static final String TAG = "Categories";
 
     // Widgets
+    private ImageButton btnBack, btnSync;
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoCategories;
     private Button btnAdd;
-    private ImageButton btnBack;
-    private RelativeLayout progressGroup;
     private Button btnDelete;
     private TextView titleTextView;
+    private RelativeLayout progressGroup;
 
     // for RecyclerView
     private CategoryListAdapter adapter;
@@ -54,6 +59,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
 
     private CompositeDisposable disposables;
     private AlertDialog addDialog;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,14 +67,14 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         setContentView(R.layout.activity_categories);
         getWidgets();
         setListeners();
-        loadData();
     }
 
     private void getWidgets() {
+        btnBack = findViewById(R.id.btn_back);
+        btnSync = findViewById(R.id.btn_sync);
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
         tvNoCategories = findViewById(R.id.tv_no_categories);
-        btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
         btnDelete = findViewById(R.id.btn_delete);
         progressGroup = findViewById(R.id.progress_group);
@@ -105,14 +111,22 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             }
         });
 
+        btnSync.setOnClickListener(v -> syncData());
+
         btnAdd.setOnClickListener(v -> showAddDialog());
 
         btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
     }
 
-    private void loadData() {
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
+        loadData();
+    }
 
+    private void loadData() {
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching Category entries: " + Thread.currentThread());
@@ -120,6 +134,7 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with size=" + list.size() + " " + Thread.currentThread());
+            exitSelectionMode();
             categoryList = list;
             adapter.replaceAll(list);
             tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
@@ -153,26 +168,24 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     private void deleteSelectedItems() {
         List<Category> selectedCategories = adapter.getSelectedCategories();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             int deletedCount = 0;
             for (Category category : selectedCategories) {
-                deletedCount += AppDatabaseImpl.getDatabase(getApplicationContext()).categories().delete(category);
+                int rowCount = AppDatabaseImpl.getDatabase(getApplicationContext()).categories().delete(category);
+                if (rowCount > 0) {
+                    deletedCount += 1;
+                    // delete from online database
+                    mDatabase.child("categories").child(String.valueOf(category.categoryId)).removeValue();
+                }
             }
             return deletedCount;
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Deleted " + count + " categories");
-
-            // Remove deleted items from the list
-            categoryList.removeAll(selectedCategories);
-            adapter.replaceAll(categoryList);
-
-            // Exit selection mode
-            exitSelectionMode();
-
-            // Show empty view if needed
-            tvNoCategories.setVisibility(categoryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-
+            loadData(); // refresh
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error during deletion: " + err);
 
             // Create a new AlertDialog.Builder each time
@@ -291,13 +304,28 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         Category category = new Category();
         category.categoryName = categoryName;
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().insert(category);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            category.categoryId = id.intValue();
-            adapter.addItem(category);
-            if (tvNoCategories.getVisibility() == View.VISIBLE) tvNoCategories.setVisibility(View.INVISIBLE);
+            // add entry to online database
+            CategoryEntry entry = new CategoryEntry();
+            entry.id = id.intValue();
+            entry.category = categoryName;
+            mDatabase.child("categories")
+                    .child(String.valueOf(entry.id))
+                    .setValue(entry)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Category entry added!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.w(TAG, "failure add category", task.getException());
+                        }
+                        loadData();
+                    });
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             // Create a new AlertDialog.Builder each time
             new AlertDialog.Builder(this)
                     .setTitle("Database Error")
@@ -315,8 +343,22 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         disposables.add(Single.fromCallable(() -> {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).categories().update(category);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowsAffected -> {
-            adapter.updateItem(category);
+            // update entry in online database
+            mDatabase.child("categories")
+                    .child(String.valueOf(categoryId))
+                    .child("category")
+                    .setValue(categoryName)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Category updated!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.w(TAG, "failure update category", task.getException());
+                        }
+                        loadData();
+                    });
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             // Create a new AlertDialog.Builder each time
             new AlertDialog.Builder(this)
                     .setTitle("Database Error")
@@ -324,6 +366,16 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                     .show();
         }));
+    }
+    
+    private void syncData() {
+        progressGroup.setVisibility(View.VISIBLE);
+        for (Category category : categoryList) {
+            CategoryEntry entry = new CategoryEntry(category.categoryId, category.categoryName);
+            mDatabase.child("categories").child(String.valueOf(category.categoryId)).setValue(entry);
+        }
+        Toast.makeText(this, "Categories Synced!", Toast.LENGTH_SHORT).show();
+        progressGroup.setVisibility(View.GONE);
     }
 
     @Override

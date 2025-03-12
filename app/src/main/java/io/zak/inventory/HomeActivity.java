@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -31,6 +33,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private CompositeDisposable disposables;
     private User mUser;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,6 +41,8 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         getWidgets();
         setListeners();
+
+        mAuth = FirebaseAuth.getInstance();
 
         // create Fragments
         dashboardFragment = new DashboardFragment();
@@ -68,52 +73,11 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (disposables == null) disposables = new CompositeDisposable();
-
-        int id = Utils.getLoginId(getApplicationContext());
-        if (id == -1) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            finish();
-        } else {
-            getUser(id);
-        }
-    }
-
     /**
      * Change the current view in the FrameLayout.
      * @param fragment Fragment view
      */
     private void setView(Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, fragment).commit();
-    }
-
-    private void getUser(int id) {
-        disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetch user: " + Thread.currentThread());
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).users().getUser(id);
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(users -> {
-            if (users.isEmpty()) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            } else {
-                mUser = users.get(0);
-                Log.d(TAG, "User " + mUser.username);
-                displayUserInfo();
-            }
-        }));
-    }
-
-    private void displayUserInfo() {
-        if (mUser == null) return;
-        // tvUsername.setText(mUser.username);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "Destroying resources...");
-        disposables.dispose();
     }
 }

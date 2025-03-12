@@ -21,7 +21,7 @@ public class Utils {
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
 
     /**
-     * Returns a database-safe String. MUST BE USED when saving entry to the database.
+     * Returns a database-safe String. MUST BE USED when saving entry to or querying the database.
      * @param str String value
      * @return String safe for database
      */
@@ -92,6 +92,13 @@ public class Utils {
         }
     }
 
+    /**
+     * Generate a Bitmap QR Code from String str
+     * @param str String used to generate QR Code
+     * @param width Bitmap width
+     * @param height Bitmap height
+     * @return Bitmap
+     */
     public static Bitmap generateQrCode(String str, int width, int height) {
         Bitmap bitmap = null;
         QRCodeWriter qrCodeWriter = new QRCodeWriter();

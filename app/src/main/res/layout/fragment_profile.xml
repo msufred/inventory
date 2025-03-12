@@ -44,7 +44,10 @@
         android:id="@+id/profile"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:src="@drawable/bg_circle"
+        android:src="@drawable/ic_user"
+        app:tint="@color/purple_500"
+        android:padding="32dp"
+        android:background="@drawable/bg_circle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -90,13 +93,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view"
-        app:layout_constraintVertical_bias="0.41">
+        app:layout_constraintTop_toBottomOf="@id/tv_position">
+
+        <TextView
+            android:id="@+id/tv_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="16dp"
+            android:text="@string/no_address"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_pin"
+            app:drawableTint="@color/purple_500" />
+
+        <TextView
+            android:id="@+id/tv_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="16dp"
+            android:text="@string/no_email"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_envelope"
+            app:drawableTint="@color/purple_500" />
 
         <TextView
             android:id="@+id/tv_contact"
@@ -108,18 +133,6 @@
             android:textSize="@dimen/form_text"
             app:drawableStartCompat="@drawable/ic_phone"
             app:drawableTint="@color/purple_500" />
-
-        <TextView
-            android:id="@+id/tv_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:drawablePadding="16dp"
-            android:text="@string/no_address"
-            android:textSize="16sp"
-            app:drawableStartCompat="@drawable/ic_pin"
-            app:drawableTint="@color/purple_500" />
-
 
     </LinearLayout>
 
@@ -148,4 +161,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_logout" />
+
+    <RelativeLayout
+        android:id="@+id/progress_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#20000000"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:indeterminateTint="@color/purple_500"/>
+
+    </RelativeLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

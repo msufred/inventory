@@ -55,38 +55,18 @@
         app:layout_constraintBottom_toTopOf="@id/button_group"
         android:background="@drawable/bg_round_rect_top">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
+            android:text="@string/user_details"
+            android:textSize="@dimen/page_title"
+            android:textStyle="bold"
+            android:textColor="#111"
+            android:layout_gravity="center_horizontal"
+            android:drawablePadding="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" >
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="@string/user_details"
-                android:textSize="@dimen/page_title"
-                android:textStyle="bold"
-                android:textColor="#111"
-                android:drawablePadding="16dp"
-                app:drawableStartCompat="@drawable/ic_user"
-                app:drawableTint="#111" />
-
-            <ImageButton
-                android:id="@+id/btn_delete"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_trash"
-                app:tint="#ccff0000"
-                android:background="@drawable/bg_ripple_round"
-                android:contentDescription="@string/button" />
-
-        </LinearLayout>
+            app:drawableStartCompat="@drawable/ic_user"
+            app:drawableTint="#111" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -99,7 +79,7 @@
                 android:padding="16dp" >
 
                 <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/name"
                     android:textStyle="bold"
@@ -117,7 +97,7 @@
                     android:layout_marginTop="8dp"/>
 
                 <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/position"
                     android:textStyle="bold"
@@ -136,26 +116,7 @@
                     android:layout_marginTop="8dp"/>
 
                 <TextView
-                    android:layout_width="90dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/contact"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"
-                    android:labelFor="@id/et_contact"/>
-
-                <EditText
-                    android:id="@+id/et_contact"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="phone"
-                    android:hint="@string/phone_or_mobile"
-                    android:inputType="text"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:layout_width="90dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/address"
                     android:textStyle="bold"
@@ -175,56 +136,39 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/username"
+                    android:text="@string/email_address"
                     android:textStyle="bold"
                     android:layout_marginTop="16dp"/>
 
                 <EditText
-                    android:id="@+id/et_username"
+                    android:id="@+id/et_email"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/text_input_target"
                     android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="name"
-                    android:hint="@string/username"
+                    android:autofillHints="postalAddress"
+                    android:hint="@string/email_address"
+                    android:inputType="textEmailAddress"
+                    android:textSize="@dimen/text_input"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/contact"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:labelFor="@id/et_contact"/>
+
+                <EditText
+                    android:id="@+id/et_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/text_input_target"
+                    android:background="@drawable/bg_textfield_grey"
+                    android:autofillHints="phone"
+                    android:hint="@string/phone_or_mobile"
                     android:inputType="text"
                     android:textSize="@dimen/text_input"
                     android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/password"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <EditText
-                    android:id="@+id/et_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="name"
-                    android:hint="@string/password"
-                    android:inputType="textPassword"
-                    android:textSize="@dimen/text_input"
-                    android:layout_marginTop="8dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/confirm_password"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp"/>
-
-                <EditText
-                    android:id="@+id/et_password_confirm"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/text_input_target"
-                    android:background="@drawable/bg_textfield_grey"
-                    android:autofillHints="name"
-                    android:hint="@string/reenter_password"
-                    android:inputType="textPassword"
-                    android:layout_marginTop="8dp"
-                    android:textSize="@dimen/text_input"/>
 
             </LinearLayout>
 

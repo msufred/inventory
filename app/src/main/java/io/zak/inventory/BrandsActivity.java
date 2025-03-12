@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -16,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,32 +32,31 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.BrandListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Brand;
+import io.zak.inventory.firebase.BrandEntry;
 
 public class BrandsActivity extends AppCompatActivity implements BrandListAdapter.OnItemClickListener, BrandListAdapter.OnItemLongClickListener {
 
     private static final String TAG = "Brands";
 
     // Widgets
+    private ImageButton btnBack, btnSync;
     private SearchView searchView;
     private RecyclerView recyclerView;
     private TextView tvNoBrands;
     private Button btnAdd;
-    private ImageButton btnBack;
     private RelativeLayout progressGroup;
     private Button btnDelete;
     private TextView titleTextView;
 
-    // for RecyclerView
     private BrandListAdapter adapter;
-
-    // list reference for search filter
     private List<Brand> brandList;
-
     // comparator for search filter
     private final Comparator<Brand> comparator = Comparator.comparing(brand -> brand.brandName);
 
     private CompositeDisposable disposables;
     private AlertDialog addDialog;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,14 +64,14 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         setContentView(R.layout.activity_brands);
         getWidgets();
         setListeners();
-        loadData();
     }
 
     private void getWidgets() {
+        btnBack = findViewById(R.id.btn_back);
+        btnSync = findViewById(R.id.btn_sync);
         searchView = findViewById(R.id.search_view);
         recyclerView = findViewById(R.id.recycler_view);
         tvNoBrands = findViewById(R.id.tv_no_brands);
-        btnBack = findViewById(R.id.btn_back);
         btnAdd = findViewById(R.id.btn_add);
         btnDelete = findViewById(R.id.btn_delete);
         progressGroup = findViewById(R.id.progress_group);
@@ -84,6 +87,16 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     }
 
     private void setListeners() {
+        btnBack.setOnClickListener(v -> {
+            if (adapter.isInSelectionMode()) {
+                exitSelectionMode();
+            } else {
+                finish();
+            }
+        });
+
+        btnSync.setOnClickListener(v -> syncData()); // sync to online database; local is prioritized
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -97,27 +110,27 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
             }
         });
 
-        btnBack.setOnClickListener(v -> {
-            if (adapter.isInSelectionMode()) {
-                exitSelectionMode();
-            } else {
-                finish();
-            }
-        });
-
         btnAdd.setOnClickListener(v -> showAddDialog());
 
         btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
     }
 
-    private void loadData() {
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
+        loadData();
+    }
 
+    private void loadData() {
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Retrieving brand entries [local]");
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
+            exitSelectionMode();
             brandList = list;
             adapter.replaceAll(list);
             tvNoBrands.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
@@ -150,26 +163,24 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private void deleteSelectedItems() {
         List<Brand> selectedBrands = adapter.getSelectedBrands();
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             int deletedCount = 0;
             for (Brand brand : selectedBrands) {
-                deletedCount += AppDatabaseImpl.getDatabase(getApplicationContext()).brands().delete(brand);
+                int rowUpdated = AppDatabaseImpl.getDatabase(getApplicationContext()).brands().delete(brand);
+                if (rowUpdated > 0) {
+                    deletedCount += 1;
+                    // delete from online database
+                    mDatabase.child("brands").child(String.valueOf(brand.brandId)).removeValue();
+                }
             }
             return deletedCount;
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
             Log.d(TAG, "Deleted " + count + " brands");
-
-            // Remove deleted items from the list
-            brandList.removeAll(selectedBrands);
-            adapter.replaceAll(brandList);
-
-            // Exit selection mode
-            exitSelectionMode();
-
-            // Show empty view if needed
-            tvNoBrands.setVisibility(brandList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-
+            progressGroup.setVisibility(View.GONE);
+            loadData(); // refresh
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error during deletion: " + err);
 
             // dialog
@@ -290,15 +301,36 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         Brand brand = new Brand();
         brand.brandName = brandName;
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Saving Brand entry: " + Thread.currentThread());
+            Log.d(TAG, "Adding new Brand entry");
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().insert(brand);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            Log.d(TAG, "Done. Returned with ID=" + id + " " + Thread.currentThread());
-            brand.brandId = id.intValue();
-            adapter.addItem(brand);
-            if (tvNoBrands.getVisibility() == View.VISIBLE) tvNoBrands.setVisibility(View.INVISIBLE);
+            Log.d(TAG, "Returned with id=" + id.intValue());
+
+            // add item to online database
+            BrandEntry brandEntry = new BrandEntry();
+            brandEntry.id = id.intValue();
+            brandEntry.brand = brandName;
+            mDatabase.child("brands")
+                    .child(String.valueOf(id))
+                    .setValue(brandEntry)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "New Brand entry added.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Failed to add new Brand entry.", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "failure adding brand", task.getException());
+                        }
+                        loadData(); // refresh list
+                    });
+
+//            brand.brandId = id.intValue();
+//            adapter.addItem(brand);
+//            if (tvNoBrands.getVisibility() == View.VISIBLE) tvNoBrands.setVisibility(View.INVISIBLE);
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
@@ -315,13 +347,31 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         brand.brandId = brandId;
         brand.brandName = brandName;
 
+        progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Updating Brand entry: " + Thread.currentThread());
             return AppDatabaseImpl.getDatabase(getApplicationContext()).brands().update(brand);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowsAffected -> {
             Log.d(TAG, "Done. Updated rows=" + rowsAffected + " " + Thread.currentThread());
-            adapter.updateItem(brand);
+            // adapter.updateItem(brand);
+
+            // update item in online database
+            mDatabase.child("brands")
+                    .child(String.valueOf(brandId))
+                    .child("brand")
+                    .setValue(brandName)
+                    .addOnCompleteListener(this, task -> {
+                        progressGroup.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Brand updated successfully.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.w(TAG, "failure brand update", task.getException());
+                        }
+                        loadData(); // refresh
+                    });
+
         }, err -> {
+            progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             // dialog
@@ -331,6 +381,16 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                     .show();
         }));
+    }
+
+    private void syncData() {
+        progressGroup.setVisibility(View.VISIBLE);
+        for (Brand brand : brandList) {
+            BrandEntry entry = new BrandEntry(brand.brandId, brand.brandName);
+            mDatabase.child("brands").child(String.valueOf(brand.brandId)).setValue(entry);
+        }
+        Toast.makeText(this, "Brands Synced!", Toast.LENGTH_SHORT).show();
+        progressGroup.setVisibility(View.GONE);
     }
 
     @Override
