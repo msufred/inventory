@@ -15,6 +15,7 @@ import java.util.List;
 
 import io.zak.inventory.R;
 import io.zak.inventory.Utils;
+import io.zak.inventory.data.entities.OrderItem;
 import io.zak.inventory.data.relations.OrderItemDetails;
 
 public class OrderItemListAdapter extends RecyclerView.Adapter<OrderItemListAdapter.ViewHolder> {

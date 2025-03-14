@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Main";
     private CompositeDisposable disposables;
-
     private FirebaseAuth mAuth;
 
     @Override
