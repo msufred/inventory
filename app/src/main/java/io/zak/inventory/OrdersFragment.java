@@ -342,6 +342,11 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
                         OrderEntry orderEntry = task.getResult().getValue(OrderEntry.class);
                         if (orderEntry != null) {
                             saveOrder(orderEntry);
+                        } else {
+                            dialogBuilder.setTitle("Error")
+                                    .setMessage("Order entry is null!")
+                                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                            dialogBuilder.create().show();
                         }
                     } else {
                         Log.w(TAG, "fetch order failure", task.getException());
@@ -372,9 +377,11 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with id=" + id.intValue());
-            // open OrderActivity
+
+            // open ViewOrderActivity
             Intent intent = new Intent(getActivity(), ViewOrderActivity.class);
             intent.putExtra("order_id", orderEntry.id);
+            intent.putExtra("fetch", true);
             startActivity(intent);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
