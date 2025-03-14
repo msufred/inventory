@@ -31,7 +31,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.ProductListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Product;
-import io.zak.inventory.data.relations.ProductDetails;
 import io.zak.inventory.firebase.ProductEntry;
 
 public class ProductsActivity extends AppCompatActivity implements ProductListAdapter.OnItemClickListener {
@@ -169,8 +168,6 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
 
     private void syncData() {
         progressGroup.setVisibility(View.VISIBLE);
-        // first, delete all data from online database
-        mDatabase.child("products").setValue(null);
         // add non-deleted entries to online database
         for (Product product : productList) {
             ProductEntry entry = new ProductEntry();
