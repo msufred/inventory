@@ -19,6 +19,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -35,6 +40,7 @@ import io.zak.inventory.adapters.OrderListAdapter;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Order;
 import io.zak.inventory.data.relations.OrderDetails;
+import io.zak.inventory.firebase.OrderEntry;
 
 public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemClickListener {
 
@@ -70,6 +76,8 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
+
+    private DatabaseReference mDatabase;
 
     @Nullable
     @Override
@@ -127,11 +135,13 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
             if (validated()) {
                 if (hasDuplicate(orderId)) {
                     resultDialog.dismiss();
-                    dialogBuilder.setTitle("Invalid").setMessage("Duplicate Order").setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                    dialogBuilder.setTitle("Invalid").setMessage("Duplicate Order")
+                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
                     dialogBuilder.create().show();
                 } else {
                     resultDialog.dismiss();
-                    saveResult();
+                    // saveResult();
+                    fetchResult();
                 }
             } else {
                 dialogBuilder.setTitle("Invalid Action").setMessage("Incomplete Data/Invalid QR Code")
@@ -145,6 +155,7 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
     public void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
         refresh();
     }
 
@@ -302,8 +313,8 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
             Log.d(TAG, "Saving Order entry.");
             return AppDatabaseImpl.getDatabase(requireActivity().getApplicationContext()).orders().insert(order);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with id=" + id.intValue());
+            progressGroup.setVisibility(View.GONE);
             refresh();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
@@ -313,6 +324,64 @@ public class OrdersFragment extends Fragment implements OrderListAdapter.OnItemC
                     .setPositiveButton("Dismiss", (dialog, which) -> {
                         dialog.dismiss();
                     });
+            dialogBuilder.create().show();
+        }));
+    }
+
+    /**
+     * Fetch Order from Firebase database.
+     */
+    private void fetchResult() {
+        Log.d(TAG, "Fetch Order entry with id=" + orderId);
+        progressGroup.setVisibility(View.VISIBLE);
+        mDatabase.child("orders").child(String.valueOf(orderId)).get()
+                .addOnCompleteListener(requireActivity(), task -> {
+                    progressGroup.setVisibility(View.VISIBLE);
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Order item retrieved.");
+                        OrderEntry orderEntry = task.getResult().getValue(OrderEntry.class);
+                        if (orderEntry != null) {
+                            saveOrder(orderEntry);
+                        }
+                    } else {
+                        Log.w(TAG, "fetch order failure", task.getException());
+                        dialogBuilder.setTitle("Invalid")
+                                .setMessage("Order ID not found.")
+                                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                        dialogBuilder.create().show();
+                    }
+                });
+    }
+
+    private void saveOrder(OrderEntry orderEntry) {
+        Order order = new Order();
+        order.orderId = orderEntry.id;
+        order.fkVehicleId = orderEntry.vehicleId;
+        order.fkEmployeeId = orderEntry.employeeId;
+        order.consumerName = orderEntry.consumer;
+        order.consumerAddress = orderEntry.address;
+        order.consumerContact = orderEntry.contactNo;
+        order.dateOrdered = orderEntry.dateOrdered;
+        order.totalAmount = orderEntry.totalAmount;
+        order.orderStatus = orderEntry.status;
+
+        progressGroup.setVisibility(View.VISIBLE);
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "Saving order item");
+            return AppDatabaseImpl.getDatabase(getActivity()).orders().insert(order);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.d(TAG, "Returned with id=" + id.intValue());
+            // open OrderActivity
+            Intent intent = new Intent(getActivity(), ViewOrderActivity.class);
+            intent.putExtra("order_id", orderEntry.id);
+            startActivity(intent);
+        }, err -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.e(TAG, "Database error: " + err);
+            dialogBuilder.setTitle("Database Error")
+                    .setMessage("Error while saving Order entry: " + err)
+                    .setPositiveButton("Dismiss", (dialog, which) -> dialog.dismiss());
             dialogBuilder.create().show();
         }));
     }
