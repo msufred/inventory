@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,11 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -36,6 +42,8 @@ import io.zak.inventory.data.entities.Order;
 import io.zak.inventory.data.entities.OrderItem;
 import io.zak.inventory.data.entities.WarehouseStock;
 import io.zak.inventory.data.relations.OrderItemDetails;
+import io.zak.inventory.firebase.OrderEntry;
+import io.zak.inventory.firebase.OrderItemEntry;
 
 public class ViewOrderActivity extends AppCompatActivity implements OrderItemListAdapter.OnItemClickListener {
 
@@ -79,6 +87,29 @@ public class ViewOrderActivity extends AppCompatActivity implements OrderItemLis
 
     // current Order
     private Order mOrder;
+
+    private DatabaseReference mDatabase;
+    private DatabaseReference mItemsRef;
+    private OrderEntry mOrderEntry;
+    private List<OrderItemEntry> mOrderItemList;
+
+    private final ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            progressGroup.setVisibility(View.VISIBLE);
+            mOrderItemList = new ArrayList<>();
+            for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                OrderItemEntry entry = postSnapshot.getValue(OrderItemEntry.class);
+                if (entry != null) mOrderItemList.add(entry);
+            }
+            processItems(mOrderItemList);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -182,12 +213,20 @@ public class ViewOrderActivity extends AppCompatActivity implements OrderItemLis
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
+        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         // get order id
         int id = getIntent().getIntExtra("order_id", -1);
+        boolean fetch = getIntent().getBooleanExtra("fetch", false);
+
         if (id == -1) {
             dialogBuilder.setTitle("Invalid Action").setMessage("Invalid Order ID: " + id)
                     .setPositiveButton("Dismiss", (dialog, which) -> {
@@ -198,19 +237,80 @@ public class ViewOrderActivity extends AppCompatActivity implements OrderItemLis
             return;
         }
 
+        // get OrderEntry
+        progressGroup.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Fetch Order entry with id=" + id);
+        mDatabase.child("orders").child(String.valueOf(id)).get()
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        mOrderEntry = task.getResult().getValue(OrderEntry.class);
+                        if (mOrderEntry != null) {
+                            Log.d(TAG, "Success! Fetching order items...");
+                            if (mOrderEntry.status.equals("Processing")) {
+                                // TODO show action buttons (Process Button)
+                                // Process button will iterated all items, and subtract quantity
+                                // from Warehouse stocks
+                            }
+                        }
+                    } else {
+                        Log.w(TAG, "failed to fetch order", task.getException());
+                        dialogBuilder.setTitle("Error")
+                                .setMessage("Order entry not found!")
+                                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                        dialogBuilder.create().show();
+                    }
+                });
+
+        // get items
+        if (fetch && mItemsRef == null) {
+            mItemsRef = mDatabase.child("orders").child(String.valueOf(id)).child("items");
+            mItemsRef.addValueEventListener(valueEventListener);
+        } else {
+            if (mItemsRef != null) mItemsRef.removeEventListener(valueEventListener);
+            refresh();
+        }
+
         // order id is not -1, get Order entry
+//        progressGroup.setVisibility(View.VISIBLE);
+//        disposables.add(Single.fromCallable(() -> {
+//            Log.d(TAG, "Retrieving Order entry with ID=" + id);
+//            return AppDatabaseImpl.getDatabase(getApplicationContext()).orders().getOrder(id);
+//        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(orders -> {
+//            progressGroup.setVisibility(View.GONE);
+//            Log.d(TAG, "Returned with list size=" + orders.size());
+//            mOrder = orders.get(0);
+//            if (mOrder != null) {
+//                tvTotalAmount.setText(Utils.toStringMoneyFormat(mOrder.totalAmount));
+//                refresh();
+//            }
+//        }));
+    }
+
+    /*
+     * Add OrderItem entry to local database.
+     */
+    private void processItems(List<OrderItemEntry> orderItemEntries) {
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Retrieving Order entry with ID=" + id);
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).orders().getOrder(id);
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(orders -> {
-            progressGroup.setVisibility(View.GONE);
-            Log.d(TAG, "Returned with list size=" + orders.size());
-            mOrder = orders.get(0);
-            if (mOrder != null) {
-                tvTotalAmount.setText(Utils.toStringMoneyFormat(mOrder.totalAmount));
-                refresh();
+            int count = 0;
+            AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
+            for (OrderItemEntry entry : orderItemEntries) {
+                OrderItem item = new OrderItem();
+                item.orderItemId = entry.id;
+                item.fkOrderId = entry.orderId;
+                item.fkWarehouseStockId = entry.warehouseStockId;
+                item.fkProductId = entry.productId;
+                item.sellingPrice = entry.sellingPrice;
+                item.quantity = entry.quantity;
+                item.subtotal = entry.subtotal;
+                long id = database.orderItems().insert(item);
+                if (id != -1) count += 1;
             }
+            return count;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
+            progressGroup.setVisibility(View.GONE);
+            Log.d(TAG, "Added " + rowCount + " rows.");
+            refresh();
         }));
     }
 
