@@ -48,7 +48,7 @@
                     android:id="@+id/btn_sync"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/ic_refresh_cw"
+                    android:src="@drawable/ic_upload"
                     android:background="@drawable/bg_ripple_round"
                     app:tint="@color/white"
                     android:contentDescription="@string/button"/>
