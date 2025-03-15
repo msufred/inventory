@@ -5,17 +5,18 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "delivery_orders", foreignKeys = {
-        @ForeignKey(entity = Vehicle.class, parentColumns = "vehicleId", childColumns = "fkVehicleId", onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = Employee.class, parentColumns = "employeeId", childColumns = "fkEmployeeId", onDelete = ForeignKey.CASCADE)
-})
+@Entity(tableName = "delivery_orders")
 public class DeliveryOrder {
 
     @PrimaryKey(autoGenerate = true)
     public int deliveryOrderId;
+
     public String trackingNo;
-    public int fkVehicleId; // assigned vehicle
-    public int fkEmployeeId; // assigned driver
+    public String userId;           // assigned user's uid
+    public String userName;         // assigned user's name
+    public int fkVehicleId;         // assigned vehicle
+    public String vehicleName;
+    public String vehiclePlateNo;
     public double totalAmount;
     public long deliveryDate;
     public String deliveryOrderStatus; // Processing, Checked-Out (can't add more items)
