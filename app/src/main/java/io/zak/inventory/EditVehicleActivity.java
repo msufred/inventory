@@ -17,12 +17,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.firebase.VehicleEntry;
 
 public class EditVehicleActivity extends AppCompatActivity {
 
@@ -39,6 +43,8 @@ public class EditVehicleActivity extends AppCompatActivity {
 
     private Vehicle mVehicle;
 
+    private DatabaseReference mDatabase;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +52,7 @@ public class EditVehicleActivity extends AppCompatActivity {
         getWidgets();
         setupSpinners();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     private void getWidgets() {
@@ -100,13 +107,14 @@ public class EditVehicleActivity extends AppCompatActivity {
 
     private void deleteVehicle() {
         progressGroup.setVisibility(View.VISIBLE);
-        disposables.add(Single.fromCallable(() ->
-                        AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().delete(mVehicle))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(result -> {
-                    progressGroup.setVisibility(View.GONE);
+        disposables.add(Single.fromCallable(() -> AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().delete(mVehicle))
+                .observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(result -> {
                     Toast.makeText(this, "Vehicle deleted successfully", Toast.LENGTH_SHORT).show();
+
+                    // delete from online database
+                    mDatabase.child("vehicles").child(String.valueOf(mVehicle.vehicleId)).setValue(null);
+
+                    progressGroup.setVisibility(View.GONE);
                     setResultAndFinish();
                 }, err -> {
                     progressGroup.setVisibility(View.GONE);
@@ -202,8 +210,19 @@ public class EditVehicleActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(id -> {
-                    progressGroup.setVisibility(View.GONE);
                     Toast.makeText(this, "Vehicle updated successfully", Toast.LENGTH_SHORT).show();
+
+                    // update online data
+                    VehicleEntry entry = new VehicleEntry(
+                            mVehicle.vehicleId,
+                            mVehicle.vehicleName,
+                            mVehicle.vehicleType,
+                            mVehicle.plateNo,
+                            mVehicle.vehicleStatus
+                    );
+                    mDatabase.child("vehicles").child(String.valueOf(mVehicle.vehicleId)).setValue(entry);
+
+                    progressGroup.setVisibility(View.GONE);
                     setResultAndFinish();
                 }, err -> {
                     progressGroup.setVisibility(View.GONE);
