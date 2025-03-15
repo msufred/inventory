@@ -6,10 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,8 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -30,14 +26,9 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.DeliveryListAdapter;
-import io.zak.inventory.adapters.EmployeeSpinnerAdapter;
-import io.zak.inventory.adapters.VehicleSpinnerAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.entities.Employee;
-import io.zak.inventory.data.entities.Vehicle;
-import io.zak.inventory.data.relations.DeliveryDetails;
 
 public class DeliveryFragment extends Fragment implements DeliveryListAdapter.OnItemClickListener {
 
@@ -54,12 +45,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     private AlertDialog.Builder dialogBuilder;  // creates AlertDialog (error, add, etc)
 
     private DeliveryListAdapter adapter;        // recyclerView list adapter
-    private List<DeliveryDetails> deliveryList; // reference list of deliveries
-
-    // used for list adapter's sorted list (see DeliveryListAdapter class)
-    // we will sort Delivery items by date
-    private final Comparator<DeliveryDetails> comparator =
-            Comparator.comparing(deliveryDetails -> deliveryDetails.deliveryOrder.deliveryDate);
+    private List<DeliveryOrder> deliveryList;   // reference list of deliveries
 
     @Nullable
     @Override
@@ -79,7 +65,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
 
         // setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new DeliveryListAdapter(comparator, this);
+        adapter = new DeliveryListAdapter(this);
         recyclerView.setAdapter(adapter);
 
         // initialize dialog builder
@@ -125,7 +111,7 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
         AppDatabase database = AppDatabaseImpl.getDatabase(getActivity());
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching DeliveryOrder entries: " + Thread.currentThread());
-            return database.deliveryOrders().getDeliveryOrdersWithDetails();
+            return database.deliveryOrders().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + list.size() + " " + Thread.currentThread());
@@ -144,8 +130,8 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     }
 
     public boolean hasPendingDelivery() {
-        for (DeliveryDetails deliveryDetails : deliveryList) {
-            if (deliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("processing")) {
+        for (DeliveryOrder deliveryOrder : deliveryList) {
+            if (deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("processing")) {
                 return true;
             }
         }
@@ -155,25 +141,25 @@ public class DeliveryFragment extends Fragment implements DeliveryListAdapter.On
     @Override
     public void onItemClick(int position) {
         if (adapter != null) {
-            DeliveryDetails deliveryDetails = adapter.getItem(position);
-            if (deliveryDetails != null) {
-                viewDeliveryItems(deliveryDetails.deliveryOrder.deliveryOrderId);
+            DeliveryOrder deliveryOrder = adapter.getItem(position);
+            if (deliveryOrder != null) {
+                viewDeliveryItems(deliveryOrder.deliveryOrderId);
             }
         }
     }
 
     private void onSearch(String query) {
-        List<DeliveryDetails> filteredList = filter(deliveryList, query);
+        List<DeliveryOrder> filteredList = filter(deliveryList, query);
         adapter.replaceAll(filteredList);
         recyclerView.scrollToPosition(0);
     }
 
-    private List<DeliveryDetails> filter(List<DeliveryDetails> deliveryDetailsList, String query) {
+    private List<DeliveryOrder> filter(List<DeliveryOrder> deliveryOrderList, String query) {
         String str = query.toLowerCase();
-        List<DeliveryDetails> list = new ArrayList<>();
-        for (DeliveryDetails deliveryDetails : deliveryDetailsList) {
-            if (deliveryDetails.vehicle.vehicleName.contains(str)) {
-                list.add(deliveryDetails);
+        List<DeliveryOrder> list = new ArrayList<>();
+        for (DeliveryOrder deliveryOrder : deliveryOrderList) {
+            if (deliveryOrder.vehicleName.contains(str)) {
+                list.add(deliveryOrder);
             }
         }
         return list;
