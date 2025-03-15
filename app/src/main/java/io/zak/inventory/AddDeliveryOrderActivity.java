@@ -251,7 +251,9 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
             Log.d(TAG, "Returned with id=" + id);
 
             // assign vehicle for user
-            AssignedVehicleEntry entry = new AssignedVehicleEntry(mUserEntry.uid, order.fkVehicleId);
+            AssignedVehicleEntry entry = new AssignedVehicleEntry(
+                    mUserEntry.uid, order.fkVehicleId, order.vehicleName, order.vehiclePlateNo
+            );
             mDatabase.child("assigned_vehicles").child(entry.userId).setValue(entry);
 
             progressGroup.setVisibility(View.GONE);
