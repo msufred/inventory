@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,8 +19,11 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +34,7 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.CategoryListAdapter;
+import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Category;
 import io.zak.inventory.firebase.CategoryEntry;
@@ -59,7 +64,21 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
 
     private CompositeDisposable disposables;
     private AlertDialog addDialog;
+
     private DatabaseReference mDatabase;
+    private DatabaseReference mCategoriesRef;
+
+    private final ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchCategories(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,6 +86,8 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
         setContentView(R.layout.activity_categories);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mCategoriesRef = mDatabase.child("categories");
     }
 
     private void getWidgets() {
@@ -122,7 +143,6 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
-        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
         loadData();
     }
 
@@ -138,6 +158,9 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
             categoryList = list;
             adapter.replaceAll(list);
             tvNoCategories.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+            // fetch categories online, sync
+            mCategoriesRef.addValueEventListener(valueEventListener);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
@@ -148,6 +171,52 @@ public class CategoriesActivity extends AppCompatActivity implements CategoryLis
                     .setMessage("Error while fetching Category entries: " + err)
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                     .show();
+        }));
+    }
+
+    private void fetchCategories(DataSnapshot dataSnapshot) {
+        Log.d(TAG, "fetch categories online");
+        progressGroup.setVisibility(View.VISIBLE);
+        List<CategoryEntry> categoryEntries = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            CategoryEntry entry = snapshot.getValue(CategoryEntry.class);
+            if (entry != null) categoryEntries.add(entry);
+        }
+        mCategoriesRef.removeEventListener(valueEventListener);
+
+        // save to local database
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "saving categories to local database");
+            int count = 0;
+            AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
+            for (CategoryEntry entry : categoryEntries) {
+                Category category = new Category();
+                category.categoryId = entry.id;
+                category.categoryName = entry.category;
+
+                boolean hasDuplicate = false;
+                for (Category c : categoryList) {
+                    if (c.categoryId == category.categoryId) {
+                        hasDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!hasDuplicate) {
+                    database.categories().insert(category);
+                    adapter.addItem(category);
+                    categoryList.add(category);
+                    count++;
+                }
+            }
+            return count;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            Log.d(TAG, "added " + count + " items");
+            tvNoCategories.setVisibility(categoryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            progressGroup.setVisibility(View.GONE);
+        }, err -> {
+            Log.e(TAG, "database error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 

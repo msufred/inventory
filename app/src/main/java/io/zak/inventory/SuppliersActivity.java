@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -17,8 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,6 +33,7 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.SupplierListAdapter;
+import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Supplier;
 import io.zak.inventory.firebase.SupplierEntry;
@@ -56,8 +61,20 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
 
     private CompositeDisposable disposables;
 
-    private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private DatabaseReference mSuppliersRef;
+
+    private final ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchSuppliers(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,7 +82,8 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
         setContentView(R.layout.activity_suppliers);
         getWidgets();
         setListeners();
-        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mSuppliersRef = mDatabase.child("suppliers");
     }
 
     private void getWidgets() {
@@ -124,8 +142,60 @@ public class SuppliersActivity extends AppCompatActivity implements SupplierList
             supplierList = list;
             adapter.replaceAll(list);
             tvNoSuppliers.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+            // fetch suppliers online and sync
+            mSuppliersRef.addValueEventListener(valueEventListener);
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
+            progressGroup.setVisibility(View.GONE);
+        }));
+    }
+
+    private void fetchSuppliers(DataSnapshot dataSnapshot) {
+        Log.d(TAG, "fetch suppliers online");
+        progressGroup.setVisibility(View.VISIBLE);
+        List<SupplierEntry> supplierEntries = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            SupplierEntry entry = snapshot.getValue(SupplierEntry.class);
+            if (entry != null) supplierEntries.add(entry);
+        }
+        mSuppliersRef.removeEventListener(valueEventListener);
+
+        // save to local database
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "saving to local database");
+            int count = 0;
+            AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
+            for (SupplierEntry entry : supplierEntries) {
+                Supplier supplier = new Supplier();
+                supplier.supplierId = entry.id;
+                supplier.supplierName = entry.name;
+                supplier.supplierAddress = entry.address;
+                supplier.supplierContactNo = entry.contactNo;
+                supplier.supplierEmail = entry.email;
+
+                boolean hasDuplicate = false;
+                for (Supplier s : supplierList) {
+                    if (s.supplierId == supplier.supplierId) {
+                        hasDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!hasDuplicate) {
+                    database.suppliers().insert(supplier);
+                    adapter.addItem(supplier);
+                    supplierList.add(supplier);
+                    count++;
+                }
+            }
+            return count;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            Log.d(TAG, "added " + count + " items");
+            //tvNoSuppliers.setVisibility(supplierList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            progressGroup.setVisibility(View.GONE);
+        }, err -> {
+            Log.e(TAG, "database error: " + err);
             progressGroup.setVisibility(View.GONE);
         }));
     }

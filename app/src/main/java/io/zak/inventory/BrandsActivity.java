@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,8 +19,11 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +34,7 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.BrandListAdapter;
+import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Brand;
 import io.zak.inventory.firebase.BrandEntry;
@@ -57,6 +62,19 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     private AlertDialog addDialog;
 
     private DatabaseReference mDatabase;
+    private DatabaseReference mBrandsRef;
+
+    private final ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchBrands(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +82,8 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
         setContentView(R.layout.activity_brands);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mBrandsRef = mDatabase.child("brands");
     }
 
     private void getWidgets() {
@@ -119,7 +139,6 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
-        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
         loadData();
     }
 
@@ -134,6 +153,9 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
             brandList = list;
             adapter.replaceAll(list);
             tvNoBrands.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+            // fetch brands online and match with local database
+            mBrandsRef.addValueEventListener(valueEventListener);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
 
@@ -143,6 +165,52 @@ public class BrandsActivity extends AppCompatActivity implements BrandListAdapte
                     .setMessage("Error while fetching Brand entries: " + err)
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                     .show();
+        }));
+    }
+
+    private void fetchBrands(DataSnapshot dataSnapshot) {
+        Log.d(TAG, "fetch brands online");
+        progressGroup.setVisibility(View.VISIBLE);
+        List<BrandEntry> brandEntries = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            BrandEntry entry = snapshot.getValue(BrandEntry.class);
+            if (entry != null) brandEntries.add(entry);
+        }
+        mBrandsRef.removeEventListener(valueEventListener);
+
+        // save to local database
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "saving brands to local database");
+            int count = 0;
+            AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
+            for (BrandEntry entry : brandEntries) {
+                Brand brand = new Brand();
+                brand.brandId = entry.id;
+                brand.brandName = entry.brand;
+
+                boolean hasDuplicate = false;
+                for (Brand b : brandList) {
+                    if (b.brandId == brand.brandId) {
+                        hasDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!hasDuplicate) {
+                    database.brands().insert(brand);
+                    adapter.addItem(brand);
+                    brandList.add(brand);
+                    count++;
+                }
+            };
+            return count;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            Log.d(TAG, "added " + count + " items");
+            tvNoBrands.setVisibility(brandList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            progressGroup.setVisibility(View.GONE);
+        }, err -> {
+            Log.e(TAG, "database error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 

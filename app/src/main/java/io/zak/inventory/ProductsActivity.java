@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,8 +18,11 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,6 +33,7 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.adapters.ProductListAdapter;
+import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Product;
 import io.zak.inventory.firebase.ProductEntry;
@@ -58,6 +63,19 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     private AlertDialog.Builder dialogBuilder;
 
     private DatabaseReference mDatabase;
+    private DatabaseReference mProductsRef;
+
+    private final ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchProducts(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +83,8 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
         setContentView(R.layout.activity_products);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mProductsRef = mDatabase.child("products");
     }
 
     private void getWidgets() {
@@ -112,7 +132,6 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
     protected void onResume() {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
-        if (mDatabase == null) mDatabase = FirebaseDatabase.getInstance().getReference();
 
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
@@ -124,14 +143,69 @@ public class ProductsActivity extends AppCompatActivity implements ProductListAd
             productList = list;
             adapter.replaceAll(list);
             tvNoProducts.setVisibility(list.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+
+            // fetch online products
+            mProductsRef.addValueEventListener(valueEventListener);
         }, err -> {
             progressGroup.setVisibility(View.GONE);
             Log.e(TAG, "Database Error: " + err);
 
             dialogBuilder.setTitle("Database Error")
-                    .setMessage("Error while fetching Product enties: " + err)
+                    .setMessage("Error while fetching Product entries: " + err)
                     .setPositiveButton("OK", ((dialog, which) -> dialog.dismiss()));
             dialogBuilder.create().show();
+        }));
+    }
+
+    private void fetchProducts(DataSnapshot dataSnapshot) {
+        progressGroup.setVisibility(View.VISIBLE);
+        Log.d(TAG, "fetch products online");
+        List<ProductEntry> productEntries = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            ProductEntry entry = snapshot.getValue(ProductEntry.class);
+            if (entry != null) productEntries.add(entry);
+        }
+        mProductsRef.removeEventListener(valueEventListener);
+
+        // save to local database
+        disposables.add(Single.fromCallable(() -> {
+            Log.d(TAG, "saving to local database");
+            int count = 0;
+            AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
+            for (ProductEntry entry : productEntries) {
+                Product product = new Product();
+                product.productId = entry.id;
+                product.fkBrandId = entry.brandId;
+                product.fkCategoryId = entry.categoryId;
+                product.fkSupplierId = entry.supplierId;
+                product.productName = entry.name;
+                product.price = entry.price;
+                product.criticalLevel = entry.criticalLevel;
+                product.productDescription = entry.description;
+
+                boolean hasDuplicate = false;
+                for (Product p : productList) {
+                    if (p.productId == product.productId) {
+                        hasDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!hasDuplicate) {
+                    database.products().insert(product);
+                    adapter.addItem(product);
+                    productList.add(product);
+                    count++;
+                }
+            }
+            return count;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(count -> {
+            Log.d(TAG, "added " + count + " items");
+            tvNoProducts.setVisibility(productList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+            progressGroup.setVisibility(View.GONE);
+        }, err -> {
+            Log.d(TAG, "database error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 
