@@ -1,7 +1,5 @@
 package io.zak.inventory;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,11 +12,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,15 +31,14 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.zak.inventory.adapters.EmployeeSpinnerAdapter;
+import io.zak.inventory.adapters.UserSpinnerAdapter;
 import io.zak.inventory.adapters.VehicleSpinnerAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.entities.Employee;
-import io.zak.inventory.data.entities.Vehicle;
-import io.zak.inventory.data.entities.WarehouseStock;
-import io.zak.inventory.data.relations.DeliveryItemDetails;
+import io.zak.inventory.firebase.AssignedVehicleEntry;
+import io.zak.inventory.firebase.UserEntry;
+import io.zak.inventory.firebase.VehicleEntry;
 
 public class EditDeliveryOrderActivity extends AppCompatActivity {
 
@@ -48,23 +52,47 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
     private Button btnCancel, btnSave;
     private RelativeLayout progressGroup;
 
-    private Drawable errorDrawable;
-
     // Spinner reference lists
-    private List<Vehicle> vehicleList;
-    private List<Employee> employeeList;
+    private List<VehicleEntry> vehicleEntryList;
+    private List<UserEntry> userEntryList;
 
     // reference for tracking no
     private List<DeliveryOrder> deliveryOrders;
 
-    private Vehicle mVehicle;   // selected vehicle
-    private Employee mEmployee; // selected employee
-
+    private VehicleEntry mVehicleEntry;
+    private UserEntry mUserEntry;
     private DeliveryOrder mDeliveryOrder; // DeliveryOrder to edit/delete (fetched in onResume)
-    private List<DeliveryItemDetails> deliveryItemList; // reference list if ever DeliveryOrder is to be deleted
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
+
+    private DatabaseReference mDatabase;
+    private DatabaseReference mVehiclesRef;
+    private DatabaseReference mUsersRef;
+
+    private final ValueEventListener usersValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchRegisteredUsers(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
+
+    private final ValueEventListener vehiclesValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchVehicles(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,6 +100,9 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_delivery_order);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mVehiclesRef = mDatabase.child("vehicles");
+        mUsersRef = mDatabase.child("users");
     }
 
     private void getWidgets() {
@@ -92,7 +123,6 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btn_save);
         progressGroup = findViewById(R.id.progress_group);
 
-        errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
         dialogBuilder = new AlertDialog.Builder(this);
     }
 
@@ -100,9 +130,7 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
         vehicleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (vehicleList != null) {
-                    mVehicle = vehicleList.get(position);
-                }
+                if (vehicleEntryList != null) mVehicleEntry = vehicleEntryList.get(position);
             }
 
             @Override
@@ -110,12 +138,11 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
                 // empty
             }
         });
+
         employeeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (employeeList != null) {
-                    mEmployee = employeeList.get(position);
-                }
+                if (userEntryList != null) mUserEntry = userEntryList.get(position);
             }
 
             @Override
@@ -123,21 +150,27 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
                 // empty
             }
         });
+
         btnBack.setOnClickListener(v -> goBack());
+
         btnCancel.setOnClickListener(v -> goBack());
+
         btnSave.setOnClickListener(v -> {
             if (validated()) saveAndClose();
         });
+
         btnDelete.setOnClickListener(v -> {
-            dialogBuilder.setTitle("Confirm Delete")
-                    .setMessage("This will delete all data related to this Delivery Order. " +
-                            "Are you sure you want to delete this entry?")
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                    .setPositiveButton("Confirm", (dialog, which) -> {
-                        dialog.dismiss();
-                        deleteDeliveryOrder();
-                    });
-            dialogBuilder.create().show();
+            if (mDeliveryOrder != null) {
+                dialogBuilder.setTitle("Confirm Delete")
+                        .setMessage("This will delete all data related to this Delivery Order. " +
+                                "Are you sure you want to delete this entry?")
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton("Confirm", (dialog, which) -> {
+                            dialog.dismiss();
+                            deleteDeliveryOrder();
+                        });
+                dialogBuilder.create().show();
+            }
         });
     }
 
@@ -169,35 +202,18 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
             Log.d(TAG, "Returned with list size=" + orders.size());
             mDeliveryOrder = orders.get(0);
             return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching delivery items.");
-                return database.deliveryOrderItems().getDeliveryItemsWithDetails(id);
-            });
-        }).flatMap(deliveryItemDetails -> {
-            Log.d(TAG, "Returned with list size=" + deliveryItemDetails.size());
-            deliveryItemList = deliveryItemDetails;
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching vehicle entries.");
-                return database.vehicles().getAll();
-            });
-        }).flatMap(vehicles -> {
-            Log.d(TAG, "Returned with list size=" + vehicles.size());
-            vehicleList = vehicles;
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching employee entries.");
-                return database.employees().getAll();
-            });
-        }).flatMap(employees -> {
-            Log.d(TAG, "Returned with list size=" + employees.size());
-            employeeList = employees;
-            return Single.fromCallable(() -> {
                 Log.d(TAG, "Fetching delivery orders.");
                 return database.deliveryOrders().getAll();
             });
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(orders -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + orders.size());
+
+            // fetch vehicles & users online
+            mVehiclesRef.addValueEventListener(vehiclesValueEventListener);
+            mUsersRef.addValueEventListener(usersValueEventListener);
+
             deliveryOrders = orders;
-            setupSpinnerAdapters();
+            progressGroup.setVisibility(View.GONE);
             displayInfo();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
@@ -205,47 +221,71 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
         }));
     }
 
-    private void setupSpinnerAdapters() {
-        vehicleSpinner.setAdapter(new VehicleSpinnerAdapter(this, vehicleList));
-        emptyVehicles.setVisibility(vehicleList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-        employeeSpinner.setAdapter(new EmployeeSpinnerAdapter(this, employeeList));
-        emptyEmployees.setVisibility(employeeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+    private void fetchVehicles(DataSnapshot dataSnapshot) {
+        Log.d(TAG, "fetch vehicles online");
+        progressGroup.setVisibility(View.VISIBLE);
+        vehicleEntryList = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            VehicleEntry entry = snapshot.getValue(VehicleEntry.class);
+            if (entry != null) {
+                vehicleEntryList.add(entry);
+            }
+        }
+        vehicleSpinner.setAdapter(new VehicleSpinnerAdapter(this, vehicleEntryList));
+        emptyVehicles.setVisibility(vehicleEntryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        mVehiclesRef.removeEventListener(vehiclesValueEventListener);
     }
+
+    private void fetchRegisteredUsers(DataSnapshot dataSnapshot) {
+        Log.d(TAG, "fetch users online");
+        userEntryList = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            UserEntry entry = snapshot.getValue(UserEntry.class);
+            if (entry != null) {
+                entry.uid = snapshot.getKey();
+                userEntryList.add(entry);
+            }
+        }
+        employeeSpinner.setAdapter(new UserSpinnerAdapter(this, userEntryList));
+        emptyEmployees.setVisibility(userEntryList.isEmpty() ? View.VISIBLE : View.GONE);
+        mUsersRef.removeEventListener(usersValueEventListener);
+    }
+
 
     private void displayInfo() {
         etTrackingNo.setText(mDeliveryOrder.trackingNo);
         int vehiclePosition;
-        for (vehiclePosition = 0; vehiclePosition < vehicleList.size(); vehiclePosition++) {
-            if (vehicleList.get(vehiclePosition).vehicleId == mDeliveryOrder.fkVehicleId) break;
+        for (vehiclePosition = 0; vehiclePosition < vehicleEntryList.size(); vehiclePosition++) {
+            if (vehicleEntryList.get(vehiclePosition).id == mDeliveryOrder.fkVehicleId) break;
         }
         vehicleSpinner.setSelection(vehiclePosition);
 
-        int employeePosition;
-        for (employeePosition = 0; employeePosition < employeeList.size(); employeePosition++) {
-            if (employeeList.get(employeePosition).employeeId == mDeliveryOrder.fkEmployeeId) break;
+        int userPosition = 0;
+        for (int i = 0; i < userEntryList.size(); i++) {
+            if (userEntryList.get(i).uid.equals(mDeliveryOrder.userId)) {
+                userPosition = i;
+                break;
+            }
         }
-        employeeSpinner.setSelection(employeePosition);
+        employeeSpinner.setSelection(userPosition);
     }
 
     private boolean validated() {
-        // clear drawables
-        etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-
         String trackingNo = etTrackingNo.getText().toString();
         if (trackingNo.isBlank()) {
-            etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+            etTrackingNo.setError("Required");
             return false;
         }
 
-        if (mVehicle == null || mEmployee == null) {
+        if (mVehicleEntry == null || mUsersRef == null) {
             return false;
         }
 
-        // check if tracking no exists
+        // check if tracking no. exists
         for (DeliveryOrder order : deliveryOrders) {
             if (order.deliveryOrderId == mDeliveryOrder.deliveryOrderId) continue;
             if (order.trackingNo.equalsIgnoreCase(trackingNo)) {
-                etTrackingNo.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+                etTrackingNo.setError("Already exists!");
                 return false;
             }
         }
@@ -255,8 +295,11 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
 
     private void saveAndClose() {
         mDeliveryOrder.trackingNo = Utils.normalize(etTrackingNo.getText().toString());
-        mDeliveryOrder.fkVehicleId = mVehicle.vehicleId;
-        mDeliveryOrder.fkEmployeeId = mEmployee.employeeId;
+        mDeliveryOrder.userId = mUserEntry.uid;
+        mDeliveryOrder.userName = mUserEntry.fullName;
+        mDeliveryOrder.fkVehicleId = mVehicleEntry.id;
+        mDeliveryOrder.vehicleName = mVehicleEntry.name;
+        mDeliveryOrder.vehiclePlateNo = mVehicleEntry.plateNo;
         mDeliveryOrder.deliveryDate = new Date().getTime();
         mDeliveryOrder.totalAmount = 0;
         mDeliveryOrder.deliveryOrderStatus = "Processing";
@@ -265,10 +308,15 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
         disposables.add(Single.fromCallable(() -> {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().update(mDeliveryOrder);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
-            progressGroup.setVisibility(View.GONE);
             if (rowCount > 0) {
-                Toast.makeText(this, "Delivery Order upadted.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Delivery Order updated.", Toast.LENGTH_SHORT).show();
             }
+
+            // update assigned vehicle online
+            AssignedVehicleEntry entry = new AssignedVehicleEntry(mUserEntry.uid, mDeliveryOrder.fkVehicleId);
+            mDatabase.child("assigned_vehicles").child(entry.userId).setValue(entry);
+
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
@@ -278,35 +326,19 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
     }
 
     private void deleteDeliveryOrder() {
-        AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         progressGroup.setVisibility(View.VISIBLE);
-
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Deleting delivery order.");
-            return database.deliveryOrders().delete(mDeliveryOrder);
-        }).flatMap(rowCount -> {
-            Log.d(TAG, "Returned with row count=" + rowCount);
-            if (rowCount > 0) {
-                Log.d(TAG, "Updating warehouse stocks");
-                for (DeliveryItemDetails details : deliveryItemList) {
-                    WarehouseStock stock = database.warehouseStocks().getWarehouseStock(details.deliveryOrderItem.fkWarehouseStockId).get(0);
-                    stock.takenOut = stock.takenOut - details.deliveryOrderItem.quantity;
-                    database.warehouseStocks().update(stock);
-                }
-            }
-            return Single.just(rowCount);
-        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
+            Log.d(TAG, "Deleting delivery order entry.");
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().delete(mDeliveryOrder);
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rows -> {
+            Log.d(TAG, "Returned with row count=" + rows);
+            // update assigned vehicle online
+            mDatabase.child("assigned_vehicles").child(mDeliveryOrder.userId).setValue(null);
             progressGroup.setVisibility(View.GONE);
-            if (rowCount > 0) {
-                Toast.makeText(this, "Delivery Order deleted.", Toast.LENGTH_SHORT).show();
-            }
-
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-        }, err -> {
-            progressGroup.setVisibility(View.GONE);
-            Log.e(TAG, "Database error: " + err);
             goBack();
+        }, err -> {
+            Log.e(TAG, "Database error: " + err);
+            progressGroup.setVisibility(View.GONE);
         }));
     }
 

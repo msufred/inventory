@@ -1,6 +1,5 @@
 package io.zak.inventory;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,11 +11,18 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,13 +30,13 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.zak.inventory.adapters.EmployeeSpinnerAdapter;
+import io.zak.inventory.adapters.UserSpinnerAdapter;
 import io.zak.inventory.adapters.VehicleSpinnerAdapter;
-import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.entities.Employee;
-import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.firebase.AssignedVehicleEntry;
+import io.zak.inventory.firebase.UserEntry;
+import io.zak.inventory.firebase.VehicleEntry;
 
 public class AddDeliveryOrderActivity extends AppCompatActivity {
 
@@ -44,20 +50,47 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
     private Button btnCancel, btnSave;
     private RelativeLayout progressGroup;
 
-    private Drawable errorDrawable;
-
     // Spinner reference lists
-    private List<Vehicle> vehicleList;
-    private List<Employee> employeeList;
+    private List<VehicleEntry> vehicleEntryList;
+    private List<UserEntry> userEntryList;
 
     // reference for tracking no
     private List<DeliveryOrder> deliveryOrders;
 
-    private Vehicle mVehicle;   // selected vehicle
-    private Employee mEmployee; // selected employee
+    // selected items (Spinners)
+    private VehicleEntry mVehicleEntry;
+    private UserEntry mUserEntry;
 
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
+
+    private DatabaseReference mDatabase;
+    private DatabaseReference mVehiclesRef;
+    private DatabaseReference mUsersRef;
+
+    private final ValueEventListener usersValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchRegisteredUsers(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
+
+    private final ValueEventListener vehiclesValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fetchVehicles(snapshot);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            Log.w(TAG, "cancelled", error.toException());
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +98,9 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_delivery_order);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mUsersRef = mDatabase.child("users");
+        mVehiclesRef = mDatabase.child("vehicles");
     }
 
     private void getWidgets() {
@@ -78,7 +114,6 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btn_save);
         progressGroup = findViewById(R.id.progress_group);
 
-        errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
         dialogBuilder = new AlertDialog.Builder(this);
     }
 
@@ -86,9 +121,7 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         vehicleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (vehicleList != null) {
-                    mVehicle = vehicleList.get(position);
-                }
+                if (vehicleEntryList != null) mVehicleEntry = vehicleEntryList.get(position);
             }
 
             @Override
@@ -99,9 +132,7 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         employeeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (employeeList != null) {
-                    mEmployee = employeeList.get(position);
-                }
+                if (userEntryList != null) mUserEntry = userEntryList.get(position);
             }
 
             @Override
@@ -112,12 +143,12 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> goBack());
         btnCancel.setOnClickListener(v -> goBack());
         btnSave.setOnClickListener(v -> {
-            if (mVehicle == null || mEmployee == null) {
+            if (mVehicleEntry == null || mUserEntry == null) {
                 showInfoDialog("Invalid Action", "No selected Vehicle and/or Employee.");
                 return;
             }
 
-            if (mVehicle.vehicleStatus.equalsIgnoreCase("On Delivery")) {
+            if (mVehicleEntry.status.equalsIgnoreCase("On Delivery")) {
                 showInfoDialog("Invalid Action", "Vehicle status is \"On Delivery\". Select another vehicle and try again.");
                 return;
             }
@@ -131,41 +162,51 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
         super.onResume();
         if (disposables == null) disposables = new CompositeDisposable();
 
-        AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
         progressGroup.setVisibility(View.VISIBLE);
         disposables.add(Single.fromCallable(() -> {
-            Log.d(TAG, "Fetching vehicle entries.");
-            return database.vehicles().getAll();
-        }).flatMap(vehicles -> {
-            Log.d(TAG, "Returned with list size=" + vehicles.size());
-            vehicleList = vehicles;
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching employee entries.");
-                return database.employees().getAll();
-            });
-        }).flatMap(employees -> {
-            Log.d(TAG, "Returned with list size=" + employees.size());
-            employeeList = employees;
-            return Single.fromCallable(() -> {
-                Log.d(TAG, "Fetching delivery orders.");
-                return database.deliveryOrders().getAll();
-            });
+            Log.d(TAG, "Fetch Deliver Order entries");
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().getAll();
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(orders -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with list size=" + orders.size());
-            deliveryOrders = orders;
-            setupSpinnerAdapters();
-        }, err -> {
-            progressGroup.setVisibility(View.GONE);
-            Log.e(TAG, "Database Error: " + err);
+            deliveryOrders  = orders;
+
+            // get vehicles online
+            mVehiclesRef.addValueEventListener(vehiclesValueEventListener);
+            mUsersRef.addValueEventListener(usersValueEventListener);
         }));
     }
 
-    private void setupSpinnerAdapters() {
-        vehicleSpinner.setAdapter(new VehicleSpinnerAdapter(this, vehicleList));
-        emptyVehicles.setVisibility(vehicleList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-        employeeSpinner.setAdapter(new EmployeeSpinnerAdapter(this, employeeList));
-        emptyEmployees.setVisibility(employeeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+    private void fetchVehicles(DataSnapshot dataSnapshot) {
+        progressGroup.setVisibility(View.VISIBLE);
+        Log.d(TAG, "fetch vehicles online");
+        vehicleEntryList = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            VehicleEntry entry = snapshot.getValue(VehicleEntry.class);
+            if (entry != null) {
+                vehicleEntryList.add(entry);
+            }
+        }
+        vehicleSpinner.setAdapter(new VehicleSpinnerAdapter(this, vehicleEntryList));
+        emptyVehicles.setVisibility(vehicleEntryList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        mVehiclesRef.removeEventListener(vehiclesValueEventListener);
+        progressGroup.setVisibility(View.GONE);
+    }
+
+    private void fetchRegisteredUsers(DataSnapshot dataSnapshot) {
+        progressGroup.setVisibility(View.VISIBLE);
+        Log.d(TAG, "fetch users online");
+        userEntryList = new ArrayList<>();
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            UserEntry entry = snapshot.getValue(UserEntry.class);
+            if (entry != null) {
+                entry.uid = snapshot.getKey();
+                userEntryList.add(entry);
+            }
+        }
+        employeeSpinner.setAdapter(new UserSpinnerAdapter(this, userEntryList));
+        emptyEmployees.setVisibility(userEntryList.isEmpty() ? View.VISIBLE : View.GONE);
+        mUsersRef.removeEventListener(usersValueEventListener);
+        progressGroup.setVisibility(View.GONE);
     }
 
     private boolean validated() {
@@ -193,8 +234,11 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
     private void saveAndClose() {
         DeliveryOrder order = new DeliveryOrder();
         order.trackingNo = Utils.normalize(etTrackingNo.getText().toString());
-        order.fkVehicleId = mVehicle.vehicleId;
-        order.fkEmployeeId = mEmployee.employeeId;
+        order.userId = mUserEntry.uid;
+        order.userName = mUserEntry.fullName;
+        order.fkVehicleId = mVehicleEntry.id;
+        order.vehicleName = mVehicleEntry.name;
+        order.vehiclePlateNo = mVehicleEntry.plateNo;
         order.deliveryDate = new Date().getTime();
         order.totalAmount = 0;
         order.deliveryOrderStatus = "Processing";
@@ -204,8 +248,13 @@ public class AddDeliveryOrderActivity extends AppCompatActivity {
             Log.d(TAG, "Saving delivery order.");
             return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().insert(order);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
-            progressGroup.setVisibility(View.GONE);
             Log.d(TAG, "Returned with id=" + id);
+
+            // assign vehicle for user
+            AssignedVehicleEntry entry = new AssignedVehicleEntry(mUserEntry.uid, order.fkVehicleId);
+            mDatabase.child("assigned_vehicles").child(entry.userId).setValue(entry);
+
+            progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
             progressGroup.setVisibility(View.GONE);
