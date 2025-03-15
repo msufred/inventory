@@ -1,6 +1,5 @@
 package io.zak.inventory;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,7 +13,9 @@ import android.widget.Spinner;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -22,6 +23,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.firebase.VehicleEntry;
 
 public class AddVehicleActivity extends AppCompatActivity {
 
@@ -34,10 +36,11 @@ public class AddVehicleActivity extends AppCompatActivity {
     private Button btnCancel, btnSave;
     private RelativeLayout progressGroup;
 
-    private Drawable errorDrawable;
     private AlertDialog.Builder dialogBuilder;
 
     private CompositeDisposable disposables;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class AddVehicleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_vehicle);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     private void getWidgets() {
@@ -54,8 +58,6 @@ public class AddVehicleActivity extends AppCompatActivity {
         btnCancel = findViewById(R.id.btn_cancel);
         btnSave = findViewById(R.id.btn_save);
         progressGroup = findViewById(R.id.progress_group);
-
-        errorDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_x_circle);
 
         // Types
         typeSpinner = findViewById(R.id.type_spinner);
@@ -123,6 +125,17 @@ public class AddVehicleActivity extends AppCompatActivity {
             return AppDatabaseImpl.getDatabase(getApplicationContext()).vehicles().insert(vehicle);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(id -> {
             Log.d(TAG, "Done. Returned with ID: " + id + " " + Thread.currentThread());
+
+            // save online data
+            VehicleEntry entry = new VehicleEntry(
+                    id.intValue(),
+                    vehicle.vehicleName,
+                    vehicle.vehicleType,
+                    vehicle.plateNo,
+                    vehicle.vehicleStatus
+            );
+            mDatabase.child("vehicles").child(String.valueOf(id.intValue())).setValue(entry);
+
             progressGroup.setVisibility(View.GONE);
             goBack();
         }, err -> {
