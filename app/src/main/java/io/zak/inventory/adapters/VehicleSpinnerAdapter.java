@@ -13,13 +13,14 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 import io.zak.inventory.data.entities.Vehicle;
+import io.zak.inventory.firebase.VehicleEntry;
 
-public class VehicleSpinnerAdapter extends ArrayAdapter<Vehicle> {
+public class VehicleSpinnerAdapter extends ArrayAdapter<VehicleEntry> {
 
     private final Context context;
-    private final List<Vehicle> vehicleList;
+    private final List<VehicleEntry> vehicleList;
 
-    public VehicleSpinnerAdapter(Context context, List<Vehicle> vehicleList) {
+    public VehicleSpinnerAdapter(Context context, List<VehicleEntry> vehicleList) {
         super(context, android.R.layout.simple_spinner_item, vehicleList);
         this.context = context;
         this.vehicleList = vehicleList;
@@ -42,7 +43,7 @@ public class VehicleSpinnerAdapter extends ArrayAdapter<Vehicle> {
         }
 
         TextView textView = view.findViewById(android.R.id.text1);
-        textView.setText(vehicleList.get(position).vehicleName);
+        textView.setText(vehicleList.get(position).name);
         return view;
     }
 }
