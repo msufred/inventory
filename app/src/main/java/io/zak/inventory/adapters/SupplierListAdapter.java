@@ -111,6 +111,10 @@ public class SupplierListAdapter extends RecyclerView.Adapter<SupplierListAdapte
         sortedList.clear();
     }
 
+    public void addItem(Supplier supplier) {
+        sortedList.add(supplier);
+    }
+
     public Supplier getItem(int position) {
         return sortedList.get(position);
     }

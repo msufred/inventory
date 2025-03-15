@@ -116,6 +116,10 @@ public class ProductListAdapter extends RecyclerView.Adapter<ProductListAdapter.
         sortedList.clear();
     }
 
+    public void addItem(Product product) {
+        sortedList.add(product);
+    }
+
     public Product getItem(int position) {
         return sortedList.get(position);
     }

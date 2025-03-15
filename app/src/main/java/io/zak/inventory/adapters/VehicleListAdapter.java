@@ -111,6 +111,10 @@ public class VehicleListAdapter extends RecyclerView.Adapter<VehicleListAdapter.
         sortedList.clear();
     }
 
+    public void addItem(Vehicle vehicle) {
+        sortedList.add(vehicle);
+    }
+
     public Vehicle getItem(int position) {
         return sortedList.get(position);
     }
