@@ -96,6 +96,7 @@
     <string name="designation_position">Designation/Position</string>
     <string name="employee_status">Permanent/Contractual etc.</string>
     <string name="no_employees">No Employees</string>
+    <string name="registered_employees">Registered Employees</string>
 
     <!-- vehicle related -->
     <string name="vehicle">Vehicle</string>
