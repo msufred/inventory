@@ -17,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -28,8 +31,6 @@ import io.zak.inventory.adapters.DeliveryItemListAdapter;
 import io.zak.inventory.data.AppDatabase;
 import io.zak.inventory.data.AppDatabaseImpl;
 import io.zak.inventory.data.entities.DeliveryOrder;
-import io.zak.inventory.data.entities.Vehicle;
-import io.zak.inventory.data.relations.DeliveryDetails;
 import io.zak.inventory.data.relations.DeliveryItemDetails;
 
 public class ViewDeliveryOrderActivity extends AppCompatActivity
@@ -61,7 +62,9 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
     private CompositeDisposable disposables;
     private AlertDialog.Builder dialogBuilder;
 
-    private DeliveryDetails mDeliveryDetails; // fetched in onResume
+    private DeliveryOrder mDeliveryOrder;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +72,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
         setContentView(R.layout.activity_view_delivery_order);
         getWidgets();
         setListeners();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     private void getWidgets() {
@@ -97,17 +101,17 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
         btnBack.setOnClickListener(v -> goBack());
 
         btnEdit.setOnClickListener(v -> {
-            if (mDeliveryDetails != null) {
+            if (mDeliveryOrder != null) {
                 Intent intent = new Intent(this, EditDeliveryOrderActivity.class);
-                intent.putExtra("delivery_order_id", mDeliveryDetails.deliveryOrder.deliveryOrderId);
+                intent.putExtra("delivery_order_id", mDeliveryOrder.deliveryOrderId);
                 startActivity(intent);
             }
         });
 
         btnAddItem.setOnClickListener(v -> {
-            if (mDeliveryDetails != null) {
+            if (mDeliveryOrder != null) {
                 Intent intent = new Intent(this, AddDeliveryOrderItemActivity.class);
-                intent.putExtra("delivery_order_id", mDeliveryDetails.deliveryOrder.deliveryOrderId);
+                intent.putExtra("delivery_order_id", mDeliveryOrder.deliveryOrderId);
                 startActivity(intent);
             }
         });
@@ -134,8 +138,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
         });
 
         btnCompleteDelivery.setOnClickListener(v -> {
-            if (mDeliveryDetails != null
-                    && mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("On Delivery")) {
+            if (mDeliveryOrder != null && mDeliveryOrder.deliveryOrderStatus.equalsIgnoreCase("On Delivery")) {
                 completeDelivery();
             }
         });
@@ -164,7 +167,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
         showProgress(true);
         disposables.add(Single.fromCallable(() -> {
             Log.d(TAG, "Fetching DeliveryDetails entry.");
-            return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().getDeliveryOrderDetails(id);
+            return AppDatabaseImpl.getDatabase(getApplicationContext()).deliveryOrders().getDeliveryOrder(id);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(deliveries -> {
             Log.d(TAG, "Returned with list size=" + deliveries.size());
             showProgress(false);
@@ -180,13 +183,13 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
             }
 
             // set DeliveryOrder (aka DeliverDetails) and display information
-            mDeliveryDetails = deliveries.get(0);
-            tvTrackingNo.setText(String.format("Tracking #: %s", mDeliveryDetails.deliveryOrder.trackingNo));
+            mDeliveryOrder = deliveries.get(0);
+            tvTrackingNo.setText(String.format("Tracking #: %s", mDeliveryOrder.trackingNo));
 
             // get all items of this delivery order
-            fetchOrderItems(mDeliveryDetails.deliveryOrder.deliveryOrderId);
+            fetchOrderItems(mDeliveryOrder.deliveryOrderId);
 
-            String status = mDeliveryDetails.deliveryOrder.deliveryOrderStatus;
+            String status = mDeliveryOrder.deliveryOrderStatus;
             if (status.equalsIgnoreCase("On Delivery")) {
                 hiddenButtonGroup.setVisibility(View.VISIBLE);
                 buttonGroup.setVisibility(View.GONE);
@@ -200,6 +203,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
                 buttonGroup.setVisibility(View.VISIBLE);
                 btnEdit.setVisibility(View.VISIBLE);
             }
+            displayInfo(mDeliveryOrder);
         }, err -> {
             showProgress(false);
             Log.e(TAG, "Database Error: " + err);
@@ -213,10 +217,10 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
         }));
     }
 
-    private void displayInfo(DeliveryDetails deliveryDetails) {
-        if (deliveryDetails != null) {
-            tvTrackingNo.setText(String.format("Delivery No: %s", deliveryDetails.deliveryOrder.trackingNo));
-            tvTotalAmount.setText(String.valueOf(deliveryDetails.deliveryOrder.totalAmount));
+    private void displayInfo(DeliveryOrder deliveryOrder) {
+        if (deliveryOrder != null) {
+            tvTrackingNo.setText(String.format("Delivery No: %s", deliveryOrder.trackingNo));
+            tvTotalAmount.setText(String.valueOf(deliveryOrder.totalAmount));
         }
     }
 
@@ -233,15 +237,15 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
                 for (DeliveryItemDetails details : list) {
                     total += details.deliveryOrderItem.subtotal;
                 }
-                mDeliveryDetails.deliveryOrder.totalAmount = total;
-                database.deliveryOrders().update(mDeliveryDetails.deliveryOrder);
+                mDeliveryOrder.totalAmount = total;
+                database.deliveryOrders().update(mDeliveryOrder);
             }
             return Single.just(list);
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(list -> {
             Log.d(TAG, "Returned with list size=" + list.size());
             adapter.replaceAll(deliveryItemList);
             tvItemCount.setText(String.valueOf(list.size()));
-            tvTotalAmount.setText(Utils.toStringMoneyFormat(mDeliveryDetails.deliveryOrder.totalAmount));
+            tvTotalAmount.setText(Utils.toStringMoneyFormat(mDeliveryOrder.totalAmount));
         }, err -> {
             Log.e(TAG, "Database Error: " + err);
             dialogBuilder.setTitle("Database Error")
@@ -260,7 +264,7 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
             DeliveryItemDetails mSelectedDeliveryItem = adapter.getItem(position);
             if (mSelectedDeliveryItem == null)
                 return;
-            if (mDeliveryDetails.deliveryOrder.deliveryOrderStatus.equalsIgnoreCase("Processing")) {
+            if (mDeliveryOrder.deliveryOrderStatus.equalsIgnoreCase("Processing")) {
                 Intent intent = new Intent(this, EditDeliveryOrderItemActivity.class);
                 intent.putExtra("delivery_order_item_id", mSelectedDeliveryItem.deliveryOrderItem.deliveryOrderItemId);
                 startActivity(intent);
@@ -281,28 +285,23 @@ public class ViewDeliveryOrderActivity extends AppCompatActivity
     }
 
     private void updateStatus(String vehicleStatus, String deliveryStatus) {
-        if (mDeliveryDetails != null) {
-            DeliveryOrder deliveryOrder = mDeliveryDetails.deliveryOrder;
-            deliveryOrder.deliveryOrderStatus = deliveryStatus;
-
-            Vehicle vehicle = mDeliveryDetails.vehicle;
-            vehicle.vehicleStatus = vehicleStatus;
-
+        if (mDeliveryOrder != null) {
+            mDeliveryOrder.deliveryOrderStatus = deliveryStatus;
             AppDatabase database = AppDatabaseImpl.getDatabase(getApplicationContext());
             progressGroup.setVisibility(View.VISIBLE);
             disposables.add(Single.fromCallable(() -> {
                 Log.d(TAG, "Updating delivery order.");
-                return database.deliveryOrders().update(deliveryOrder);
-            }).flatMap(rowCount -> {
-                if (rowCount > 0) {
-                    database.vehicles().update(vehicle);
-                }
-                return Single.just(rowCount);
+                return database.deliveryOrders().update(mDeliveryOrder);
             }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(rowCount -> {
-                progressGroup.setVisibility(View.GONE);
                 if (rowCount > 0) {
                     Toast.makeText(this, "Delivery Order updated.", Toast.LENGTH_SHORT).show();
                 }
+
+                // update vehicle online
+                mDatabase.child("vehicles").child(String.valueOf(mDeliveryOrder.fkVehicleId))
+                                .child("status").setValue(vehicleStatus);
+
+                progressGroup.setVisibility(View.GONE);
                 goBack();
             }, err -> {
                 progressGroup.setVisibility(View.GONE);
