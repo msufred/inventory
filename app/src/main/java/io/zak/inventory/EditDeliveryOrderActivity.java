@@ -313,7 +313,9 @@ public class EditDeliveryOrderActivity extends AppCompatActivity {
             }
 
             // update assigned vehicle online
-            AssignedVehicleEntry entry = new AssignedVehicleEntry(mUserEntry.uid, mDeliveryOrder.fkVehicleId);
+            AssignedVehicleEntry entry = new AssignedVehicleEntry(
+                    mUserEntry.uid, mDeliveryOrder.fkVehicleId, mDeliveryOrder.vehicleName, mDeliveryOrder.vehiclePlateNo
+            );
             mDatabase.child("assigned_vehicles").child(entry.userId).setValue(entry);
 
             progressGroup.setVisibility(View.GONE);
