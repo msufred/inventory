@@ -18,7 +18,7 @@ import java.util.Locale;
 
 import io.zak.inventory.R;
 import io.zak.inventory.Utils;
-import io.zak.inventory.data.relations.DeliveryDetails;
+import io.zak.inventory.data.entities.DeliveryOrder;
 
 public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapter.ViewHolder> {
 
@@ -43,11 +43,11 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
 
     }
 
-    private final Comparator<DeliveryDetails> comparator;
+    private final Comparator<DeliveryOrder> comparator = Comparator.comparing(deliveryOrder -> deliveryOrder.trackingNo);
 
-    private final SortedList<DeliveryDetails> sortedList = new SortedList<>(DeliveryDetails.class, new SortedList.Callback<>() {
+    private final SortedList<DeliveryOrder> sortedList = new SortedList<>(DeliveryOrder.class, new SortedList.Callback<>() {
         @Override
-        public int compare(DeliveryDetails o1, DeliveryDetails o2) {
+        public int compare(DeliveryOrder o1, DeliveryOrder o2) {
             return comparator.compare(o1, o2);
         }
 
@@ -57,13 +57,13 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
         }
 
         @Override
-        public boolean areContentsTheSame(DeliveryDetails oldItem, DeliveryDetails newItem) {
+        public boolean areContentsTheSame(DeliveryOrder oldItem, DeliveryOrder newItem) {
             return oldItem.equals(newItem);
         }
 
         @Override
-        public boolean areItemsTheSame(DeliveryDetails item1, DeliveryDetails item2) {
-            return item1.deliveryOrder.deliveryOrderId == item2.deliveryOrder.deliveryOrderId;
+        public boolean areItemsTheSame(DeliveryOrder item1, DeliveryOrder item2) {
+            return item1.deliveryOrderId == item2.deliveryOrderId;
         }
 
         @Override
@@ -85,8 +85,7 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
     private final OnItemClickListener onItemClickListener;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
-    public DeliveryListAdapter(Comparator<DeliveryDetails> comparator, OnItemClickListener onItemClickListener) {
-        this.comparator = comparator;
+    public DeliveryListAdapter(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -99,13 +98,13 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        DeliveryDetails details = sortedList.get(position);
-        if (details != null) {
-            holder.name.setText(String.format("%s (%s)", details.vehicle.vehicleName, details.vehicle.plateNo));
-            holder.amount.setText(Utils.toStringMoneyFormat(details.deliveryOrder.totalAmount));
-            holder.employee.setText(details.employee.employeeName);
-            holder.date.setText(Utils.humanizeDate(new Date(details.deliveryOrder.deliveryDate)));
-            holder.status.setText(details.deliveryOrder.deliveryOrderStatus);
+        DeliveryOrder deliveryOrder = sortedList.get(position);
+        if (deliveryOrder != null) {
+            holder.name.setText(String.format("%s (%s)", deliveryOrder.vehicleName, deliveryOrder.vehiclePlateNo));
+            holder.amount.setText(Utils.toStringMoneyFormat(deliveryOrder.totalAmount));
+            holder.employee.setText(deliveryOrder.userName);
+            holder.date.setText(Utils.humanizeDate(new Date(deliveryOrder.deliveryDate)));
+            holder.status.setText(deliveryOrder.deliveryOrderStatus);
         }
     }
 
@@ -114,15 +113,15 @@ public class DeliveryListAdapter extends RecyclerView.Adapter<DeliveryListAdapte
         return sortedList.size();
     }
 
-    public DeliveryDetails getItem(int position) {
+    public DeliveryOrder getItem(int position) {
         return sortedList.get(position);
     }
 
-    public void replaceAll(List<DeliveryDetails> list) {
+    public void replaceAll(List<DeliveryOrder> list) {
         sortedList.beginBatchedUpdates();
         for (int i = sortedList.size() - 1; i >= 0; i--) {
-            DeliveryDetails details = sortedList.get(i);
-            if (!list.contains(details)) sortedList.remove(details);
+            DeliveryOrder order = sortedList.get(i);
+            if (!list.contains(order)) sortedList.remove(order);
         }
         sortedList.addAll(list);
         sortedList.endBatchedUpdates();
